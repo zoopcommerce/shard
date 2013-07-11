@@ -1,0 +1,2359 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Zoop · Shard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Tim Roediger">
+
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="css/docs.css" rel="stylesheet">
+    <link href="js/google-code-prettify/prettify.css" rel="stylesheet">
+  </head>
+
+  <body onload="prettyPrint()">
+
+    <!-- Navbar
+    ================================================== -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="./index.html">Shard</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="">
+                <a href="./index.html">Home</a>
+              </li>
+              <li class="">
+                <a href="./getting-started.html">Get started</a>
+              </li>
+              <li class="">
+                <a href="./config.html">Config</a>
+              </li>
+              <li class="">
+                <a href="./extensions.html">Extensions</a>
+              </li>
+              <li class="">
+                <a href="./custom-extensions.html">Custom Extensions</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+<!-- Subhead
+================================================== -->
+<header class="jumbotron subhead" id="overview">
+  <div class="container">
+    <h1>Extensions</h1>
+    <p class="lead">Shard Extensions to make your documents super charged.</p>
+  </div>
+</header>
+
+
+  <div class="container">
+
+    <!-- Docs nav
+    ================================================== -->
+    <div class="row">
+      <div class="span3 bs-docs-sidebar">
+        <ul data-dojo-type="havok/widget/ListNav"
+            data-dojo-mixins="havok/widget/_AffixMixin, havok/widget/_ScrollSpyMixin"
+            data-dojo-props="
+               linkTemplate: '&lt;a role=&quot;navitem&quot; href=&quot;${href}&quot;&gt;&lt;i class=&quot;icon-chevron-right&quot;&gt;&lt;/i&gt; ${label}&lt;/a&gt;',
+               affixOffset: {top: 40, bottom: 0},
+               affixTarget: 'mainContent',
+               spyTarget: 'mainContent'
+            "
+            class="nav-stacked bs-docs-sidenav"
+        >
+        </ul>
+      </div>
+      <div class="span9" id="mainContent">
+
+        <section id="access-control" title="Access Control">
+  <div class="page-header">
+    <h1>Access Control</h1>
+  </div>
+
+    <p class="lead">Add role based permissions to your documents.</p>
+
+    <p>The Access Control extension allows you to set user access permissions on a document with simple annotations.</p>
+
+    <h2>Configuration</h2>
+    <p>Access Control has no configuration options. Just use:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.accessControl' => true
+    ],
+    ...
+]);
+</pre>
+
+    <p>However, Access Control requires a configured <code>user</code> service which is an instance of <code>Zoop\Common\User\RoleAwareUserInterface</code>. See <a href="./config.html#user-config">User Config</a></p>
+
+    <h2>Annotations</h2>
+    <h3>@Shard\AccessControl</h3>
+
+    <p>The <code>@Shard\AccessControl</code> annotation is a document annotation that can contain a list of permission annotations which define who can access the document and what level of access they have. Eg:</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     ...
+ * })
+ */
+class MyDoc {...}
+
+</pre>
+
+    <h3>@Shard\Permission\Basic</h3>
+    <p>The Access Control extension provides the Basic permission. (Other extensions may provide other kinds of permission.) The Basic permission has three arguments: </p>
+
+<table class="table table-bordered table-striped">
+  <thead>
+   <tr>
+     <th style="width: 100px;">Name</th>
+     <th style="width: 50px;">type</th>
+     <th style="width: 50px;">default</th>
+     <th>description</th>
+   </tr>
+  </thead>
+  <tbody>
+<tr>
+    <td>allow</td>
+    <td>string | array</td>
+    <td>null</td>
+    <td>A role, or array of roles that are allowed.</td>
+</tr>
+<tr>
+    <td>roles</td>
+    <td>string | array</td>
+    <td>null</td>
+    <td>A role, or array of roles that the permission applies to.</td>
+</tr>
+<tr>
+    <td>allow</td>
+    <td>string | array</td>
+    <td>null</td>
+    <td>An action, or array of actions that are allowed.</td>
+</tr>
+<tr>
+    <td>deny</td>
+    <td>string | array</td>
+    <td>null</td>
+    <td>An action, or array of actions that are denied.</td>
+</tr>
+</tbody>
+</table>
+
+    <p>Access Control defines four actions (other extensions may define further actions):</p>
+
+<table class="table table-bordered table-striped">
+  <thead>
+   <tr>
+     <th style="width: 100px;">Name</th>
+     <th>description</th>
+   </tr>
+  </thead>
+  <tbody>
+<tr>
+    <td>create</td>
+    <td>Persist a new instance of the document to the database.</td>
+</tr>
+<tr>
+    <td>read</td>
+    <td>Read documents of this type from the database.</td>
+</tr>
+<tr>
+    <td>update::$field</td>
+    <td>Change fields on an instance of this document which has already been persisted.</td>
+</tr>
+<tr>
+    <td>delete</td>
+    <td>Perminently delete this type of document from the database.</td>
+</tr>
+</tbody>
+</table>
+
+    <p>So, for example, the following annotations would allow users with the <code>guest</code> permission to <code>create</code>, and <code>read</code>.</p>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Basic(roles="guest", allow={"create", "read"})
+ * })
+ */
+class Simple {...}
+</pre>
+
+        <h2>Events</h2>
+
+        <p>Most access control checks happen during a <code>$documentManager->flush()</code>. Therefore, when an access control check fails, an exception is not raised, as that would prevent a flush from completing correctly. Rather, an event is raised. The following events may be listened to:</p>
+
+<table class="table table-bordered table-striped">
+  <thead>
+   <tr>
+     <th style="width: 100px;">Name</th>
+     <th>description</th>
+   </tr>
+  </thead>
+  <tbody>
+<tr>
+    <td>createDenied</td>
+    <td>Fires if create is attempted and denied.</td>
+</tr>
+<tr>
+    <td>updateDenied</td>
+    <td>Fires if update is attempted and denied.</td>
+</tr>
+<tr>
+    <td>deleteDenied</td>
+    <td>Fires if delete is attempted and denied.</td>
+</tr>
+</tbody>
+</table>
+
+        <p>Note: there is no event for a rejected <code>read</code>. This is because read access control is achieved through query filters, meaning both Doctrine and Shard are unaware if, or how many documents may have been filtered out by read access control.</p>
+        
+    <h3>Default permission</h3>
+
+    <p>If a permission is not allowed, then it is always denied.</p>
+    <p>So, in this example there isn't any user who can <code>update</code> or <code>delete</code>.</p>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Basic(roles="guest", allow={"create", "read"})
+ * })
+ */
+class Simple {...}
+</pre>
+
+    <h3>The * wildcard</h3>
+
+    <p>The <code>*</code> can be used to glob role or action names.</p>
+
+    <p>In this example all users are allowed to read, editors are also allowed to create, and admins can do everything.</p>
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Basic(roles="*", allow="read"),
+ *     @Shard\Permission\Basic(roles="editor", allow="create"),
+ *     @Shard\Permission\Basic(roles="admin", allow="*")
+ * })
+ */
+class Simple {...}
+</pre>
+
+    <p>Specific actions take precidence over wild cards in the same Permission. Eg, editors are allowed to all actions except <code>delete</code></p>
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Basic(roles="editor", allow="*", deny="delete")
+ * })
+ */
+class Simple {...}
+</pre>
+
+    <h3>Order of permissions</h3>
+
+    <p>Permissions are read in the order they are listed, so permissions lower on the list can override permissions higher on the list. Eg, if a user with the role <code>editor</code> tries to <code>create</code> they will be allowed, because the later permission overrides the earlier permission.</p>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Basic(roles={"guest", "editor"}, allow="read"),
+ *     @Shard\Permission\Basic(roles="editor", allow="create")
+ * })
+ */
+class Simple {...}
+</pre>
+
+    <h3>Users with multiple roles</h3>
+
+    <p>Users may have more than one role. Eg, if a user has only the editor role, they they will be allowed to create, but not be allowed to read. If a user has both the guest and editor role, they will be allowed to read and create.</p>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Basic(roles="guest", allow="read"),
+ *     @Shard\Permission\Basic(roles="editor", allow="create")
+ * })
+ */
+class Simple {...}
+</pre>
+
+    <h3>Update actions</h3>
+
+    <p>Update actions are related to individual fields, not whole documents. To allow all fields to be updated, use the <code>*</code> wildcard. Eg:</p>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Basic(roles="editor", allow="update::*")
+ * })
+ */
+class Simple {...}
+</pre>
+
+    <p>To allow update on a specific field, use the field name. Eg:</p>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Basic(roles="editor", allow="update::description")
+ * })
+ */
+class Simple {...}
+</pre>
+
+    <p>To allow update on all fields, except some:</p>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Basic(roles="editor", allow="update::*", deny={"update::lockedField1", "update::lockedField2"})
+ * })
+ */
+class Simple {...}
+</pre>
+
+    <h2>Access Controller Service</h2>
+    <p>Use the Access Controller service's <code>areAllowed</code> method to check if the configured user has permission to do actions on a document.</p>
+
+    <h4>AccessController::areAllowed arguments</h4>
+<table class="table table-bordered table-striped">
+  <thead>
+   <tr>
+     <th style="width: 100px;">Name</th>
+     <th style="width: 50px;">type</th>
+     <th>description</th>
+   </tr>
+  </thead>
+  <tbody>
+<tr>
+    <td>actions</td>
+    <td>array</td>
+    <td>An array of action names to check.</td>
+</tr>
+<tr>
+    <td>metadata</td>
+    <td>ClassMetadata</td>
+    <td>The metadata for the document type being checked. This argument doesn't have to be passed, but is required if checking the <code>create</code> action, because no document instance exists before it is created.</td>
+</tr>
+<tr>
+    <td>document</td>
+    <td>Object</td>
+    <td>A document instance to check permissions against. Not required when checking <code>create</code> action.</td>
+</tr>
+</tbody>
+</table>
+
+    <p>This method will return an AllowedResult object.</p>
+
+    <p>For example:</p>
+
+<pre class="prettyprint linenums">
+$accessController = $manifest->getServiceManager->get('accessController');
+
+if ( ! $accessController->areAllowed('update::name', null, $mydocument)->getAllowed()){
+    //configured user is not allowed to update the name field of $mydocument;
+}
+</pre>
+
+</section>
+<section id="annotations" title="Annotations">
+  <div class="page-header">
+    <h1>Annotations</h1>
+  </div>
+
+    <p class="lead">Event based annotation handling.</p>
+
+    <p>The Annotation Extension is a low level extension that handles reading all the <code>@Shard</code> annotations. It is automatically enabled by any extension that requires annotations, so it can normally be ignored.</p>
+
+</section>
+<section id="crypt" title="Crypt">
+  <div class="page-header">
+    <h1>Crypt</h1>
+  </div>
+
+    <p class="lead">Hash or encrypt document fields.</p>
+
+    <h2>Configuration</h2>
+    <p>Access Control has no configuration options. Just use:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.crypt' => true
+    ],
+    ...
+]);
+</pre>
+
+    <h2>Hash</h2>
+    <p>A hash is a one way encryption method. That is, once the text is encrypted, you can't get the plain text back. It is especially useful for user passwords.</p>
+
+    <h3>@Shard\Crypt\Hash</h3>
+    <p>To hash a field, just add the <code>@Shard\Crypt\Hash</code> annotation to that field. Eg:</p>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+class MyDocument {
+    /**
+     * @ODM\String
+     * @Shard\Crypt\Hash
+     */
+    protected $password;
+
+    ...
+}
+</pre>
+
+    <h3>Hash Salt</h3>
+
+    <p>It is wise to use a salt when hashing to make cracking the encryption harder.</p>
+
+    <h4>Salt stored in Document</h4>
+    <p>By default, the crypt extension will check if your document implements <code>Zoop\Common\Crypt\SaltInterface</code>. If so, that will be used to retireve a salt. Eg:</p>
+
+<pre class="prettyprint linenums">
+use Zoop\Common\Crypt\SaltInterface;
+use Zoop\Shard\Crypt\SaltGenerator;
+
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+class MyDocument implements SaltInterface {
+
+    /**
+     * @ODM\String
+     * @Shard\Crypt\Hash
+     */
+    protected $password;
+
+    /**
+     * @ODM\String
+     */
+    protected $salt;
+
+    public function getSalt(){
+        if (!isset($this->salt)){
+            $this->salt = SaltGenerator::generateSalt();
+        }
+        return $this->salt;
+    }
+
+    ...
+}
+</pre>
+
+    <p>Note: if there are several hashed fields in the one document, this method will use the same salt for all.</p>
+
+    <h4>Alternate salt</h4>
+
+    <p>If you want to use a different salt, set the <code>salt</code> property of the annotation to a service name that will return an instance of <code>Zoop\Common\Crypt\SaltInterface</code>. Eg</p>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+class MyDocument {
+    /**
+     * @ODM\String
+     * @Shard\Crypt\Hash(salt='mysaltservice')
+     */
+    protected $password;
+
+    ...
+}
+</pre>
+
+    <p>And configure your salt service in the Manifest:</p>
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    'service_manager_config' => [
+        'invokables' => [
+            'mysaltservice' => 'My\Salt' //A class that implements SaltInterface
+        ]
+    ]
+]);
+</pre>
+
+    <h4>Alternate Hash Algorithim</h4>
+
+    <p>The default hash algorithim is in <code>Zoop\Shard\Crypt\Hash\BasicHashService</code>. If you would like to use an alternate hashing algorithim, set the <code>service</code> property of the annotation to a service name that will return an instance of <code>Zoop\Shard\Crypt\Hash\HashServiceInterface</code>. Eg:</p>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+class MyDocument {
+    /**
+     * @ODM\String
+     * @Shard\Crypt\Hash(service='myhashservice')
+     */
+    protected $password;
+
+    ...
+}
+</pre>
+
+    <p>And configure your hash service in the Manifest:</p>
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    'service_manager_config' => [
+        'invokables' => [
+            'myhashservice' => 'My\Hash\Service' //A class that implements HashServiceInterface
+        ]
+    ]
+]);
+</pre>
+
+    <h2>Block Cipher</h2>
+
+    <p>A block cipher is a two way encryption method. That is, once the text is encrypted, you can get the plain text back.</p>
+
+    <h3>@Shard\Crypt\BlockCipher</h3>
+    <p>To encrypt a field, just add the <code>@Shard\Crypt\BlockCipher</code> annotation to that field. You must also set the name of a key service. Eg:</p>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+class MyDocument {
+    /**
+     * @ODM\String
+     * @Shard\Crypt\BlockCipher(key="mykey")
+     */
+    protected $password;
+
+    ...
+}
+</pre>
+
+    <h3>Key Service</h3>
+    <p>The key is used to encrypt and decrypt the field. <strong>Keep your keys safe! If someone steals your keys, then they can unlock your data.</strong>. The key is set with a key service which must return an instance of <code>Zoop\Common\Crypt\KeyInterface</code>. Eg:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    'service_manager_config' => [
+        'invokables' => [
+            'mykey' => 'My\Key' //A class that implements KeyInterface
+        ]
+    ]
+]);
+</pre>
+
+<pre class="prettyprint linenums">
+use Zoop\Common\Crypt\KeyInterface;
+
+class Key implements KeyInterface {
+
+    public function getKey() {
+        return 'my very secret key phrase';
+    }
+}
+</pre>
+
+
+    <h3>Block Cipher Salt</h3>
+
+    <p>If you want to use a salt with the Block Cipher, you can.</p>
+
+    <h4>Salt stored in Document</h4>
+    <p>By default, the crypt extension will check if your document implements <code>Zoop\Common\Crypt\SaltInterface</code>. If so, that will be used to retireve a salt. Eg:</p>
+
+<pre class="prettyprint linenums">
+use Zoop\Common\Crypt\SaltInterface;
+use Zoop\Shard\Crypt\SaltGenerator;
+
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+class MyDocument implements SaltInterface {
+
+    /**
+     * @ODM\String
+     * @Shard\Crypt\Hash
+     */
+    protected $password;
+
+    /**
+     * @ODM\String
+     */
+    protected $salt;
+
+    public function getSalt(){
+        if (!isset($this->salt)){
+            $this->salt = SaltGenerator::generateSalt();
+        }
+        return $this->salt;
+    }
+
+    ...
+}
+</pre>
+
+    <p>Note: if there are several encrypted fields in the one document, this method will use the same salt for all.</p>
+
+    <h4>Alternate salt</h4>
+
+    <p>If you want to use a different salt, set the <code>salt</code> property of the annotation to a service name that will return an instance of <code>Zoop\Common\Crypt\SaltInterface</code>. Eg</p>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+class MyDocument {
+    /**
+     * @ODM\String
+     * @Shard\Crypt\BlockCypter(key='mykey', salt='mysaltservice')
+     */
+    protected $password;
+
+    ...
+}
+</pre>
+
+    <p>And configure your salt service in the Manifest:</p>
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    'service_manager_config' => [
+        'invokables' => [
+            'mykey' => 'My\Key',
+            'mysaltservice' => 'My\Salt' //A class that implements SaltInterface
+        ]
+    ]
+]);
+</pre>
+
+    <h4>Alternate Encryption Algorithim</h4>
+
+    <p>The default block cypher algorithim is in <code>Zoop\Shard\Crypt\BlockCypher\ZendBlockCypherService</code>. If you would like to use an alternate algorithim, set the <code>service</code> property of the annotation to a service name that will return an instance of <code>Zoop\Shard\Crypt\BlockCypher\BlockCypherServiceInterface</code>. Eg:</p>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+class MyDocument {
+    /**
+     * @ODM\String
+     * @Shard\Crypt\BlockCypher(key="mykey", service='mycipherservice')
+     */
+    protected $password;
+
+    ...
+}
+</pre>
+
+    <p>And configure your service in the Manifest:</p>
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    'service_manager_config' => [
+        'invokables' => [
+            'mykey' => 'My\Key',
+            'mycipherservice' => 'My\Cipher\Service' //A class that implements BlockCipherServiceInterface
+        ]
+    ]
+]);
+</pre>
+
+</section>
+<section id="dojo" title="Dojo">
+  <div class="page-header">
+    <h1>Dojo</h1>
+  </div>
+
+    <p class="lead">Generate client side code for your documents.</p>
+
+    <p>The Dojo extension uses the Generator extension. It aims to generate client side js that can describe and validate your documents. However, this extension is experimental. Expect it to change. Use at your own risk.</p>
+
+</section>
+<section id="freeze" title="Freeze">
+  <div class="page-header">
+    <h1>Freeze</h1>
+  </div>
+
+    <p class="lead">Freeze documents against updating or deleting.</p>
+
+    <h2>Configuration</h2>
+    <p>Freeze has no configuration options. Just use:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.freeze' => true
+    ],
+    ...
+]);
+</pre>
+
+    <h2>Making a document freezable</h2>
+
+    <p>To make a document freezable, a boolean field should be annotated with <code>@Shard\Freeze</code>. Eg:</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Boolean
+ * @Shard\Freeze
+ */
+protected $frozen = false;
+</pre>
+
+    <p>For convienence you can use the <code>Zoop\Shard\Freeze\DataModel\FreezableTrait</code> to add such a field to a document. Eg:</p>
+
+<pre class="prettyprint linenums">
+use Zoop\Shard\Freeze\DataModel\FreezeableTrait;
+
+//Annotation imports
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/** @ODM\Document */
+class MyDocument {
+
+    use FreezeableTrait;
+
+    ...
+}
+</pre>
+
+    <h2>Using the Freezer service</h2>
+    <p>The freezer can be used to freeze and thaw documents. When frozen they cannot be updated or deleted. Note that the frozen state is not persisted until the DocumentManager is flushed. Eg:</p>
+
+<pre class="prettyprint linenums">
+$freezer = $manifest->getServiceManager()->get('freezer'); //get the freezer service
+$freezer->freeze($myDocument); //freeze a document
+
+$freezer->thaw($anotherDocument); //thaw a document
+
+$manifest->getServiceManager()->get('mydocumentmanager')->flush() //flush to persist changes
+</pre>
+
+
+    <h2>Freeze and Thaw stamps</h2>
+
+    <h3>Timestamps</h3>
+    <p>The freeze extension support automatic timestamping of freeze and thaw events. Use the <code>@Shard\Freeze\FrozenOn</code> and <code>@Shard\Freeze\ThawedOn</code> annotations. Eg:</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Timestamp
+ * @Shard\Freeze\FrozenOn
+ */
+protected $frozenOn;
+
+/**
+ * @ODM\Timestamp
+ * @Shard\Freeze\ThawedOn
+ */
+protected $thawedOn;
+</pre>
+
+    <p>Alternately you can use traits. Eg</p>
+
+<pre class="prettyprint linenums">
+use Zoop\Shard\Freeze\DataModel\FreezeableTrait;
+use Zoop\Shard\Freeze\DataModel\FreezenOnTrait;
+use Zoop\Shard\Freeze\DataModel\ThawedOnTrait;
+
+//Annotation imports
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/** @ODM\Document */
+class MyDocument {
+
+    use FreezeableTrait;
+    use FrozenOnTrait;
+    use ThawedOnTrait;
+    ...
+}
+</pre>
+
+    <p>The values of the fields can be retrieved with:</p>
+
+<pre class="prettyprint linenums">
+$myDocument->getFrozenOn();
+$myDocument->getThawedOn();
+</pre>
+
+    <h3>User stamps</h3>
+    <p>The freeze extension support automatic stamping with the active username on freeze and thaw events. Use the <code>@Shard\Freeze\FrozenBy</code> and <code>@Shard\Freeze\ThawedBy</code> annotations. This requires a configured <a href="./config.href#user-config">user</a>. Eg:</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\String
+ * @Shard\Freeze\FrozenBy
+ */
+protected $frozenBy;
+
+/**
+ * @ODM\String
+ * @Shard\Freeze\ThawedBy
+ */
+protected $thawedBy;
+</pre>
+
+    <p>Alternately you can use traits. Eg</p>
+
+<pre class="prettyprint linenums">
+use Zoop\Shard\Freeze\DataModel\FreezeableTrait;
+use Zoop\Shard\Freeze\DataModel\FreezenByTrait;
+use Zoop\Shard\Freeze\DataModel\ThawedByTrait;
+
+//Annotation imports
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/** @ODM\Document */
+class MyDocument {
+
+    use FreezeableTrait;
+    use FrozenByTrait;
+    use ThawedByTrait;
+    ...
+}
+</pre>
+
+    <p>The values of the fields can be retrieved with:</p>
+
+<pre class="prettyprint linenums">
+$myDocument->getFrozenBy();
+$myDocument->getThawedBy();
+</pre>
+
+
+        <h2>Access Conntrol</h2>
+
+        <p>The Freeze extension can hook into the Access Control extension to allow or deny roles to the <code>freeze</code> and <code>thaw</code> actions. This requires the Access Control extension to be enabled, as well as the Freeze extension. Eg:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.accessControl' => true,
+        'extension.freeze' => true
+    ],
+    ...
+]);
+</pre>
+
+        <p>Permissions can then be used as normal with the added actions of <code>freeze</code> and <code>thaw</code>. Eg:</p>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Basic(roles="editor", allow="freeze", deny="thaw")
+ *     ...
+ * })
+ */
+class Simple {...}
+</pre>
+
+        <h2>Freeze Filter</h2>
+
+        <p>The freeze extension provides a filter that can be used to remove frozen documents from result sets.</p>
+
+        <p>To filter out all frozen documents, use:</p>
+
+<pre class="prettyprint linenums">
+$documentManager->getFilterCollection()->enable('freeze');
+</pre>
+
+        <p>To filter so <i>only</i> frozen documents are returned use:</p>
+
+<pre class="prettyprint linenums">
+$documentManager->getFilterCollection()->enable('freeze');
+$filter = $documentManager->getFilterCollection()->getFilter('freeze');
+$filter->onlyFrozen();
+</pre>
+
+
+        <h2>Events</h2>
+
+        <p>Freeze provides the following events which can be subscribed to with the Doctrine EventManager:</p>
+
+<table class="table table-bordered table-striped">
+  <thead>
+   <tr>
+     <th style="width: 100px;">Name</th>
+     <th>description</th>
+   </tr>
+  </thead>
+  <tbody>
+<tr>
+    <td>preFreeze</td>
+    <td>Fires before freeze happens.</td>
+</tr>
+<tr>
+    <td>postFreeze</td>
+    <td>Fires after freeze happens.</td>
+</tr>
+<tr>
+    <td>preThaw</td>
+    <td>Fires before thaw happens.</td>
+</tr>
+<tr>
+    <td>postThaw</td>
+    <td>Firest after thaw happens.</td>
+</tr>
+<tr>
+    <td>freezeDenied</td>
+    <td>Fires if a freeze is attempted but denied by access control.</td>
+</tr>
+<tr>
+    <td>thawDenied</td>
+    <td>Fires if a thaw is attempted by denied by access control.</td>
+</tr>
+<tr>
+    <td>frozenUpdateDenied</td>
+    <td>Fires if attempt is made to update a frozen document.</td>
+</tr>
+<tr>
+    <td>frozenDeleteDenied</td>
+    <td>Fires if attempt is made to delete a frozen document.</td>
+</tr>
+</tbody>
+</table>
+
+</section>
+<section id="generator" title="Generator">
+  <div class="page-header">
+    <h1>Generator</h1>
+  </div>
+
+    <p class="lead">Dynamically generate new resources based on document classes</p>
+
+    <p>The generator extension can be used to dynamically generate resources such as help files, javascript, and api documentation, from your document classes.</p>
+
+    <h2>Configuration</h2>
+
+    <p>Configuration is very important for the Generator extension. A <code>resource_map</code> must be defined. A <code>resource_map</code> is an array of resources that can be generated by the generator extension. The array keys are the resource names.</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.generator' => [
+            'my resource name' => [
+                /* resource generator config goes here */
+            ]
+        ]
+    ],
+    ...
+]);
+</pre>
+
+    <p>The configuration array for a resource may have three keys:</p>
+
+<table class="table table-bordered table-striped">
+  <thead>
+   <tr>
+     <th style="width: 100px;">Name</th>
+     <th style="width: 50px;">type</th>
+     <th style="width: 50px;">required</th>
+     <th>description</th>
+   </tr>
+  </thead>
+  <tbody>
+<tr>
+    <td>generator</td>
+    <td>string</td>
+    <td>true</td>
+    <td>The service name which will return an instance of <code>Zoop\Shard\Generator\GeneratorInterface</code></td>
+</tr>
+<tr>
+    <td>class</td>
+    <td>string</td>
+    <td>true</td>
+    <td>The class name of a document class that will be used to generate the resource.</td>
+</tr>
+<tr>
+    <td>options</td>
+    <td>array</td>
+    <td>false</td>
+    <td>An array of options that will be passed to the generator.</td>
+</tr>
+</tbody>
+</table>
+
+    <p>A complete config might look like:</p>
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.generator' => [
+            'userDescription.html' => [
+                'generator' => 'my.description.generator',
+                'class' => 'My\Documents\User',
+                'options' => [
+                    'theme' => 'ocean_blue'
+                ]
+            ]
+        ]
+    ],
+    ...
+]);
+</pre>
+
+    <h2>The Resource Map</h2>
+
+    <p>The resource map is a service provided by the generator extension. To get it use:</p>
+
+<pre class="prettyprint linenums">
+$resourceMap = $manifest->getServiceManager()->get('resourceMap');
+</pre>
+
+    <p>To check if a resource can be generated:</p>
+
+<pre class="prettyprint linenums">
+if ($resourceMap->has('userDescription.html')){
+    //resource can be generated
+} else {
+    //resource can't be generated
+};
+</pre>
+
+    <p>To generate a resource:</p>
+<pre class="prettyprint linenums">
+$html = $resourceMap->get('userDescription.html');
+</pre>
+
+    <h2>Create your own generator</h2>
+
+    <p>To create your own generator, just implement <code>Zoop\Shard\Generator\GeneratorInterface</code>. Eg:</p>
+
+<pre class="prettyprint linenums">
+namespace My;
+
+use Zoop\Shard\Generator\GeneratorInterface;
+
+class DescriptionGenerator implements GeneratorInterface
+{
+    public function generate($name, $class, $options = null)
+    {
+        return "<p>You requested resource $name for $class be generated</p>";
+    }
+}
+</pre>
+
+    <p>You will also need to register your generator with the service manager. This is most easily done when configuring the Manifest. Eg:</p>
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.generator' => [
+            ...
+        ]
+    ],
+    'service_manager_config' => [
+        'invokables' => [
+            'my.description.generator' => 'My\DescriptionGenerator'
+        ],
+        ...
+    ]
+]);
+</pre>
+
+</section>
+<section id="owner" title="Owner">
+  <div class="page-header">
+    <h1>Owner</h1>
+  </div>
+
+    <p class="lead">Add an owner field to documents, and enable the owner based access control.</p>
+
+    <h2>Configuration</h2>
+    <p>Owner has no configuration options. Just use:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.owner' => true
+    ],
+    ...
+]);
+</pre>
+
+    <p>However, the Owner extension requires a configured <code>user</code> service which is an instance of <code>Zoop\Common\User\UserInterface</code>. See <a href="./config.html#user-config">User Config</a></p>
+
+    <h2>Add an owner field</h2>
+
+    <p>Place the <code>@Shard\Owner</code> annotation on a field.</p>
+<pre class="prettyprint linenums">
+/**
+ * @ODM\String
+ * @Shard\Owner
+ */
+protected $owner;
+</pre>
+
+    <p>Alternately you can use traits. Eg</p>
+
+<pre class="prettyprint linenums">
+use Zoop\Shard\Owner\DataModel\OwnerTrait;
+
+//Annotation imports
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/** @ODM\Document */
+class MyDocument {
+
+    use OwnerTrait;
+    ...
+}
+</pre>
+
+    <p>The values of the field can be set and retrieved with:</p>
+
+<pre class="prettyprint linenums">
+$myDocument->setOwner();
+$myDocument->getOwner();
+</pre>
+
+    <p>Note: the value of the owner field is not automatically assigned to the active use when a document is created. It must be manually set.</p>
+
+    <h2>Owner based access control</h2>
+
+    <p>If the Access Control extension is enabled along with the Owner extension, the <code>owner</code> role can be used to allow or deny actions if the current user is equal to the owner field.</p>
+
+    <p>For example, the following access control annotations, only the owning user may read the document.</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Basic(roles="owner", allow="read")
+ * })
+ */
+</pre>
+
+    <h2>Access control owner field update</h2>
+
+    <p>It is normally required to access control the ability to change who owns a document. Eg:</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Basic(roles="*",     allow={"create", "read"}                     ),
+ *     @Shard\Permission\Basic(roles="owner", allow="update::*",       deny="update::owner"),
+ *     @Shard\Permission\Basic(roles="admin", allow="update::owner"                        )
+ * })
+ */
+</pre>
+
+    <p>In this example, all roles can read. Only the own can update a document. And only an admin can update the document owner.</p>
+
+</section>
+<section id="rest" title="Rest">
+  <div class="page-header">
+    <h1>Rest</h1>
+  </div>
+
+    <p class="lead">Map documents to Rest web services</p>
+
+    <p>The Rest extension allows you to specify the mapping of document classes to Rest endpoints.</p>
+
+    <p>Note: This extension does not create a web service. It only provides the mapping. If you require a full web service, one is provided by <a href="http://zoopcommerce.github.io/shard-module">shard-module</a>.</p>
+
+    <h2>Configuration</h2>
+
+    <p>Configuration is very important for the Rest extension. An <code>endpoint_map</code> must be defined. An <code>endpoint_map</code> defines how endpoint are mapped to document classes. The array keys are the endpoint names.</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.rest' => [
+            'user' => [
+                /* rest config goes here */
+            ]
+        ]
+    ],
+    ...
+]);
+</pre>
+
+    <p>The configuration array for an endpoint may have three keys:</p>
+
+<table class="table table-bordered table-striped">
+  <thead>
+   <tr>
+     <th style="width: 100px;">Name</th>
+     <th style="width: 50px;">type</th>
+     <th style="width: 50px;">required</th>
+     <th>description</th>
+   </tr>
+  </thead>
+  <tbody>
+<tr>
+    <td>class</td>
+    <td>string</td>
+    <td>true</td>
+    <td>The class name of a document class that will be used to generate the resource.</td>
+</tr>
+<tr>
+    <td>property</td>
+    <td>string</td>
+    <td>true</td>
+    <td>The name of the document property to be used as the rest Id. This should normally be the same as the document Id, but it does not have to be. If it is not the same, care must be take so that it is always unique.</td>
+</tr>
+<tr>
+    <td>cache</td>
+    <td>array</td>
+    <td>false</td>
+    <td>An optional array of cache directives that can be used to set cache headers.</td>
+</tr>
+<tr>
+    <td>embedded_lists</td>
+    <td>array</td>
+    <td>false</td>
+    <td>An optional array of embedded documents that you want exposed through your rest api.</td>
+</tr>
+</tbody>
+</table>
+
+    <p>A complete config might look like:</p>
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.rest' => [
+            'user' => [
+                'class' => 'My\Documents\User',
+                'property' => 'username',
+                'cache_control' => [
+                    'public'  => true,
+                    'max_age' => 10
+                ]
+            ]
+        ]
+    ],
+    ...
+]);
+</pre>
+
+    <h2>The Endpoint Map</h2>
+
+    <p>The endpoint map is a service provided by the rest extension. To get it use:</p>
+
+<pre class="prettyprint linenums">
+$endpointMap = $manifest->getServiceManager()->get('endpointMap');
+</pre>
+
+    <p>To check if an endpoint exists:</p>
+
+<pre class="prettyprint linenums">
+if ($endpointMap->hasEndpoint('user')){
+    //endpoint does exist
+} else {
+    //endpoint doesn't exist
+};
+</pre>
+
+    <p>To get an endpoint, and access it's properties:</p>
+<pre class="prettyprint linenums">
+$endpoint = $endpointMap->getEndpoint('user');
+
+$endpoint->getClass();
+$endpoint->getProperty();
+$endpoint->getCacheControl();
+$endpoint->getEmbeddedLists();
+</pre>
+
+    <p>The endpointMap can also do a reverse lookup from the document class. Note: this will return an array.</p>
+<pre class="prettyprint linenums">
+$endpoints = $endpointMap->getEndpointsFromClass('My\Documents\User');
+</pre>
+
+</section>
+<section id="serializer" title="Serializer">
+  <div class="page-header">
+    <h1>Serializer</h1>
+  </div>
+
+    <p class="lead">Serialize document instances to array or json, and unserialize back to document instances.</p>
+    <p>The shard Serializer offers fine grained control over how documents are serialized and unserialized, with particluar mind to ajax and web clients.</p>
+
+    <h2>Configuration</h2>
+    <p>The serializer does not require any specific configuration.</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.serializer' => true
+    ],
+    ...
+]);
+</pre>
+
+    <p>However, some configuration options are available:</p>
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.serializer' => [
+            'class_name_field' => ...,
+            'type_serializers' => [...]
+            'max_nesting_depth' => [...]
+        ]
+    ],
+    ...
+]);
+</pre>
+
+<table class="table table-bordered table-striped">
+  <thead>
+   <tr>
+     <th style="width: 100px;">Name</th>
+     <th style="width: 50px;">type</th>
+     <th style="width: 50px;">default</th>
+     <th>description</th>
+   </tr>
+  </thead>
+  <tbody>
+<tr>
+    <td>class_name_filed</td>
+    <td>string</td>
+    <td>_className</td>
+    <td>If the class name of a document is serialized, this is the property name that will be used.</td>
+</tr>
+<tr>
+    <td>type_serializer</td>
+    <td>array</td>
+    <td>['date' => 'serializer.type.dateToISO8601']</td>
+    <td>An array of type serializers. For more information see below.</td>
+</tr>
+<tr>
+    <td>max_nesting_depth</td>
+    <td>integer</td>
+    <td>1</td>
+    <td>How deeply should the tree of references inside documents be followed when serializing.</td>
+</tr>
+</tbody>
+</table>
+
+    <h2>Serializing Documents</h2>
+
+    <p>First get the Serializer service, and then it can be used to serialize documents:</p>
+<pre class="prettyprint linenums">
+$serializer = $manifest->getServiceManager()->get('serializer');
+
+$array = $serializer->toArray($myDocument); //serialize to array
+$json = $serializer->toJson($myDocument);   //serialize to json
+</pre>
+
+    <p>Serialization rules can be applied to an array. This can be very handy when retrieving a document using doctrine without hydration.</p>
+<pre class="prettyprint linenums">
+$array = $serializer->applySerializeMetadataToArray($myDocumentArray, 'My\Documents\Class');
+</pre>
+
+    <h2>@Shard\Serializer\ClassName</h2>
+
+    <p>Put this annotation on a document to make sure the class name of the document is also serialized. Eg:</p>
+<pre class="prettyprint linenums">
+namespace My\Document;
+/**
+ * @ODM\Document
+ * @Shard\Serializer\ClassName
+ */
+class Test {
+    ...
+}
+</pre>
+
+    <p>When an instance of this document is serialized to an array, it will look like this:</p>
+<pre class="prettyprint linenums">
+[
+    '_className' => 'My\Document\Test',
+    ...
+]
+</pre>
+
+    <p>Serializing the class name makes future unserialization much simpler.</p>
+    <p>The <code>_className</code> field name can be changed in the serializer extencion configuration.</p>
+
+    <h2>@Shard\Serializer\Discriminator</h2>
+
+    <p>Much the same as <code>@Shard\Serializer\ClassName</code>. Will serialize a document's discriminator if it has one.</p>
+
+    <h2>@Shard\Serializer\Ignore</h2>
+    <p>Place on a document field to control if the field is serialized</p>
+
+    <p>Always ignore the field, eg:</p>
+<pre class="prettyprint linenums">
+/**
+ * @ODM\String
+ * @Shard\Serializer\Ignore
+ */
+protected MyProperty;
+
+/* or */
+
+/**
+ * @ODM\String
+ * @Shard\Serializer\Ignore("ignore_always")
+ */
+protected MyProperty;
+</pre>
+
+    <p>Ignore a field only when serializing (not when unserializing):</p>
+<pre class="prettyprint linenums">
+/**
+ * @ODM\String
+ * @Shard\Serializer\Ignore("ignore_when_serializing")
+ */
+protected MyProperty;
+</pre>
+
+    <p>Ignore a field only when unserializing (not when serializing):</p>
+<pre class="prettyprint linenums">
+/**
+ * @ODM\String
+ * @Shard\Serializer\Ignore("ignore_when_unserializing")
+ */
+protected MyProperty;
+</pre>
+
+    <h2>Reference Serializers</h2>
+
+    <p>Document references can be serialized in several differnet ways.</p>
+
+    <h3>RefLazy</h3>
+
+    <p>By default references will be serialized to an array like this:</p>
+<pre class="prettyprint linenums">
+[$ref: 'CollectionName/DocumentId']
+</pre>
+
+    <p>The <code>$ref</code> style of referencing is what Mongo uses internally.</p>
+
+    <p>The default behaviour uses the RefLazy serializer. However this can be overridden by defineing an alternative ReferenceSerializer as a property annotation.</p>
+
+    <p>Two alternate ReferenceSerializers are already included with Shard.</p>
+
+    <h3>SimpleLazy</h3>
+
+    <p>SimpleLazy will serialize a reference as the mongo id. It can be used like this:</p>
+<pre class="prettyprint linenums">
+/**
+ * @ODM\ReferenceMany(targetDocument="MyTargetDocument")
+ * @Sds\Serializer\SimpleLazy
+ */
+protected $myDocumentProperty;
+</pre>
+
+    <h3>Eager</h3>
+    <p>Eager will serialize references as if they were embedded documents. It can be used like this:</p>
+<pre class="prettyprint linenums">
+/**
+ * @ODM\ReferenceMany(targetDocument="MyTargetDocument")
+ * @Sds\Serializer\Eager
+ */
+protected $myDocumentProperty;
+</pre>
+
+    <p>When using the Eager serializer, the maxNestingDepth configuration option will control how deep the Eager serializer will go into a tree of references.</p>
+
+    <h3>Custom Reference Serializer</h3>
+
+    <p>You can create your own reference serializer to render references however you like. To do so, implement the <code>Shard\Serializer\Reference\ReferenceSerializerInterface</code>.</p>
+
+    <p>Then register your serializer with the service manager in the manifest config:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.serializer' => [
+            ...
+        ]
+    ],
+    'service_manager_config' => [
+        'invokables' => [
+            'my.reference.serializer' => 'My\ReferenceSerializer\Class'
+        ],
+        ...
+    ]
+]);
+</pre>
+
+    <p>To use your reference serializer, use the annotation:</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\ReferenceMany(targetDocument="MyTargetDocument")
+ * @Sds\Serializer\ReferenceSerializer("my.reference.serializer")
+ */
+protected $myDocumentProperty;
+</pre>
+
+    <h2>Date Serializer</h2>
+
+    <p>Fields of type <code>date</code> are serialized by default with <code>Shard\Serializer\Type\DateToISO8601</code>.</p>
+
+    <p>To override this format, see Custom Type Serializers below</p>
+
+    <h2>Custom Type Serializers</h2>
+
+    <p>Each document field has an associated type, such as string or date. Serialization may be customized by type.</p>
+
+    <p>First create a class which implements the <code>Shard\Serializer\Type\TypeSerializerInterface</code>. You will need to define serialize and unserialize methods.</p>
+
+    <p>For example, this class will uppercase the first letter of every string when serializing, and lower case the first letter when unserializing:</p>
+
+<pre class="prettyprint linenums">
+use Shard\Serializer\Type\TypeSerializerInterface;
+
+class MyStringSerializer implements TypeSerializerInterface {
+
+    public static function serialize($value) {
+        return ucfirst($value);
+    }
+
+    public static function unserialize($value) {
+        return lcfirst($value);
+    }
+}
+</pre>
+
+    <p>Then the class needs to be registered in the extension config and service manager:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.serializer' => [
+            'type_serializers' => [
+                'string' => 'my.string.serializer'
+            ]
+        ]
+    ],
+    'service_manager_config' => [
+        'invokables' => [
+            'my.string.serializer' => 'MyStringSerializer'
+        ],
+        ...
+    ]
+]);
+</pre>
+
+    <p>The default Date serializer is an example of a Type Serializer which is regisered by default. To over ride it, simply register your own in the extension config.</p>
+
+    <h2>Unserializing Documents</h2>
+
+    <p>Both <code>fromArray</code> and <code>fromJson</code> will unserialize an array or json into a document. They take up to four arguments:</p>
+
+<table class="table table-bordered table-striped">
+  <thead>
+   <tr>
+     <th style="width: 100px;">Name</th>
+     <th style="width: 50px;">type</th>
+     <th style="width: 50px;">default</th>
+     <th>description</th>
+   </tr>
+  </thead>
+  <tbody>
+<tr>
+    <td>data</td>
+    <td>array | string</td>
+    <td></td>
+    <td>The data to be unserialized. An array for <code>fromArray</code>, or a json string for <code>fromJson</code>.</td>
+</tr>
+<tr>
+    <td>className</td>
+    <td>string</td>
+    <td>null</td>
+    <td>The class name of the document instance to create. If not supplied, the <code>_className</code> field of the <code>data</code> argument will be used.</td>
+</tr>
+<tr>
+    <td>mode</td>
+    <td>string</td>
+    <td>unserialize_patch</td>
+    <td>Must be either <code>unserialize_update</code> or <code>unserialize_patch</code>. If <code>unserialize_update</code> is used, the unserialized document will replace any existing document in the db with the same id. If <code>unserialize_patch</code> is used the unserialized data will be merged with any existing document in the db.</td>
+</tr>
+<tr>
+    <td>document</td>
+    <td>object</td>
+    <td>null</td>
+    <td>If supplied, the unserializer won't attempt to load any document from the db, but use this one instead.</td>
+</tr>
+</tbody>
+</table>
+
+
+</section>
+<section id="soft-delete" title="Soft Delete">
+  <div class="page-header">
+    <h1>Soft Delete</h1>
+  </div>
+
+    <p class="lead">Mark documents as deleted, without actually deleting them.</p>
+    <p>Soft Deleted documents are simply marked as soft deleted, so they can be filtered out from result sets. Soft Deleted documents cannot be updated. However, note that Soft Deleted documents can still be fully deleted. If you need to control delete access, then use the Access Control extension.</p>
+
+    <h2>Configuration</h2>
+    <p>Soft Delete has no configuration options. Just use:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.softDelete' => true
+    ],
+    ...
+]);
+</pre>
+
+    <h2>Making a document soft deletable</h2>
+
+    <p>To make a document soft deleteable, a boolean field should be annotated with <code>@Shard\SoftDelete</code>. Eg:</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Boolean
+ * @Shard\SoftDelete
+ */
+protected $softDeleted = false;
+</pre>
+
+    <p>For convienence you can use the <code>Zoop\Shard\SoftDelete\DataModel\SoftDeletableTrait</code> to add such a field to a document. Eg:</p>
+
+<pre class="prettyprint linenums">
+use Zoop\Shard\SoftDelete\DataModel\SoftDeletableTrait;
+
+//Annotation imports
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/** @ODM\Document */
+class MyDocument {
+
+    use SoftDeletableTrait;
+
+    ...
+}
+</pre>
+
+    <h2>Using the SoftDeleter service</h2>
+    <p>The SoftDeleter can be used to soft delete and restore documents. Note that the soft delete state is not persisted until the DocumentManager is flushed. Eg:</p>
+
+<pre class="prettyprint linenums">
+$softDeleter = $manifest->getServiceManager()->get('softDeleter'); //get the softDeleter service
+$softDeleter->softDelete($myDocument); //soft delete a document
+
+$softDeleter->restore($anotherDocument); //restore a document
+
+$manifest->getServiceManager()->get('mydocumentmanager')->flush() //flush to persist changes
+</pre>
+
+
+    <h2>Soft Delete and Restore stamps</h2>
+
+    <h3>Timestamps</h3>
+    <p>The soft delete extension supports automatic timestamping of soft delete and restore events. Use the <code>@Shard\SoftDelete\SoftDeletedOn</code> and <code>@Shard\SoftDelete\RestoredOn</code> annotations. Eg:</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Timestamp
+ * @Shard\SoftDelete\SoftDeletedOn
+ */
+protected $softDeletedOn;
+
+/**
+ * @ODM\Timestamp
+ * @Shard\SoftDelete\RestoredOn
+ */
+protected $restoredOn;
+</pre>
+
+    <p>Alternately you can use traits. Eg</p>
+
+<pre class="prettyprint linenums">
+use Zoop\Shard\SoftDelete\DataModel\SoftDeletableTrait;
+use Zoop\Shard\SoftDelete\DataModel\SoftDeletedOnTrait;
+use Zoop\Shard\SoftDelete\DataModel\RestoredOnTrait;
+
+//Annotation imports
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/** @ODM\Document */
+class MyDocument {
+
+    use SoftDeletableTrait;
+    use SoftDeletedOnTrait;
+    use RestoredOnTrait;
+    ...
+}
+</pre>
+
+    <p>The values of the fields can be retrieved with:</p>
+
+<pre class="prettyprint linenums">
+$myDocument->getSoftDeletedOn();
+$myDocument->getRestoredOn();
+</pre>
+
+    <h3>User stamps</h3>
+    <p>The soft delete extension supports automatic stamping with the active username on soft delete and restore events. Use the <code>@Shard\SoftDelete\SoftDeletedBy</code> and <code>@Shard\SoftDelete\RestoredBy</code> annotations. This requires a configured <a href="./config.href#user-config">user</a>. Eg:</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\String
+ * @Shard\SoftDelete\SoftDeletedBy
+ */
+protected $softDeletedBy;
+
+/**
+ * @ODM\String
+ * @Shard\SoftDelete\RestoredBy
+ */
+protected $restoredBy;
+</pre>
+
+    <p>Alternately you can use traits. Eg</p>
+
+<pre class="prettyprint linenums">
+use Zoop\Shard\SoftDelete\DataModel\SoftDeleteableTrait;
+use Zoop\Shard\SoftDelete\DataModel\SoftDeletedByTrait;
+use Zoop\Shard\SoftDelete\DataModel\RestoredByTrait;
+
+//Annotation imports
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/** @ODM\Document */
+class MyDocument {
+
+    use SoftDeleteableTrait;
+    use SoftDeletedByTrait;
+    use RestoredByTrait;
+    ...
+}
+</pre>
+
+    <p>The values of the fields can be retrieved with:</p>
+
+<pre class="prettyprint linenums">
+$myDocument->getSoftDeletedBy();
+$myDocument->getRestoredBy();
+</pre>
+
+
+        <h2>Access Conntrol</h2>
+
+        <p>The soft deleted extension can hook into the Access Control extension to allow or deny roles to the <code>softDelete</code> and <code>restore</code> actions. This requires the Access Control extension to be enabled, as well as the Soft Delete extension. Eg:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.accessControl' => true,
+        'extension.softDelete' => true
+    ],
+    ...
+]);
+</pre>
+
+        <p>Permissions can then be used as normal with the added actions of <code>softDelete</code> and <code>restore</code>. Eg:</p>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Basic(roles="editor", allow="softDelete", deny="restore")
+ *     ...
+ * })
+ */
+class Simple {...}
+</pre>
+
+        <h2>Soft Delete Filter</h2>
+
+        <p>The soft delete extension provides a filter that can be used to remove soft deleted documents from result sets.</p>
+
+        <p>To filter out all soft deleted documents, use:</p>
+
+<pre class="prettyprint linenums">
+$documentManager->getFilterCollection()->enable('softDelete');
+</pre>
+
+        <p>To filter so <i>only</i> soft deleted documents are returned use:</p>
+
+<pre class="prettyprint linenums">
+$documentManager->getFilterCollection()->enable('softDelete');
+$filter = $documentManager->getFilterCollection()->getFilter('softDelete');
+$filter->onlySoftDeleted();
+</pre>
+
+        <h2>Events</h2>
+
+        <p>Soft Delete provides the following events which can be subscribed to with the Doctrine EventManager:</p>
+
+<table class="table table-bordered table-striped">
+  <thead>
+   <tr>
+     <th style="width: 100px;">Name</th>
+     <th>description</th>
+   </tr>
+  </thead>
+  <tbody>
+<tr>
+    <td>preSoftDelete</td>
+    <td>Fires before soft delete happens.</td>
+</tr>
+<tr>
+    <td>postSoftDelete</td>
+    <td>Fires after soft delete happens.</td>
+</tr>
+<tr>
+    <td>preRestore</td>
+    <td>Fires before restore happens.</td>
+</tr>
+<tr>
+    <td>postRestore</td>
+    <td>Firest after restore happens.</td>
+</tr>
+<tr>
+    <td>softDeleteDenied</td>
+    <td>Fires if a soft delete is attempted but denied by access control.</td>
+</tr>
+<tr>
+    <td>restoreDenied</td>
+    <td>Fires if a restore is attempted by denied by access control.</td>
+</tr>
+<tr>
+    <td>softDeleteUpdateDenied</td>
+    <td>Fires if attempt is made to update a soft deleted document.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="stamp" title="Stamp">
+  <div class="page-header">
+    <h1>Stamp</h1>
+  </div>
+
+    <p class="lead">Stamp documents with creation and update timestamp and user.</p>
+
+    <h2>Configuration</h2>
+    <p>Stamp has no configuration options. Just use:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.stamp' => true
+    ],
+    ...
+]);
+</pre>
+
+    <h2>Create and Update stamps</h2>
+
+    <h3>Timestamps</h3>
+    <p>The stamp extension supports automatic timestamping of create and update events on documents. Use the <code>@Shard\Stamp\CreatedOn</code> and <code>@Shard\Stamp\UpdatedOn</code> annotations. Eg:</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Timestamp
+ * @Shard\Stamp\CreatedOn
+ */
+protected $createdOn;
+
+/**
+ * @ODM\Timestamp
+ * @Shard\Stamp\UpdatedOn
+ */
+protected $updatedOn;
+</pre>
+
+    <p>Alternately you can use traits. Eg</p>
+
+<pre class="prettyprint linenums">
+use Zoop\Shard\Stamp\DataModel\CreatedOnTrait;
+use Zoop\Shard\Stamp\DataModel\CreatedOnTrait;
+
+//Annotation imports
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/** @ODM\Document */
+class MyDocument {
+
+    use CreatedOnTrait;
+    use UpdatedOnTrait;
+    ...
+}
+</pre>
+
+    <p>The values of the fields can be retrieved with:</p>
+
+<pre class="prettyprint linenums">
+$myDocument->getCreatedOn();
+$myDocument->getUpdatedOn();
+</pre>
+
+    <h3>User stamps</h3>
+    <p>The stamp extension supports automatic stamping with the active username on document create and update. Use the <code>@Shard\Stamp\CreatedBy</code> and <code>@Shard\Stamp\UpdatedBy</code> annotations. This requires a configured <a href="./config.href#user-config">user</a>. Eg:</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\String
+ * @Shard\Stamp\CreatedBy
+ */
+protected $createdBy;
+
+/**
+ * @ODM\String
+ * @Shard\Stamp\UpdatedBy
+ */
+protected $updatedBy;
+</pre>
+
+    <p>Alternately you can use traits. Eg</p>
+
+<pre class="prettyprint linenums">
+use Zoop\Shard\State\DataModel\CreatedByTrait;
+use Zoop\Shard\State\DataModel\UpdatedByTrait;
+
+//Annotation imports
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/** @ODM\Document */
+class MyDocument {
+
+    use CreatedByTrait;
+    use UpdatedByTrait;
+    ...
+}
+</pre>
+
+    <p>The values of the fields can be retrieved with:</p>
+
+<pre class="prettyprint linenums">
+$myDocument->getCreatedBy();
+$myDocument->getUpdatedBy();
+</pre>
+
+
+        <h2>Access Conntrol</h2>
+
+        <p>The stamp extension can hook into the Access Control extension to provide the extra roles of <code>creator</code> and <code>updater</code>. Permissions can be allowed or denied if the current active user is the creator or updater. Eg:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.accessControl' => true,
+        'extension.stamp' => true
+    ],
+    ...
+]);
+</pre>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Basic(roles="creator", allow="update::*")
+ *     ...
+ * })
+ */
+class Simple {...}
+</pre>
+
+</section>
+<section id="state" title="State">
+  <div class="page-header">
+    <h1>State</h1>
+  </div>
+
+    <p class="lead">Add state to documents and build document workflows.</p>
+    <p>A document has a state, such as 'draft' and can be transitioned to another state, such as 'published'.</p>
+
+    <h2>Configuration</h2>
+    <p>State has no configuration options. Just use:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.state' => true
+    ],
+    ...
+]);
+</pre>
+
+    <h2>Adding state to a Document</h2>
+
+    <p>To add state, add <code>@Shard\State</code> to a field. Eg:</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\String
+ * @Shard\State
+ */
+protected $state;
+</pre>
+
+    <p>For convienence you can use the <code>Zoop\Shard\State\DataModel\StateTrait</code> to add such a field to a document.</p>
+
+    <h2>State Access Control</h2>
+
+    <p>Access Control permissions can be tied to document state. Use <code>@Shard\Permission\State</code>.</p>
+
+    <p>Eg. These permissions allow all roles to read only when a document is in a published state. A writer role is allowed to create, read and update documents in a draft state.</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\State     (roles="*",      state="published", allow="read"                      ),
+ *     @Shard\Permission\State     (roles="writer", state="draft",     allow={"create", "update", "read"}),
+ * })
+ */
+class AccessControlled {
+    ...
+}
+</pre>
+
+    <h2>Transition Access Control</h2>
+
+    <p>Access Control permission can use used to control who can make changes to document state. Use <code>@Shard\Permission\Transition</code></p>
+
+    <p>Eg. These permissions allow a writer to move a document from draft to reivew. A reviewer may move a document from review to draft or review to published. An admin can make any transition.</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Transition(roles="writer",   allow="draft->review"                       ),
+ *     @Shard\Permission\Transition(roles="reviewer", allow={"review->draft", "review->published"}),
+ *     @Shard\Permission\Basic     (roles="admin",    allow="*"                                   )
+ * })
+ */
+class AccessControlled {
+    ...
+}
+</pre>
+
+        <h2>State Filter</h2>
+
+        <p>The state extension provides a filter that can be used to filter result sets based on document state.</p>
+
+        <p>The state filter takes a list of states, and if those states should be included or excluded.</p>
+
+        <p>Eg, exclude some states:</p>
+<pre class="prettyprint linenums">
+$documentManager->getFilterCollection()->enable('state');
+$filter = $documentManager->getFilterCollection()->getFilter('state');
+$filter->setStates(['inactive']);
+$filter->excludeStateList();
+</pre>
+
+        <p>Eg, include some states:</p>
+<pre class="prettyprint linenums">
+$documentManager->getFilterCollection()->enable('state');
+$filter = $documentManager->getFilterCollection()->getFilter('state');
+$filter->setStates(['published', 'draft']);
+$filter->includeStateList();
+</pre>
+
+        <h2>Events</h2>
+
+        <p>State provides the following events which can be subscribed to with the Doctrine EventManager:</p>
+
+<table class="table table-bordered table-striped">
+  <thead>
+   <tr>
+     <th style="width: 100px;">Name</th>
+     <th>description</th>
+   </tr>
+  </thead>
+  <tbody>
+<tr>
+    <td>preTransition</td>
+    <td>Fires before state transition happens.</td>
+</tr>
+<tr>
+    <td>onTransition</td>
+    <td>Fires when a transition is happening. That is, after access control checks but before a new document change set is prepared for document persistance.</td>
+</tr>
+<tr>
+    <td>postTransition</td>
+    <td>Fires after a transition has happened.</td>
+</tr>
+<tr>
+    <td>transitionDenied</td>
+    <td>Fires if Access Control has denied permission to make a requested transition.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="validator" title="Validator">
+  <div class="page-header">
+    <h1>Validator</h1>
+  </div>
+
+    <p class="lead">Add validation to documents.</p>
+    <p>Validate fields, and whole documents so only quality data makes it into your database.</p>
+    <p>The Validator extensions uses the <a href="http://zoopcommerce.github.io/mystique">Mystique</a> validator library.</p>
+
+    <h2>Configuration</h2>
+    <p>State has no configuration options. Just use:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.validator' => true
+    ],
+    ...
+]);
+</pre>
+
+    <h2>Adding validation to a Field</h2>
+
+    <p>To add a validator use annotations in the <code>@Shard\Validator</code> namespace. Eg:</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\String
+ * @Shard\Validator\Length("min" = 5, "max" = 10)
+ */
+protected $myproperty;
+</pre>
+
+    <p>To add a multiple validators in a chain, use <code>@Shard\Validator\Chain</code>. Eg:</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\String
+ * @Shard\Validator\Chain({
+ *     @Shard\Validator\Alpha,
+ *     @Shard\Validator\Length("min" = 5, "max" = 10)
+ * })
+ */
+protected $myproperty;
+</pre>
+
+    <p>All the validators in the Mystique library are supported with their own annotation.</p>
+
+    <h2>Custom Validators</h2>
+
+    <p>To write your own validators, inherit from <code>Zoop\Mystique\Base</code> and use the <code>@Shard\Validator</code> annotation.</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\String
+ * @Shard\Validator("class" = "My\Validator\Class", "options" = {"constuctor options array"})
+ */
+protected $myproperty;
+</pre>
+
+    <h2>Document validators</h2>
+
+    <p>Sometimes you want a validation rule that interrogates more than one field. To do so, just use the <code>@Shard\Validator</code> annotation on a document, rather than a field. Eg:</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Document
+ * @Shard\Validator(class = "Zoop\Shard\Test\Validator\TestAsset\ClassValidator")
+ */
+class Simple {
+    ...
+}
+</pre>
+
+    <p>The <code>isValid</code> method of the validator will be passed the complete document instance to validate.</p>
+
+    <h2>Document Validator Service</h2>
+
+    <p>To validate a document before flush, use the documentValidator service. This will validate all fields and any document validators. Eg:</p>
+<pre class="prettyprint linenums">
+$documentValidator = $manifest->getServiceManager()->get('documentValidator');
+$result = $documentValidator->isValid($myDocument);
+</pre>
+
+
+        <h2>Events</h2>
+
+        <p>Validator provides the following events which can be subscribed to with the Doctrine EventManager:</p>
+
+<table class="table table-bordered table-striped">
+  <thead>
+   <tr>
+     <th style="width: 100px;">Name</th>
+     <th>description</th>
+   </tr>
+  </thead>
+  <tbody>
+<tr>
+    <td>invalidUpdate</td>
+    <td>Fires during flush if and updated document is invalid.</td>
+</tr>
+<tr>
+    <td>invalidCreate</td>
+    <td>Fires during flush if and updated document is invalid.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="zone" title="Zone">
+  <div class="page-header">
+    <h1>Zone</h1>
+  </div>
+
+    <p class="lead">Add zones to documents.</p>
+    <p>A zone is a region of relevance. For example, it may be a company department, a geographical area.</p>
+
+    <p>A document may be assigned multiple zones.</p>
+
+    <h2>Configuration</h2>
+    <p>Zone has no configuration options. Just use:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'extension.zone' => true
+    ],
+    ...
+]);
+</pre>
+
+    <h2>Adding zones to a Document</h2>
+
+    <p>To add zones, add <code>@Shard\Zones</code> to a field. Eg:</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Collection
+ * @Shard\Zones
+ */
+protected $zones;
+</pre>
+
+    <p>For convienence you can use the <code>Zoop\Shard\Zone\DataModel\ZoneTrait</code> to add such a field to a document.</p>
+
+
+        <h2>Zone Filter</h2>
+
+        <p>The zone extension provides a filter that can be used to filter result sets based on document zones.</p>
+
+        <p>The zone filter takes a list of zones, and if those zones should be included or excluded.</p>
+
+        <p>Eg, exclude some zones:</p>
+<pre class="prettyprint linenums">
+$documentManager->getFilterCollection()->enable('zone');
+$filter = $documentManager->getFilterCollection()->getFilter('zone');
+$filter->setStates(['business-support']);
+$filter->excludeZoneList();
+</pre>
+
+        <p>Eg, include some states:</p>
+<pre class="prettyprint linenums">
+$documentManager->getFilterCollection()->enable('zone');
+$filter = $documentManager->getFilterCollection()->getFilter('zone');
+$filter->setStates(['accounts', 'hr']);
+$filter->includeZoneList();
+</pre>
+
+</section>
+
+      </div>
+    </div>
+  </div>
+
+    <!-- Footer
+    ================================================== -->
+    <footer class="footer">
+      <div class="container">
+        <p>Created by <a href="http://github.com/superdweebie">@superdweebie</a> and <a href="http://github.com/crimsonronin">@crimsonronin</a>.</p>
+        <p>Code licensed under MIT.</p>
+        <p>Built on the shoulders of giants <a href="http://github.com/doctrine/mongo-odm">doctrine</a>, <a href="http://mongodb.org">mongo</a> and <a href="http://github.com/zendframework/zf2">zf2</a>.</p>
+        <ul class="footer-links">
+          <li><a href="http://zoopcommerce.com">Zoop</a></li>
+          <li class="muted">&middot;</li>
+          <li><a href="https://github.com/zoopcommerce/shard/issues?state=open">Issues</a></li>
+          <li class="muted">&middot;</li>
+          <li><a href="https://github.com/zoopcommerce/shard/blob/master/CHANGELOG.md">Changelog</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="js/google-code-prettify/prettify.js"></script>
+    <script src="js/havok.js"></script>
+    <script type="text/javascript">
+        require(['dojo/parser'], function(parser){parser.parse()})
+    </script>
+  </body>
+</html>

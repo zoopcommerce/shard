@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Zoop · Shard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Tim Roediger">
+
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="css/docs.css" rel="stylesheet">
+    <link href="js/google-code-prettify/prettify.css" rel="stylesheet">
+  </head>
+
+  <body onload="prettyPrint()">
+
+    <!-- Navbar
+    ================================================== -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="./index.html">Shard</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="">
+                <a href="./index.html">Home</a>
+              </li>
+              <li class="">
+                <a href="./getting-started.html">Get started</a>
+              </li>
+              <li class="">
+                <a href="./config.html">Config</a>
+              </li>
+              <li class="">
+                <a href="./extensions.html">Extensions</a>
+              </li>
+              <li class="">
+                <a href="./custom-extensions.html">Custom Extensions</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+<!-- Subhead
+================================================== -->
+<header class="jumbotron subhead" id="overview">
+  <div class="container">
+    <h1>Custom Extensions</h1>
+    <p class="lead">Create your own Shard Extensions.</p>
+    <p>Follow this tutorial to create a simple extension that defines a Color annotation that can be added to a document and can filter by color.</p>
+  </div>
+</header>
+
+
+  <div class="container">
+
+    <!-- Docs nav
+    ================================================== -->
+    <div class="row">
+      <div class="span3 bs-docs-sidebar">
+        <ul data-dojo-type="havok/widget/ListNav"
+            data-dojo-mixins="havok/widget/_AffixMixin, havok/widget/_ScrollSpyMixin"
+            data-dojo-props="
+               linkTemplate: '&lt;a role=&quot;navitem&quot; href=&quot;${href}&quot;&gt;&lt;i class=&quot;icon-chevron-right&quot;&gt;&lt;/i&gt; ${label}&lt;/a&gt;',
+               affixOffset: {top: 40, bottom: 0},
+               affixTarget: 'mainContent',
+               spyTarget: 'mainContent'
+            "
+            class="nav-stacked bs-docs-sidenav"
+        >
+        </ul>
+      </div>
+      <div class="span9" id="mainContent">
+
+        <section id="extension-class" title="Extension Class">
+  <div class="page-header">
+    <h1>Extension Class</h1>
+  </div>
+
+    <p>At bare minimum, an extension must have an instance of <code>Zoop\Shard\AbstractExtension</code>. This class provides all the hooks and configuration required to create your extension. It has these properties, and you can add your own custom configuration properties:</p>
+
+<table class="table table-bordered table-striped">
+  <thead>
+   <tr>
+     <th style="width: 100px;">Name</th>
+     <th style="width: 50px;">type</th>
+     <th>description</th>
+   </tr>
+  </thead>
+  <tbody>
+<tr>
+    <td>documents</td>
+    <td>array</td>
+    <td>An array of document namespaces and directories to register.</td>
+</tr>
+<tr>
+    <td>subscribers</td>
+    <td>array</td>
+    <td>An array of subscribers, or subscriber service names to register.</td>
+</tr>
+<tr>
+    <td>cliCommands</td>
+    <td>array</td>
+    <td>An array of cli command service names to register with the doctrine cli.</td>
+</tr>
+<tr>
+    <td>cliHelpers</td>
+    <td>array</td>
+    <td>An array of cli helper service names to register with the doctrine cli.</td>
+</tr>
+<tr>
+    <td>serviceManagerConfig</td>
+    <td>array</td>
+    <td>Any service manager configuration.</td>
+</tr>
+<tr>
+    <td>dependencies</td>
+    <td>array</td>
+    <td>An array of service names of other extensions that must be loaded for this extension to work.</td>
+</tr>
+</tbody>
+</table>
+
+    <p>For example, the Color extension class would look like this:</p>
+
+<pre class="prettyprint linenums">
+namespace My\Color;
+
+use Zoop\Shard\AbstractExtension;
+
+class Extension extends AbstractExtension
+{
+
+    protected $subscribers = [
+        'subscriber.color.annotationsubscriber' //annotation subscriber to listen to @Color annotation events
+    ];
+
+    protected $serviceManagerConfig = [
+        'invokables' => [
+            'subscriber.color.annotationsubscriber' => 'My\Color\AnnotationSubscriber' //register the annotation subscriber service
+        ]
+    ];
+
+    protected $filters = [
+        'color' => 'My\Color\Filter' //register filter
+    ];
+
+    protected $dependencies = [
+        'extension.annotation' => true //require the annotation extension to make annotation events work
+    ];
+}
+</pre>
+
+</section>
+<section id="extension-factory" title="Extension Factory">
+  <div class="page-header">
+    <h1>Extension Factory</h1>
+  </div>
+
+    <p>Create a small factory class to return an instance of your extension. Eg:</p>
+
+<pre class="prettyprint linenums">
+namespace My\Color;
+
+use Zoop\Shard\AbstractExtensionFactory;
+use Zend\ServiceManager\ServiceLocatorInterface;
+
+class ExtensionFactory extends AbstractExtensionFactory
+{
+    protected $extensionServiceName = 'my.extension.color';
+
+    public function createService(ServiceLocatorInterface $serviceLocator)
+    {
+        return new Extension($this->getConfig($serviceLocator));
+    }
+}
+</pre>
+
+</section>
+<section id="annoation" title="Annotation">
+  <div class="page-header">
+    <h1>Annotation</h1>
+  </div>
+
+    <p>The color extension is using an annotation, so we need to define that annotation:</p>
+
+<pre class="prettyprint linenums">
+namespace My\Color;
+
+use Doctrine\Common\Annotations\Annotation;
+
+final class Color extends Annotation
+{
+    const event = 'annotationColor';
+}
+</pre>
+
+</section>
+<section id="annoation-subscriber" title="Annotation Subscriber">
+  <div class="page-header">
+    <h1>Annotation Subscriber</h1>
+  </div>
+
+    <p>Add an annotation subscriber to listen to the <code>annotationColor</code> event and augment the metadata:</p>
+
+<pre class="prettyprint linenums">
+namespace My\Color;
+
+use Doctrine\Common\EventSubscriber;
+use Zoop\Shard\Annotation\AnnotationEventArgs;
+
+class AnnotationSubscriber implements EventSubscriber
+{
+
+    public function getSubscribedEvents(){
+        return [Color::event];
+    }
+
+    public function annotationColorZones(AnnotationEventArgs $eventArgs)
+    {
+        $eventArgs->getMetadata()->color = $eventArgs->getReflection()->getName();
+    }
+}
+</pre>
+
+</section>
+<section id="filter" title="Filter">
+  <div class="page-header">
+    <h1>Filter</h1>
+  </div>
+
+    <p>Add a filter that can filter by color:</p>
+
+<pre class="prettyprint linenums">
+namespace My\Color;
+
+use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
+use Doctrine\ODM\MongoDB\Query\Filter\BsonFilter;
+
+class Filter extends BsonFilter
+{
+    protected $color;
+
+    public function setColor($color){
+        $this->color = $color;
+    }
+
+    public function addFilterCriteria(ClassMetadata $metadata)
+    {
+        if (isset($metadata->color)) {
+            return array($metadata->color => $this->color);
+        }
+        return array();
+    }
+}
+</pre>
+
+</section>
+<section id="using-it" title="Using It">
+  <div class="page-header">
+    <h1>Using It</h1>
+  </div>
+
+    <p>That's it!</p>
+
+    <h2>Config</h2>
+    <p>Now register and enable you extension when you create a manifest:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'extension_configs' => [
+        'my.extension.color' => true
+    ],
+    'service_manager_config' => [
+        'factories' => [
+            'my.extension.color' => 'My\Color\ExtensionFactory'
+        ],
+    ]
+]);
+</pre>
+
+    <h2>@Color</h2>
+    <p>Use your <code>@Color</code> annotation in a document:</p>
+
+<pre class="prettyprint linenums">
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use My\Color\Color;
+
+/**
+ * @ODM\Document
+ */
+class DocWithColor {
+
+    /**
+     * @ODM\String
+     * @Color
+     */
+    protected $color;
+    ...
+}
+</pre>
+
+    <h2>Filter</h2>
+    <p>Use your filter to filter documents by color:</p>
+
+<pre class="prettyprint linenums">
+$documentManager->getFilterCollection()->enable('color');
+$filter = $documentManager->getFilterCollection()->getFilter('color');
+$filter->setColor('blue');
+</pre>
+     
+</section>
+<section id="share-it" title="Share It">
+  <div class="page-header">
+    <h1>Share It</h1>
+  </div>
+
+    <p>Now package up your rocking extension and share it with others! Or, contribute it back into Shard if you're feeling kind.</p>
+
+</section>
+
+      </div>
+    </div>
+  </div>
+
+    <!-- Footer
+    ================================================== -->
+    <footer class="footer">
+      <div class="container">
+        <p>Created by <a href="http://github.com/superdweebie">@superdweebie</a> and <a href="http://github.com/crimsonronin">@crimsonronin</a>.</p>
+        <p>Code licensed under MIT.</p>
+        <p>Built on the shoulders of giants <a href="http://github.com/doctrine/mongo-odm">doctrine</a>, <a href="http://mongodb.org">mongo</a> and <a href="http://github.com/zendframework/zf2">zf2</a>.</p>
+        <ul class="footer-links">
+          <li><a href="http://zoopcommerce.com">Zoop</a></li>
+          <li class="muted">&middot;</li>
+          <li><a href="https://github.com/zoopcommerce/shard/issues?state=open">Issues</a></li>
+          <li class="muted">&middot;</li>
+          <li><a href="https://github.com/zoopcommerce/shard/blob/master/CHANGELOG.md">Changelog</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="js/google-code-prettify/prettify.js"></script>
+    <script src="js/havok.js"></script>
+    <script type="text/javascript">
+        require(['dojo/parser'], function(parser){parser.parse()})
+    </script>
+  </body>
+</html>
