@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit backupGlobals="false"
+         backupStaticAttributes="false"
+         colors="false"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         stopOnFailure="false"
+         syntaxCheck="false"
+         bootstrap="bootstrap.php"
+>
+    <testsuites>
+        <testsuite name="Zoop Shard Test Suite">
+            <directory>./Zoop/Shard/Test/</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">../lib</directory>
+        </whitelist>
+    </filter>
+</phpunit>

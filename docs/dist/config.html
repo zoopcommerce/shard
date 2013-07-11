@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Zoop · Shard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Tim Roediger">
+
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="css/docs.css" rel="stylesheet">
+    <link href="js/google-code-prettify/prettify.css" rel="stylesheet">
+  </head>
+
+  <body onload="prettyPrint()">
+
+    <!-- Navbar
+    ================================================== -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="./index.html">Shard</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="">
+                <a href="./index.html">Home</a>
+              </li>
+              <li class="">
+                <a href="./getting-started.html">Get started</a>
+              </li>
+              <li class="">
+                <a href="./config.html">Config</a>
+              </li>
+              <li class="">
+                <a href="./extensions.html">Extensions</a>
+              </li>
+              <li class="">
+                <a href="./custom-extensions.html">Custom Extensions</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+<!-- Subhead
+================================================== -->
+<header class="jumbotron subhead" id="overview">
+  <div class="container">
+    <h1>Config</h1>
+    <p class="lead">How to plug Shard into Doctrine so it all comes to life</p>
+  </div>
+</header>
+
+
+  <div class="container">
+
+    <!-- Docs nav
+    ================================================== -->
+    <div class="row">
+      <div class="span3 bs-docs-sidebar">
+        <ul data-dojo-type="havok/widget/ListNav"
+            data-dojo-mixins="havok/widget/_AffixMixin, havok/widget/_ScrollSpyMixin"
+            data-dojo-props="
+               linkTemplate: '&lt;a role=&quot;navitem&quot; href=&quot;${href}&quot;&gt;&lt;i class=&quot;icon-chevron-right&quot;&gt;&lt;/i&gt; ${label}&lt;/a&gt;',
+               affixOffset: {top: 40, bottom: 0},
+               affixTarget: 'mainContent',
+               spyTarget: 'mainContent'
+            "
+            class="nav-stacked bs-docs-sidenav"
+        >
+        </ul>
+      </div>
+      <div class="span9" id="mainContent">
+
+        <section id="zf2" title="Zend Framework 2">
+  <div class="page-header">
+    <h1>Zend Framework 2</h1>
+  </div>
+
+    <p class="lead">Fast setup for zf2 users.</p>
+
+    <p>If your project is using the zf2 mvc, you'll want to use the <a href="http://zoopcommerce.github.io/shard-module">ShardModule</a> which integrates Shard with the standard <a href="http://github.com/doctrine/doctrine-mongo-odm-module">DoctrineMongoODMModule</a> and <a href="http://github.com/doctrine/DoctrineModule">DoctrineModule</a>. It also means you can ignore the manual config below.</p>
+
+</section>
+<section id="manual-config" title="Manual Config">
+  <div class="page-header">
+    <h1>Manual Config</h1>
+  </div>
+
+    <p class="lead">Hook Shard into the Doctrine configuration process.</p>
+
+    <p>The DocumentManager is at the core of Doctrine Mongo ODM. Surprisingly enough, it manages all the fetching and persistence of documents. Configuring a DocumentManager can be quite involved, because it needs to know about a lot of stuff. Adding Shard into the mix doesn't make it more complex, but it is helpful to know what is going on. Config requires these elements:</p>
+
+    <ul>
+        <li>Standard DocumentManager config, including locations of document classes, proxies, hydrators, filters, and database connection details.</li>
+        <li>A Shard Manifest specifying which Shard extensions to use</li>
+        <li>A DocumentManager and a Shard Manifest need to be linked together. (note: Shard supports multiple document managers, each with their own unique set of extensions. However, a DocumentManager and a Manifest must be linked in a one to one relationship. That is, a single manifest can't service multiple DocumentManagers, and a single DocumentManager shouldn't be linked to multiple Manifests.)</li>
+    </ul>
+
+    <h2>Create a Manifest</h2>
+    <p>The first thing to do is create a Manifest. The Manifest constructor takes a configuration array. Configuration keys are:</p>
+
+    <h3>documents</h3>
+    <p>Specifies any document namespaces you want the DocumentManager to use</p>
+
+<pre class="prettyprint linenums">
+'documents' => [
+    'My\Document\Namespace' => 'my/document/directory/'
+]
+</pre>
+
+    <h3>extension_configs</h3>
+    <p>Specifies the extensions you want to enable. The keys are extension names. The values are extension config arrays. If you don't want to pass any config, just set the value to true. Eg:</p>
+
+<pre class="prettyprint linenums">
+'extension_configs' => [
+    'extension.accessControl' => true,
+    'extension.rest' => ['endpointMap' => [...]]
+]
+</pre>
+
+    <h3>document_manager</h3>
+    <p>Specifies the service name of the DocumentManager to use. See below for an explaination of service names and services.</p>
+
+<pre class="prettyprint linenums">
+'document_manager' => 'mydocumentmanager'
+</pre>
+
+    <h3>service_manager_config</h3>
+    <p>Shard makes extensive use of <code>Zend/ServiceManager/ServiceManager</code>. You don't need to know all the ins and outs of this class, it's just a container for holding services. The config tells the container where to get those services from, and then you can get them by calling <code>$serviceManager->get('serviceName')</code></p>
+
+    <p>You must configure the service used for the <code>document_manager</code> config key above. It's recommended that you use a factory, and there is an example factory below.</p>
+
+<pre class="prettyprint linenums">
+'service_manager_config' => [
+    'invokables' => [...],
+    'factories' => [
+        'mydocumentmanager' => 'My\DocumentManager\Factory' //A factory that can create the DocumentManager
+    ],
+    'abstract_factories => [...]
+]
+</pre>
+
+    <h3>Putting it all together</h3>
+    <p>You can create a Manifest like this:</p>
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    'documents' => [
+        'My\Document\Namespace' => 'my/document/directory/' //Specify the location of any documents you want to use.
+    ],
+    'extension_configs' => [
+        'extension.accessControl' => true //List any extensions you want to enable
+    ],
+    'document_manager' => 'mydocumentmanager', //The service name of the DocumentManager
+    'service_manager_config' => [
+        'factories' => [
+            'mydocumentmanager' => 'My\DocumentManager\Factory' //A factory that can create the DocumentManager
+        ]
+    ]
+]);
+</pre>
+
+    <h3>Manifest resources</h3>
+
+    <p>Once created, the manifest can be used to retrieve all the resources used by all the extensions for the configuration of a DocumentManager. Eg:</p>
+
+<pre class="prettyprint linenums">
+$manifest->getDocuments(); //Array of all the document namespaces required
+
+$manifest->getFilters(); //Array of all the filters required
+
+$manifest->getSubscribers(); //Array of all the event subscribers required
+</pre>
+
+    <h2>DocumentManager Factory</h2>
+
+    <p>The resources in the Manifest can be used in a factory class to create a DocumentManger. Eg:</p>
+
+<pre class="prettyprint linenums">
+namespace My\DocumentManager;
+
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\AnnotationRegistry;
+use Doctrine\Common\Cache\ArrayCache;
+use Doctrine\Common\EventManager;
+use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
+use Doctrine\MongoDB\Connection;
+use Doctrine\ODM\MongoDB\Configuration;
+use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver;
+use Zend\ServiceManager\FactoryInterface;
+use Zend\ServiceManager\ServiceLocatorInterface;
+
+class Factory implements FactoryInterface
+{
+
+    /**
+     *
+     * @param ServiceLocatorInterface $serviceLocator
+     * @return DocumentManager
+     */
+    public function createService(ServiceLocatorInterface $serviceLocator)
+    {
+        //Get the Shard Manifest
+        $manifest = $serviceLocator->get('manifest');
+
+        $config = new Configuration();
+
+        //Set the proxy directory
+        $config->setProxyDir('my/proxy/directory');
+        $config->setProxyNamespace('Proxies');
+
+        //Set the hydrator directory
+        $config->setHydratorDir('my/hydrator/directory');
+        $config->setHydratorNamespace('Hydrators');
+
+        //Set the db name
+        $config->setDefaultDB('my_db_name');
+
+        //Set the metadata cache type
+        $config->setMetadataCacheImpl(new ArrayCache);
+
+        //create driver chain
+        $chain  = new MappingDriverChain;
+
+        //add all the document folders in the manifest
+        foreach ($manifest->getDocuments() as $namespace => $path){
+            $driver = new AnnotationDriver(new AnnotationReader, $path);
+            $chain->addDriver($driver, $namespace);
+        }
+        $config->setMetadataDriverImpl($chain);
+
+        //register manifest filters
+        foreach ($manifest->getFilters() as $name => $class){
+            $config->addFilter($name, $class);
+        }
+
+        //create event manager
+        $eventManager = new EventManager();
+
+        //register manifest event subscribers
+        foreach($manifest->getSubscribers() as $subscriber){
+            $eventManager->addEventSubscriber($serviceLocator->get($subscriber));
+        }
+
+        //register annotations
+        AnnotationRegistry::registerLoader(function($className) {
+            return class_exists($className);
+        });
+
+        //create the connection
+        $conn = new Connection(null, array(), $config);
+
+        //create and return the DocumentManager yay!
+        return DocumentManager::create($conn, $config, $eventManager);
+    }
+}
+</pre>
+
+    <h2>Using it</h2>
+
+    <p>With a configured Manifest and DocumentManager factory, you can get the DocumentManger with:</p>
+
+<pre class="prettyprint linenums">
+$manifest = new Manifest([...]);
+$documentManager = $manifest->getServiceManager()->get('mydocumentmanager');
+</pre>
+
+    <p>Then just use the DocumentManager, and the extensions will do all their work for you.</p>
+
+    <p>Extensions may also provide other services which are available through the ServiceManager. For example, the Serializer extension provides a Serializer:</p>
+
+<pre class="prettyprint linenums">
+$serializer = $manifest->getServiceManager()->get('serializer');
+</pre>
+
+</section>
+
+<section id="user-config" title="User Config">
+  <div class="page-header">
+    <h1>User Config</h1>
+  </div>
+
+    <p class="lead">Tell Shard who is using documents.</p>
+
+    <p>Several Shard extensions need to know who the current authenticated user is and what their roles are be. If the Shard extensions you are using don't need a configured user, then you can skip this bit. The documentation for each extension will note if a user is required.</p>
+
+    <p>If you need a configured user, first you need to create a user class.</p>
+
+    <h2>Creating a simple user class</h2>
+    <p>A simple user should implement the <code>Zoop\Common\User\UserInterface</code>, and may use the <code>Zoop\Shard\User\DataModel\UserTrait</code>. Eg:</p>
+
+<pre class="prettyprint linenums">
+use Zoop\Common\User\UserInterface;
+use Zoop\Shard\User\DataModel\UserTrait;
+
+//Annotation imports
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+class User implements UserInterface {
+
+    use UserTrait;
+}
+</pre>
+
+    <h2>Creating a role aware user class</h2>
+    <p>A role aware user is a further requirement of some extensions. It must also implement the <code>Zoop\Common\User\RoleAwareUserInterface</code>, and may use the <code>Zoop\Shard\User\DataModel\RoleAwareUserTrait</code>. Eg:</p>
+
+<pre class="prettyprint linenums">
+use Zoop\Common\User\UserInterface;
+use Zoop\Common\User\RoleAwareUserInterface;
+use Zoop\Shard\User\DataModel\UserTrait;
+use Zoop\Shard\User\DataModel\RoleAwareUserTrait;
+
+//Annotation imports
+use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use Zoop\Shard\Annotation\Annotations as Shard;
+
+class RoleAwareUser implements UserInterface, RoleAwareUserInterface {
+
+    use UserTrait;
+    use RoleAwareUserTrait;
+}
+</pre>
+
+    <h2>Configure the user service</h2>
+
+    <p>The <code>user</code> service must be configured to return an instance of your user class.</p>
+
+    <p>For example you can configure your service as a closure factory:</p>
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'service_manager_config' => [
+        'factories' => [
+            ...
+            'user' => function(){
+                $user = new RoleAwareUser();
+                $user->setUsername('toby'); //set the username
+                $user->addRole('admin');    //add any roles the user has
+                return $user;
+            }
+        ]
+    ]
+]);
+</pre>
+
+    <p>For example you can configure your service with a factory class:</p>
+<pre class="prettyprint linenums">
+$manifest = new Zoop\Shard\Manifest([
+    ...
+    'service_manager_config' => [
+        'factories' => [
+            ...
+            'user' => 'My\Active\User\Factory'
+            }
+        ]
+    ]
+]);
+</pre>
+
+    <p>Or, you may wish to set the <code>user</code> service directly:</p>
+
+<pre class="prettyprint linenums">
+$user = new RoleAwareUser();
+$user->setUsername('toby'); //set the username
+$user->addRole('admin');    //add any roles the user has
+
+$manifest = new Zoop\Shard\Manifest([...]);
+$manifest->getServiceManager()->setService('user', $user);
+</pre>
+</section>
+
+      </div>
+    </div>
+  </div>
+
+    <!-- Footer
+    ================================================== -->
+    <footer class="footer">
+      <div class="container">
+        <p>Created by <a href="http://github.com/superdweebie">@superdweebie</a> and <a href="http://github.com/crimsonronin">@crimsonronin</a>.</p>
+        <p>Code licensed under MIT.</p>
+        <p>Built on the shoulders of giants <a href="http://github.com/doctrine/mongo-odm">doctrine</a>, <a href="http://mongodb.org">mongo</a> and <a href="http://github.com/zendframework/zf2">zf2</a>.</p>
+        <ul class="footer-links">
+          <li><a href="http://zoopcommerce.com">Zoop</a></li>
+          <li class="muted">&middot;</li>
+          <li><a href="https://github.com/zoopcommerce/shard/issues?state=open">Issues</a></li>
+          <li class="muted">&middot;</li>
+          <li><a href="https://github.com/zoopcommerce/shard/blob/master/CHANGELOG.md">Changelog</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="js/google-code-prettify/prettify.js"></script>
+    <script src="js/havok.js"></script>
+    <script type="text/javascript">
+        require(['dojo/parser'], function(parser){parser.parse()})
+    </script>
+  </body>
+</html>

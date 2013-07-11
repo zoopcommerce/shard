@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Zoop · Shard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Tim Roediger">
+
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="css/docs.css" rel="stylesheet">
+    <link href="js/google-code-prettify/prettify.css" rel="stylesheet">
+  </head>
+
+  <body onload="prettyPrint()">
+
+    <!-- Navbar
+    ================================================== -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="./index.html">Shard</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="">
+                <a href="./index.html">Home</a>
+              </li>
+              <li class="">
+                <a href="./getting-started.html">Get started</a>
+              </li>
+              <li class="">
+                <a href="./config.html">Config</a>
+              </li>
+              <li class="">
+                <a href="./extensions.html">Extensions</a>
+              </li>
+              <li class="">
+                <a href="./custom-extensions.html">Custom Extensions</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+<!-- Subhead
+================================================== -->
+<header class="jumbotron subhead" id="overview">
+  <div class="container">
+    <h1>Getting Started</h1>
+    <p class="lead">Overview of Shard</p>
+  </div>
+</header>
+
+
+  <div class="container">
+
+    <!-- Docs nav
+    ================================================== -->
+    <div class="row">
+      <div class="span3 bs-docs-sidebar">
+        <ul data-dojo-type="havok/widget/ListNav"
+            data-dojo-mixins="havok/widget/_AffixMixin, havok/widget/_ScrollSpyMixin"
+            data-dojo-props="
+               linkTemplate: '&lt;a role=&quot;navitem&quot; href=&quot;${href}&quot;&gt;&lt;i class=&quot;icon-chevron-right&quot;&gt;&lt;/i&gt; ${label}&lt;/a&gt;',
+               affixOffset: {top: 40, bottom: 0},
+               affixTarget: 'mainContent',
+               spyTarget: 'mainContent'
+            "
+            class="nav-stacked bs-docs-sidenav"
+        >
+        </ul>
+      </div>
+      <div class="span9" id="mainContent">
+
+        <section id="download-shard" title="Download">
+  <div class="page-header">
+    <h1>Download</h1>
+  </div>
+
+    <p class="lead">Ready to integrate with any PHP project.</p>
+    <p>Note: Shard uses some components from the zf2 framework, but it does <i>not</i> need to be used inside the zf2 mvc. Shard <i>is</i> compatible with any php framework or system. However, if you are using the zf2 mvc, you'll probably want the ShardModule which handles installation and configuration for you.</p>
+
+    <p>Shard requires php 5.4</p>
+
+    <div class="row-fluid">
+
+      <div class="span6">
+        <h2>Source with Composer</h2>
+        <p>Get the source, and easily manage versioning. This is the recommended way to install.</p>
+        <p>Add the following to your root <code>composer.json</code>:</p>
+<pre class="prettyprint linenums">
+require: [
+    "zoopcommerce/shard": "~1.0"
+]
+</pre>
+      </div>
+
+      <div class="span6">
+        <h2 class="muted">Source from Github</h2>
+        <p>Once downloaded, you'll need to run composer in Shard's root directory to install dependencies.</p>
+        <p><a class="btn btn-large" href="https://github.com/zoopcommerce/shard/zipball/master" ><span class="muted">Download Shard source</span></a></p>
+        <p>or gittish people:</p>
+<pre class="prettyprint linenums">
+git clone http://github.com/zoopcommerce/shard
+</pre>
+      </div>
+    </div>
+
+</section>
+<section id="whats-included" title="What's Included">
+  <div class="page-header">
+    <h1>What's Included</h1>
+  </div>
+  <p class="lead">Shard is two things. First it is a system for creating, registering and using extentions that add behaviors to Documented managed by Doctrine Mongo ORM. Secondly, it is has over a dozen rich extensions already bundled to make your development fast, solid, and fun.</p>
+
+    <h2>Docs sections</h2>
+    <h4><a href="./doctrine-config.html">Doctrine Config</a></h4>
+    <p>Detailed information about how configure Doctrine and Shard to work together.</p>
+    <h4><a href="./manifest.html">PHP</a></h4>
+    <p>How the Manifest works, which is the core of the extensions system.</p>
+    <h4><a href="./extensions.html">Extensions</a></h4>
+    <p>The bundled extensions and how they work.</p>
+    <h4><a href="./custom-extensions.html">Spec</a></h4>
+    <p>A guide to writing your own Shard extensions for Doctrine Mongo ODM.</p>
+</section>
+
+<section id="examples" title="Examples">
+  <div class="page-header">
+    <h1>Examples</h1>
+  </div>
+
+    <p class="lead">Most Shard extensions use annotations to add behaviors to documents.</p>
+
+    <h2>Update Timestamp</h2>
+    <p>Add the following annotation to a field. Whenever the document is updated, the field will be updated with a timestamp. Eg:</p>
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Timestamp
+ * @Shard\Stamp\UpdatedOn
+ */
+protected $updatedOn;
+</pre>
+
+    <h2>Soft Delete</h2>
+    <p>To make a document soft deletable, add the following annotation to a field:</p>
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Boolean
+ * @Shard\SoftDelete
+ * )
+ */
+protected $softDeleted = false;
+</pre>
+
+    <p>Then to Soft delete the document, use the SoftDeleter service:</p>
+<pre class="prettyprint linenums">
+$softDeleter = $manifest->getServiceManager()->get('softDeleter');
+$softDeleter->softDelete($myDocument);
+</pre>
+
+    <p>The SoftDeleter service can also be used to restore a document:</p>
+<pre class="prettyprint linenums">
+$softDeleter->restore($myDocument);
+</pre>
+
+    <h2>Data validation</h2>
+    <p>Use annotations to add a validator to a field. Whenever the document is created or updated, the validators will be checked before the data is persisted.</p>
+<pre class="prettyprint linenums">
+/**
+ * @ODM\String
+ * @Shard\Validator\Email
+ * )
+ */
+protected $email;
+</pre>
+
+    <p>All the validators in the <a href="http://zoopcommerce.github.io/mystique">Mystique</a> validator library are supported, including validator chains. Eg:</p>
+<pre class="prettyprint linenums">
+/**
+ * @ODM\String
+ * @Shard\Validator\Chain({
+ *     @Shard\Validator\Required,
+ *     @Shard\Validator\Email
+ * })
+ * )
+ */
+protected $email;
+</pre>
+
+    <h2>Access Control</h2>
+    <p>Shard supports adding fine grained role based access control to documents. Eg, give all guest users read access, and admins complete control:</p>
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Basic(roles="guest", allow="read")
+ *     @Shard\Permission\Basic(roles="admin", allow="*")
+ * })
+ */
+class Simple {...}
+</pre>
+  
+</section>
+<section id="what-next" title="What Next?">
+  <div class="page-header">
+    <h1>What next?</h1>
+  </div>
+
+  <p class="lead">Dive into the docs for detailed instructions...</p>
+
+  <div class="row-fluid">
+    <a class="span4 btn btn-large" href="./config.html">Configure Shard</a>
+    <a class="span4 btn btn-large" href="./extensions.html">Explore Shard Extensions</a>
+  </div>
+</section>
+
+
+      </div>
+    </div>
+  </div>
+
+    <!-- Footer
+    ================================================== -->
+    <footer class="footer">
+      <div class="container">
+        <p>Created by <a href="http://github.com/superdweebie">@superdweebie</a> and <a href="http://github.com/crimsonronin">@crimsonronin</a>.</p>
+        <p>Code licensed under MIT.</p>
+        <p>Built on the shoulders of giants <a href="http://github.com/doctrine/mongo-odm">doctrine</a>, <a href="http://mongodb.org">mongo</a> and <a href="http://github.com/zendframework/zf2">zf2</a>.</p>
+        <ul class="footer-links">
+          <li><a href="http://zoopcommerce.com">Zoop</a></li>
+          <li class="muted">&middot;</li>
+          <li><a href="https://github.com/zoopcommerce/shard/issues?state=open">Issues</a></li>
+          <li class="muted">&middot;</li>
+          <li><a href="https://github.com/zoopcommerce/shard/blob/master/CHANGELOG.md">Changelog</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="js/google-code-prettify/prettify.js"></script>
+    <script src="js/havok.js"></script>
+    <script type="text/javascript">
+        require(['dojo/parser'], function(parser){parser.parse()})
+    </script>
+  </body>
+</html>

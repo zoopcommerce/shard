@@ -1,0 +1,35 @@
+{
+    "name": "zoopcommerce/shard",
+    "description": "Add new behaviours to Doctrine Mongo ODM Documents",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "doctrine",
+        "mongo",
+        "odm",
+        "zoop"
+    ],
+    "homepage": "http://zoopcommerce.github.io/shard",
+    "authors": [
+        {
+            "name": "Tim Roediger",
+            "email": "superdweebie@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "zoopcommerce/common":               "~1.0",
+        "zoopcommerce/mystique":             "~1.0",
+        "doctrine/mongodb-odm":              "1.0.0-BETA9",
+        "zendframework/zend-json":           "~2.2",
+        "zendframework/zend-crypt":          "~2.2",
+        "zendframework/zend-math"  :         "~2.2",
+        "zendframework/zend-servicemanager": "~2.2",
+        "zendframework/zend-stdlib":         "~2.2"
+    },
+    "autoload": {
+        "psr-0": {
+            "Zoop\\Shard": "lib/"
+        }
+    }
+}
