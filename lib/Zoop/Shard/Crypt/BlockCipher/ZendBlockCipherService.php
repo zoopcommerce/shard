@@ -9,6 +9,7 @@ namespace Zoop\Shard\Crypt\BlockCipher;
 use Zend\Crypt\BlockCipher;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zoop\Common\Crypt\SaltInterface;
 
 /**
  *

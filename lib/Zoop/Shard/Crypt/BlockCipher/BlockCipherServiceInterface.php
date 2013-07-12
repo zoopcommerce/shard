@@ -13,6 +13,10 @@ namespace Zoop\Shard\Crypt\BlockCipher;
  */
 interface BlockCipherServiceInterface {
 
+    public function encryptValue($plaintext, $key, $salt = null);
+
+    public function decryptValue($encryptedText, $key);
+    
     public function encryptField($field, $document, $metadata);
 
     public function decryptField($field, $document, $metadata);
