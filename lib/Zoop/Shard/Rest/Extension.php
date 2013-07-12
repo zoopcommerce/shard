@@ -30,7 +30,7 @@ class Extension extends AbstractExtension {
         'extension.reference' => true
     );
 
-    protected $endpointMap;
+    protected $endpointMap = [];
 
     public function getEndpointMap() {
         return $this->endpointMap;
