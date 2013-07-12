@@ -13,5 +13,7 @@ namespace Zoop\Shard\Crypt\Hash;
  */
 interface HashServiceInterface {
 
+    public function hashValue($plaintext, $salt = null);
+
     public function hashField($field, $document, $metadata);
 }
