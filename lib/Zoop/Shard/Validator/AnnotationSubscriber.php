@@ -31,7 +31,7 @@ class AnnotationSubscriber implements EventSubscriber {
             Shard\Validator\CreditCardExpiry::event,
             Shard\Validator\Cvv::event,
             Shard\Validator\Date::event,
-            Shard\Validator\EmailAddress::event,
+            Shard\Validator\Email::event,
             Shard\Validator\Equal::event,
             Shard\Validator\Float::event,
             Shard\Validator\GreaterThan::event,
@@ -174,7 +174,7 @@ class AnnotationSubscriber implements EventSubscriber {
      *
      * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
      */
-    public function annotationEmailAddressValidator(AnnotationEventArgs $eventArgs)
+    public function annotationEmailValidator(AnnotationEventArgs $eventArgs)
     {
         $annotation = $eventArgs->getAnnotation();
         $this->setFieldValidator($eventArgs, ['class' => $annotation->class]);
