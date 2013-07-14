@@ -27,6 +27,10 @@ class ReadAccessControl extends BsonFilter
         $this->accessController = $accessController;
     }
 
+    public function getAccessController() {
+        return $this->accessController;
+    }
+
     /**
      *
      * @param \Doctrine\ODM\MongoDB\Mapping\ClassMetadata $targetDocument

@@ -118,6 +118,10 @@ class Manifest extends AbstractExtension {
         $serviceManager->setService('manifest', $this);
 
         foreach ($this->extensionConfigs as $name => $extensionConfig){
+            if (!$extensionConfig){
+                unset($this->extensionConfigs[$name]);
+                continue;
+            }
             $this->expandExtensionConfig($name);
         }
 
