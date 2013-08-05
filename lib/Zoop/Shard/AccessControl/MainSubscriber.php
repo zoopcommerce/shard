@@ -44,7 +44,7 @@ class MainSubscriber extends AbstractAccessControlSubscriber {
         $unitOfWork = $documentManager->getUnitOfWork();
         $eventManager = $documentManager->getEventManager();
         $accessController = $this->getAccessController();
-
+        
         foreach ($unitOfWork->getScheduledDocumentInsertions() as $document) {
 
             //Check create permissions
@@ -77,6 +77,8 @@ class MainSubscriber extends AbstractAccessControlSubscriber {
 
         //Check update permissions
         foreach ($unitOfWork->getScheduledDocumentUpdates() as $document) {
+
+            $actions = [];
 
             //Assemble all the actions that require permission
             $changeSet = $unitOfWork->getDocumentChangeSet($document);
