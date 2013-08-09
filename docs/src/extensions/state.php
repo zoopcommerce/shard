@@ -43,8 +43,22 @@ protected $state;
 /**
  * @ODM\Document
  * @Shard\AccessControl({
- *     @Shard\Permission\State     (roles="*",      state="published", allow="read"                      ),
- *     @Shard\Permission\State     (roles="writer", state="draft",     allow={"create", "update", "read"}),
+ *     @Shard\Permission\State     (roles="*",      states="published", allow="read"                      ),
+ *     @Shard\Permission\State     (roles="writer", states="draft",     allow={"create", "update", "read"}),
+ * })
+ */
+class AccessControlled {
+    ...
+}
+</pre>
+
+    <p>States can be listed as an array, and also support wilds. Eg: </p>
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\State     (roles="*",      states="published", allow="read"                      ),
+ *     @Shard\Permission\State     (roles="writer", states={"d*", "published"},     allow={"create", "update", "read"}),
  * })
  */
 class AccessControlled {
@@ -65,6 +79,22 @@ class AccessControlled {
  *     @Shard\Permission\Transition(roles="writer",   allow="draft->review"                       ),
  *     @Shard\Permission\Transition(roles="reviewer", allow={"review->draft", "review->published"}),
  *     @Shard\Permission\Basic     (roles="admin",    allow="*"                                   )
+ * })
+ */
+class AccessControlled {
+    ...
+}
+</pre>
+
+    <p>Transitions can have wilds. (very handy).</p>
+
+<pre class="prettyprint linenums">
+/**
+ * @ODM\Document
+ * @Shard\AccessControl({
+ *     @Shard\Permission\Transition(roles="writer",   allow="draft->review"),
+ *     @Shard\Permission\Transition(roles="reviewer", allow="review->*"    ),
+ *     @Shard\Permission\Basic     (roles="admin",    allow="*"            )
  * })
  */
 class AccessControlled {
