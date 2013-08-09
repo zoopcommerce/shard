@@ -97,8 +97,8 @@ class TransitionPermission implements PermissionInterface
                 $transition = Transition::fromString($testActions[0]);
                 return new AllowedResult(  //one or more actions are explicitly denied
                     false,
-                    [$this->stateField => $transition->getFrom()],
-                    [$this->stateField => $transition->getTo()]
+                    [$this->stateField => $this->mongoRegex($transition->getFrom())],
+                    [$this->stateField => $this->mongoRegex($transition->getTo())]
                 );
             }
             if ($allowMatch){
@@ -109,11 +109,20 @@ class TransitionPermission implements PermissionInterface
             $transition = Transition::fromString($testActions[0]);
             return new AllowedResult(  //all actions are explicitly allowed
                 true,
-                [$this->stateField => $transition->getFrom()],
-                [$this->stateField => $transition->getTo()]
+                [$this->stateField => $this->mongoRegex($transition->getFrom())],
+                [$this->stateField => $this->mongoRegex($transition->getTo())]
             );
         }
 
         return new AllowedResult; //Permission is neither explicitly allowed or denied.
+    }
+
+    protected function mongoRegex($state){
+
+        if (strchr($state, self::wild)){
+            return new \MongoRegex('/^' . str_replace(self::wild, '[a-zA-Z0-9_:-]*', $state) . '$/');
+        } else {
+            return $state;
+        }
     }
 }

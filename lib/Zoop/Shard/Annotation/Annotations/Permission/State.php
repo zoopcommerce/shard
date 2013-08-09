@@ -22,5 +22,5 @@ final class State extends AbstractPermission
 
     public $deny;
 
-    public $state;
+    public $states;
 }

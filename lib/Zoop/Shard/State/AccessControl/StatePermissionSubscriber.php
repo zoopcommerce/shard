@@ -36,10 +36,14 @@ class StatePermissionSubscriber implements EventSubscriber {
 
         $config = [
             'factory' => 'Zoop\Shard\State\AccessControl\StatePermissionFactory',
-            'options' => [
-                'state' => $annotation->state
-            ]
+            'options' => []
         ];
+
+        if (is_array($annotation->states)){
+            $config['options']['states'] = $annotation->states;
+        } else {
+            $config['options']['states'] = [$annotation->states];
+        }
 
         if (isset($annotation->roles)){
             if (is_array($annotation->roles)){

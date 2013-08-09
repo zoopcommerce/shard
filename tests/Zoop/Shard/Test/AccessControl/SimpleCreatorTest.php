@@ -37,7 +37,7 @@ class SimpleCreatorTest extends BaseTest {
 
        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
     }
-
+/*
     public function testCreateAllow(){
 
         $this->calls = array();
@@ -95,7 +95,7 @@ class SimpleCreatorTest extends BaseTest {
 
         $this->assertTrue(isset($this->calls[AccessControlEvents::deleteDenied]));
     }
-
+*/
     public function testReadDeny(){
 
         $documentManager = $this->documentManager;

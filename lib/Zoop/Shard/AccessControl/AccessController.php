@@ -44,7 +44,6 @@ class AccessController implements ServiceLocatorAwareInterface, DocumentManagerA
      * @return \Zoop\Shard\AccessControl\IsAllowedResult
      */
     public function areAllowed(array $actions, ClassMetadata $metadata = null, $document = null){
-
         $result = new AllowedResult(false);
         if (!isset($metadata)){
             $metadata = $this->documentManager->getClassMetadata(get_class($document));
@@ -90,6 +89,7 @@ class AccessController implements ServiceLocatorAwareInterface, DocumentManagerA
             if ( ! isset($allowed)){
                 continue;
             }
+
             $result->setAllowed($allowed);
 
             $new = $newResult->getNew();
@@ -106,7 +106,8 @@ class AccessController implements ServiceLocatorAwareInterface, DocumentManagerA
         if (isset($document)){
             if (count($result->getNew()) > 0){
                 foreach ($result->getNew() as $field => $value){
-                    if ($metadata->reflFields[$field]->getValue($document) != $value){
+                    $newValue = $metadata->reflFields[$field]->getValue($document);
+                    if (!$this->testCriteria($newValue, $value)){
                         $result->setAllowed(false);
                         return $result;
                     }
@@ -116,7 +117,8 @@ class AccessController implements ServiceLocatorAwareInterface, DocumentManagerA
             if (count($result->getOld()) > 0){
                 $changeSet = $this->documentManager->getUnitOfWork()->getDocumentChangeSet($document);
                 foreach ($result->getOld() as $field => $value){
-                    if ($changeSet[$field][0] != $value){
+                    $oldValue = $changeSet[$field][0];
+                    if (!$this->testCriteria($oldValue, $value)){
                         $result->setAllowed(false);
                         return $result;
                     }
@@ -125,6 +127,23 @@ class AccessController implements ServiceLocatorAwareInterface, DocumentManagerA
         }
 
         return $result;
+    }
+
+    protected function testCriteria($documentValue, $testValue){
+        if (($testValue instanceof \MongoRegex && !preg_match("/$testValue->regex/", $documentValue)) ||
+            (is_string($testValue) && $documentValue != $testValue)
+        ) {
+            return false;
+        }
+        if (is_array($testValue) && array_key_exists('$or', $testValue)){
+            foreach ($testValue['$or'] as $option){
+                if ($this->testCriteria($documentValue, $option)){
+                    return true;
+                }
+            }
+            return false;
+        }
+        return true;
     }
 
     protected function getRoles(){

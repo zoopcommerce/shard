@@ -25,16 +25,16 @@ class StatePermission implements PermissionInterface
 
     protected $deny;
 
-    protected $state;
+    protected $states;
 
     protected $stateField;
 
-    public function __construct(array $roles, array $allow, array $deny, $state, $stateField)
+    public function __construct(array $roles, array $allow, array $deny, array $states, $stateField)
     {
         $this->roles = array_map([$this, 'roleToRegex'], $roles);;
         $this->allow = array_map([$this, 'actionToRegex'], $allow);
         $this->deny  = array_map([$this, 'actionToRegex'], $deny);
-        $this->state = (string) $state;
+        $this->states = array_map([$this, 'stateToRegex'], $states);
         $this->stateField = (string) $stateField;
     }
 
@@ -44,6 +44,13 @@ class StatePermission implements PermissionInterface
 
     protected function actionToRegex($string){
         return '/^' . str_replace(self::wild, '[a-zA-Z0-9_:-]*', $string) . '$/';
+    }
+
+    protected function stateToRegex($string){
+        if (!strpos(self::wild, $string)){
+            return '/^' . str_replace(self::wild, '[a-zA-Z0-9_:-]*', $string) . '$/';            
+        }
+        return $string;
     }
 
     /**
@@ -69,6 +76,7 @@ class StatePermission implements PermissionInterface
                 break;
             }
         }
+
         if (!$roleMatch){
             return new AllowedResult; //Permission is neither explicitly allowed or denied.
         }
@@ -80,21 +88,39 @@ class StatePermission implements PermissionInterface
                 return preg_match($action, $testAction);
             })) > 0;
 
-            $denyMatch = count(array_filter($this->deny, function($action) use ($testAction){ //second check that action does not matche any deny
+            $denyMatch = count(array_filter($this->deny, function($action) use ($testAction){ //second check that action does not match any deny
                 return preg_match($action, $testAction);
             })) > 0;
 
             if ($denyMatch){
-                return new AllowedResult(false, null, [$this->stateField => $this->state]); //one or more actions are explicitly denied
+                return new AllowedResult(false, null, [$this->stateField => $this->mongoRegex($this->states)]); //one or more actions are explicitly denied
             }
             if ($allowMatch){
                 $allowMatches++;
             }
         }
         if ($allowMatches == count($testActions)){
-            return new AllowedResult(true, null, [$this->stateField => $this->state]); //all actions are explicitly allowed
+            return new AllowedResult(true, null, [$this->stateField => $this->mongoRegex($this->states)]); //all actions are explicitly allowed
         }
 
         return new AllowedResult; //Permission is neither explicitly allowed or denied.
+    }
+
+    protected function mongoRegex(array $states){
+
+        $result = [];
+        foreach ($states as $state){
+            if (!strpos(self::wild, $state)){
+                $result[] = new \MongoRegex($state);
+            } else {
+                $result[] = $state;
+            }
+        }
+
+        if (count($result) == 1){
+            return $result[0];
+        } else {
+            return ['$or' => $result];
+        }
     }
 }
