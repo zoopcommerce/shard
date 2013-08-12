@@ -10,7 +10,6 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\ODM\MongoDB\Event\OnFlushEventArgs;
 use Doctrine\ODM\MongoDB\Events as ODMEvents;
 use Zoop\Common\State\Transition;
-use Zoop\Shard\State\Events as StateEvents;
 use Zoop\Shard\State\EventArgs as TransitionEventArgs;
 
 /**
@@ -41,6 +40,28 @@ class MainSubscriber implements EventSubscriber
         $documentManager = $eventArgs->getDocumentManager();
         $unitOfWork = $documentManager->getUnitOfWork();
 
+        foreach ($unitOfWork->getScheduledDocumentInsertions() as $document) {
+
+            $metadata = $documentManager->getClassMetadata(get_class($document));
+            if ( ! isset($metadata->state)){
+                continue;
+            }
+
+            $field = array_keys($metadata->state)[0];
+
+            if (count($metadata->state[$field]) > 0 && ! in_array($metadata->reflFields[$field]->getValue($document), $metadata->state[$field])){
+
+                $unitOfWork->detach($document);
+                $eventManager = $documentManager->getEventManager();
+                if ($eventManager->hasListeners(Events::badState)) {
+                    $eventManager->dispatchEvent(
+                        Events::badState,
+                        $eventArgs
+                    );
+                }
+            }
+        }
+
         foreach ($unitOfWork->getScheduledDocumentUpdates() AS $document) {
 
             $metadata = $documentManager->getClassMetadata(get_class($document));
@@ -50,7 +71,7 @@ class MainSubscriber implements EventSubscriber
 
             $eventManager = $documentManager->getEventManager();
             $changeSet = $unitOfWork->getDocumentChangeSet($document);
-            $field = $metadata->state;
+            $field = array_keys($metadata->state)[0];
 
             if (!isset($changeSet[$field])) {
                 continue;
@@ -59,10 +80,23 @@ class MainSubscriber implements EventSubscriber
             $fromState = $changeSet[$field][0];
             $toState = $changeSet[$field][1];
 
+            //stop state change if the new state is not on the defined state list
+            if (count($metadata->state[$field]) > 0 && ! in_array($toState, $metadata->state[$field])){
+                $metadata->reflFields[$field]->setValue($document, $fromState);
+                if ($eventManager->hasListeners(Events::badState)) {
+                    $eventManager->dispatchEvent(
+                        Events::badState,
+                        $eventArgs
+                    );
+                }
+                $unitOfWork->recomputeSingleDocumentChangeSet($metadata, $document);
+                continue;
+            }
+
             // Raise preTransition
-            if ($eventManager->hasListeners(StateEvents::preTransition)) {
+            if ($eventManager->hasListeners(Events::preTransition)) {
                 $eventManager->dispatchEvent(
-                    StateEvents::preTransition,
+                    Events::preTransition,
                     new TransitionEventArgs(new Transition($fromState, $toState), $document, $documentManager)
                 );
             }
@@ -74,9 +108,9 @@ class MainSubscriber implements EventSubscriber
             }
 
             // Raise onTransition
-            if ($eventManager->hasListeners(StateEvents::onTransition)) {
+            if ($eventManager->hasListeners(Events::onTransition)) {
                 $eventManager->dispatchEvent(
-                    StateEvents::onTransition,
+                    Events::onTransition,
                     new TransitionEventArgs(new Transition($fromState, $toState), $document, $documentManager)
                 );
             }
@@ -85,9 +119,9 @@ class MainSubscriber implements EventSubscriber
             $unitOfWork->recomputeSingleDocumentChangeSet($metadata, $document);
 
             // Raise postTransition - this is when workflow vars should be updated
-            if ($eventManager->hasListeners(StateEvents::postTransition)) {
+            if ($eventManager->hasListeners(Events::postTransition)) {
                 $eventManager->dispatchEvent(
-                    StateEvents::postTransition,
+                    Events::postTransition,
                     new TransitionEventArgs(new Transition($fromState, $toState), $document, $documentManager)
                 );
             }

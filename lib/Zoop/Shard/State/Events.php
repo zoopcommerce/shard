@@ -34,4 +34,10 @@ final class Events
      * for
      */
     const transitionDenied = 'transitionDenied';
+
+    /**
+     * Triggered when there is an attempt to set the state to a value that is not
+     * part of the state list defined in the @State annotation
+     */
+    const badState = 'badState';
 }
