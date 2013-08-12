@@ -28,7 +28,7 @@ class State extends BsonFilter
      */
     protected $parameters = array(
         'includeStateList' => true,
-        'states' => array()
+        'states' => []
    );
 
     /**
@@ -83,9 +83,9 @@ class State extends BsonFilter
             count($this->parameters['states'])
         ) {
             $operator = $this->parameters['includeStateList'] ? '$in' : '$nin';
-            return array(
-                $targetMetadata->state => array($operator => $this->parameters['states'])
-            );
+            return [
+                array_keys($targetMetadata->state)[0] => [$operator => $this->parameters['states']]
+            ];
         }
         return array();
     }
