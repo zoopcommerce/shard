@@ -23,7 +23,7 @@ class StatePermissionFactory implements PermissionFactoryInterface
             $options['allow'],
             $options['deny'],
             $options['states'],
-            $metadata->state
+            array_keys($metadata->state)[0]
         );
     }
 }
