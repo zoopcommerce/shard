@@ -42,7 +42,19 @@ class ReadAccessControl extends BsonFilter
         $result = $accessController->areAllowed([Actions::read], $metadata);
 
         if ($result->hasCriteria()){
-            return $result->getNew();
+            if ($result->getAllowed()){
+                return $result->getNew();
+            } else {
+                $criteria = [];
+                foreach($result->getNew() as $field => $value){
+                    if ($value instanceof \MongoRegex){
+                        $critiera[$field] = ['$not' => $value];
+                    } else {
+                        $critiera[$field] = ['$ne' => $value];
+                    }
+                }
+                return $critiera;
+            }
         } else {
             if ($result->getAllowed()){
                 return []; //allow read
