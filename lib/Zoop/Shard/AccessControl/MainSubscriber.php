@@ -61,7 +61,7 @@ class MainSubscriber extends AbstractAccessControlSubscriber {
                         $collection->removeElement($document);
                         $unitOfWork->recomputeSingleDocumentChangeSet($parentMetadata, $parent);
                     } else {
-                        $parentMetadata->reflFields[$mapping->field]->setValue($document, null);
+                        $parentMetadata->reflFields[$mapping['fieldName']]->setValue($document, null);
                     }
                 }
                 $unitOfWork->detach($document);
