@@ -387,7 +387,7 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
         $mode = self::UNSERIALIZE_PATCH,
         $document = null
     ) {
-        return $this->unserialize(json_dencode($data), $className, $mode, $document);
+        return $this->unserialize(json_decode($data, true), $className, $mode, $document);
     }
 
     /**
