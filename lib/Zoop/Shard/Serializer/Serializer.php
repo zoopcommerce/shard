@@ -454,12 +454,23 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                     $value = $this->unserialize(
                         $data[$field],
                         $mapping['targetDocument'],
-                        $mode
+                        $mode,
+                        $metadata->reflFields[$field]->getValue($document)
                     );
                     break;
                 case isset($mapping['embedded']) && $mapping['type'] == 'many':
                     $newArray = [];
                     if (isset($data[$field])){
+//TODO: come back and finish this new loop
+//                        $embeddedCollection = $metadata->reflFields[$field]->getValue($document);
+//                        for($i = 0; $i < count($data[$field]); $i++){
+//                            $newArray[] = $this->unserialize(
+//                                $data[$field][$i],
+//                                $mapping['targetDocument'],
+//                                $mode,
+//                                $embeddedCollection[$i]
+//                            );
+//                        }
                         foreach($data[$field] as $embedData){
                             $newArray[] = $this->unserialize(
                                 $embedData,
@@ -544,6 +555,9 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                     break;
                 case array_key_exists($mapping['type'], $this->typeSerializers) && isset($data[$field]):
                     $value = $this->getTypeSerializer($mapping['type'])->unserialize($data[$field]);
+                    break;
+                case $mapping['type'] == 'float' && isset($data[$field]) && is_integer($data[$field]):
+                    $value = (float) $data[$field];
                     break;
                 case isset($data[$field]):
                     $value = $data[$field];

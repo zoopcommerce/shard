@@ -18,14 +18,14 @@ use Zoop\Shard\Annotations as Shard;
 trait CreatedOnTrait {
 
     /**
-     * @ODM\Timestamp
+     * @ODM\Date
      * @Shard\Stamp\CreatedOn
      */
     protected $createdOn;
 
     /**
      *
-     * @return timestamp
+     * @return date
      */
     public function getCreatedOn(){
         return $this->createdOn;

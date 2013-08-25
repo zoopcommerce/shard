@@ -18,14 +18,14 @@ use Zoop\Shard\Annotations as Shard;
 trait UpdatedOnTrait {
 
     /**
-     * @ODM\Timestamp
+     * @ODM\Date
      * @Shard\Stamp\UpdatedOn
      */
     protected $updatedOn;
 
     /**
      *
-     * @return timestamp
+     * @return date
      */
     public function getUpdatedOn(){
         return $this->updatedOn;

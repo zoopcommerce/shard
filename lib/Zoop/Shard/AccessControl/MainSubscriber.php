@@ -82,6 +82,11 @@ class MainSubscriber extends AbstractAccessControlSubscriber {
 
             //Assemble all the actions that require permission
             $changeSet = $unitOfWork->getDocumentChangeSet($document);
+
+            if (count($changeSet) == 0){
+                continue;
+            }
+            
             foreach ($changeSet as $field => $change){
                 $actions[] = Actions::update($field);
             }
