@@ -18,9 +18,9 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Email extends Annotation
 {
-    const event = 'annotationEmailValidator';
+    const EVENT = 'annotationEmailValidator';
 
     public $value = true;
-    
+
     public $class = 'Zoop\Mystique\Equal';
 }

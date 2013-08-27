@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Float extends Annotation
 {
-    const event = 'annotationFloatValidator';
+    const EVENT = 'annotationFloatValidator';
 
     public $value = true;
 

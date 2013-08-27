@@ -14,8 +14,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait SoftDeletedOnTrait {
-
+trait SoftDeletedOnTrait
+{
     /**
      * @ODM\Timestamp
      * @Shard\SoftDelete\DeletedOn
@@ -26,7 +26,8 @@ trait SoftDeletedOnTrait {
      *
      * @return timestamp
      */
-    public function getSoftDeletedOn(){
+    public function getSoftDeletedOn()
+    {
         return $this->softDeletedOn;
     }
 }

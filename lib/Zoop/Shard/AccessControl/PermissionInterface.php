@@ -12,8 +12,9 @@ namespace Zoop\Shard\AccessControl;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-interface PermissionInterface{
+interface PermissionInterface
+{
+    const WILD = '*';
 
     public function areAllowed(array $roles, array $action);
-
 }

@@ -14,8 +14,8 @@ use Zoop\Shard\AbstractExtension;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Extension extends AbstractExtension {
-
+class Extension extends AbstractExtension
+{
     protected $subscribers = [
         'subscriber.state.mainsubscriber',
         'subscriber.state.annotationsubscriber',
@@ -25,10 +25,14 @@ class Extension extends AbstractExtension {
 
     protected $serviceManagerConfig = [
         'invokables' => [
-            'subscriber.state.mainsubscriber' => 'Zoop\Shard\State\MainSubscriber',
-            'subscriber.state.annotationsubscriber' => 'Zoop\Shard\State\AnnotationSubscriber',
-            'subscirber.state.statePermissionSubscirber' => 'Zoop\Shard\State\AccessControl\StatePermissionSubscriber',
-            'subscirber.state.transitionPermissionSubscriber' => 'Zoop\Shard\State\AccessControl\TransitionPermissionSubscriber'
+            'subscriber.state.mainsubscriber' =>
+                'Zoop\Shard\State\MainSubscriber',
+            'subscriber.state.annotationsubscriber' =>
+                'Zoop\Shard\State\AnnotationSubscriber',
+            'subscirber.state.statePermissionSubscirber' =>
+                'Zoop\Shard\State\AccessControl\StatePermissionSubscriber',
+            'subscirber.state.transitionPermissionSubscriber' =>
+                'Zoop\Shard\State\AccessControl\TransitionPermissionSubscriber'
         ]
     ];
 

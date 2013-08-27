@@ -20,5 +20,5 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class SoftDelete extends Annotation
 {
-    const event = 'annotationSoftDelete';
+    const EVENT = 'annotationSoftDelete';
 }

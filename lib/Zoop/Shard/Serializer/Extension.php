@@ -14,8 +14,8 @@ use Zoop\Shard\AbstractExtension;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Extension extends AbstractExtension {
-
+class Extension extends AbstractExtension
+{
     protected $subscribers = [
         'subscriber.serializer.annotation'
     ];
@@ -49,27 +49,33 @@ class Extension extends AbstractExtension {
 
     protected $classNameField = '_className';
 
-    public function getTypeSerializers() {
+    public function getTypeSerializers()
+    {
         return $this->typeSerializers;
     }
 
-    public function setTypeSerializers(array $typeSerializers) {
+    public function setTypeSerializers(array $typeSerializers)
+    {
         $this->typeSerializers = $typeSerializers;
     }
 
-    public function getMaxNestingDepth() {
+    public function getMaxNestingDepth()
+    {
         return $this->maxNestingDepth;
     }
 
-    public function setMaxNestingDepth($maxNestingDepth) {
+    public function setMaxNestingDepth($maxNestingDepth)
+    {
         $this->maxNestingDepth = (integer) $maxNestingDepth;
     }
 
-    public function getClassNameField() {
+    public function getClassNameField()
+    {
         return $this->classNameField;
     }
 
-    public function setClassNameField($classNameField) {
+    public function setClassNameField($classNameField)
+    {
         $this->classNameField = (string) $classNameField;
     }
 }

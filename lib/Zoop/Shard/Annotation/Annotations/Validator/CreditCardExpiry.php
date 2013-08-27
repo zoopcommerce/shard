@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class CreditCardExpiry extends Annotation
 {
-    const event = 'annotationCreditCardExpiryValidator';
+    const EVENT = 'annotationCreditCardExpiryValidator';
 
     public $value = true;
 

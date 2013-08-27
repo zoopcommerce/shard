@@ -15,8 +15,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  *     @Shard\Permission\Basic(roles="*", allow="*")
  * })
  */
-class CakeWithSecrets {
-
+class CakeWithSecrets
+{
     /**
      * @ODM\Id(strategy="UUID")
      */
@@ -41,7 +41,8 @@ class CakeWithSecrets {
         $this->secretIngredients = new ArrayCollection();
     }
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
@@ -50,7 +51,8 @@ class CakeWithSecrets {
         return $this->ingredients;
     }
 
-    public function setIngredients(array $ingredients){
+    public function setIngredients(array $ingredients)
+    {
         $this->ingredients = $ingredients;
     }
 
@@ -64,7 +66,8 @@ class CakeWithSecrets {
         return $this->secretIngredients;
     }
 
-    public function setSecretIngredients(array $secretIngredients){
+    public function setSecretIngredients(array $secretIngredients)
+    {
         $this->secretIngredients = $secretIngredients;
     }
 

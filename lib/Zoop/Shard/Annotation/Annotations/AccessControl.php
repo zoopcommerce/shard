@@ -15,9 +15,9 @@ use Doctrine\Common\Annotations\Annotation;
  * @Annotation
  * @Target({"CLASS"})
  */
-final class AccessControl extends Annotation {
-
-    const event = 'annotationAccessControl';
+final class AccessControl extends Annotation
+{
+    const EVENT = 'annotationAccessControl';
 
     public $value = [];
 }

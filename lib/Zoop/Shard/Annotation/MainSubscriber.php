@@ -26,7 +26,8 @@ class MainSubscriber implements EventSubscriber
      *
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return [
             ODMEvents::loadClassMetadata
         ];
@@ -42,7 +43,7 @@ class MainSubscriber implements EventSubscriber
         $documentManager = $eventArgs->getDocumentManager();
         $eventManager = $documentManager->getEventManager();
 
-        if (!isset($this->annotationReader)){
+        if (! isset($this->annotationReader)) {
             $this->annotationReader = new Annotations\AnnotationReader;
             $this->annotationReader = new Annotations\CachedReader(
                 $this->annotationReader,
@@ -60,28 +61,34 @@ class MainSubscriber implements EventSubscriber
         $this->buildMetadata($metadata, $metadata, $eventManager);
 
         // Raise post build metadata event
-        if ($eventManager->hasListeners(Events::postBuildMetadata)) {
+        if ($eventManager->hasListeners(Events::POST_BUILD_METADATA)) {
             $eventManager->dispatchEvent(
-                Events::postBuildMetadata,
+                Events::POST_BUILD_METADATA,
                 $eventArgs
             );
         }
     }
 
-    protected function buildMetadata(ClassMetadata $source, ClassMetadata $target, $eventManager){
-
+    protected function buildMetadata(ClassMetadata $source, ClassMetadata $target, $eventManager)
+    {
         $sourceReflClass = $source->getReflectionClass();
         $targetReflClass = $target->getReflectionClass();
 
         //Document annotations
         foreach ($this->annotationReader->getClassAnnotations($sourceReflClass) as $annotation) {
-            if (defined(get_class($annotation) . '::event')) {
+            if (defined(get_class($annotation) . '::EVENT')) {
 
                 // Raise annotation event
-                if ($eventManager->hasListeners($annotation::event)) {
+                if ($eventManager->hasListeners($annotation::EVENT)) {
                     $eventManager->dispatchEvent(
-                        $annotation::event,
-                        new AnnotationEventArgs($target, EventType::document, $annotation, $targetReflClass, $eventManager)
+                        $annotation::EVENT,
+                        new AnnotationEventArgs(
+                            $target,
+                            EventType::DOCUMENT,
+                            $annotation,
+                            $targetReflClass,
+                            $eventManager
+                        )
                     );
                 }
             }
@@ -90,13 +97,13 @@ class MainSubscriber implements EventSubscriber
         //Field annotations
         foreach ($sourceReflClass->getProperties() as $reflField) {
             foreach ($this->annotationReader->getPropertyAnnotations($reflField) as $annotation) {
-                if (defined(get_class($annotation) . '::event')) {
+                if (defined(get_class($annotation) . '::EVENT')) {
 
                     // Raise annotation event
-                    if ($eventManager->hasListeners($annotation::event)) {
+                    if ($eventManager->hasListeners($annotation::EVENT)) {
                         $eventManager->dispatchEvent(
-                            $annotation::event,
-                            new AnnotationEventArgs($target, EventType::field, $annotation, $reflField, $eventManager)
+                            $annotation::EVENT,
+                            new AnnotationEventArgs($target, EventType::FIELD, $annotation, $reflField, $eventManager)
                         );
                     }
                 }
@@ -107,13 +114,13 @@ class MainSubscriber implements EventSubscriber
         foreach ($sourceReflClass->getMethods() as $reflMethod) {
 
             foreach ($this->annotationReader->getMethodAnnotations($reflMethod) as $annotation) {
-                if (defined(get_class($annotation) . '::event')) {
+                if (defined(get_class($annotation) . '::EVENT')) {
 
                     // Raise annotation event
-                    if ($eventManager->hasListeners($annotation::event)) {
+                    if ($eventManager->hasListeners($annotation::EVENT)) {
                         $eventManager->dispatchEvent(
-                            $annotation::event,
-                            new AnnotationEventArgs($target, EventType::method, $annotation, $reflMethod, $eventManager)
+                            $annotation::EVENT,
+                            new AnnotationEventArgs($target, EventType::METHOD, $annotation, $reflMethod, $eventManager)
                         );
                     }
                 }

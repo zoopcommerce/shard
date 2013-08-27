@@ -8,39 +8,41 @@ use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\Crypt\TestAsset\Document\Simple;
 use Zoop\Shard\Test\TestAsset\User;
 
-class BlockCipherTest extends BaseTest {
-
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.crypt' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'invokables' => [
-                    'testkey' => 'Zoop\Shard\Test\Crypt\TestAsset\Key'
+class BlockCipherTest extends BaseTest
+{
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    'user' => function(){
-                        $user = new User();
-                        $user->setUsername('toby');
-                        return $user;
-                    }
+                'extension_configs' => [
+                    'extension.crypt' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'invokables' => [
+                        'testkey' => 'Zoop\Shard\Test\Crypt\TestAsset\Key'
+                    ],
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                        'user' => function () {
+                            $user = new User();
+                            $user->setUsername('toby');
+                            return $user;
+                        }
+                    ]
                 ]
-            ]
-       ]);
+           ]
+        );
 
-       $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
-       $this->blockCipherHelper = $manifest->getServiceManager()->get('crypt.blockcipherhelper');
+        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->blockCipherHelper = $manifest->getServiceManager()->get('crypt.blockcipherhelper');
     }
 
-    public function testBlockCipher(){
-
+    public function testBlockCipher()
+    {
         $documentManager = $this->documentManager;
 
         $testDoc = new Simple();

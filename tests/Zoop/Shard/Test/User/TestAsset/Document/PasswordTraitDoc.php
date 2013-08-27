@@ -16,8 +16,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  *     @Shard\Permission\Basic(roles="admin", allow="update::password"                                   )
  * })
  */
-class PasswordTraitDoc implements PasswordInterface {
-
+class PasswordTraitDoc implements PasswordInterface
+{
     use PasswordTrait;
 
     /**
@@ -25,7 +25,8 @@ class PasswordTraitDoc implements PasswordInterface {
      */
     protected $id;
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 }

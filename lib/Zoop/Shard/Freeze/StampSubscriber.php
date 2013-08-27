@@ -15,16 +15,17 @@ use Zoop\Shard\Stamp\AbstractStampSubscriber;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class StampSubscriber extends AbstractStampSubscriber {
-
+class StampSubscriber extends AbstractStampSubscriber
+{
     /**
      *
      * @return array
      */
-    public function getSubscribedEvents() {
+    public function getSubscribedEvents()
+    {
         return [
-            Events::postFreeze,
-            Events::postThaw
+            Events::POST_FREEZE,
+            Events::POST_THAW
         ];
     }
 
@@ -32,17 +33,17 @@ class StampSubscriber extends AbstractStampSubscriber {
      *
      * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
      */
-    public function postFreeze(LifecycleEventArgs $eventArgs) {
-
+    public function postFreeze(LifecycleEventArgs $eventArgs)
+    {
         $recomputeChangeSet = false;
         $document = $eventArgs->getDocument();
         $metadata = $eventArgs->getDocumentManager()->getClassMetadata(get_class($document));
 
-        if(isset($metadata->freeze['frozenBy'])){
+        if (isset($metadata->freeze['frozenBy'])) {
             $metadata->reflFields[$metadata->freeze['frozenBy']]->setValue($document, $this->getUsername());
             $recomputeChangeSet = true;
         }
-        if(isset($metadata->freeze['frozenOn'])){
+        if (isset($metadata->freeze['frozenOn'])) {
             $metadata->reflFields[$metadata->freeze['frozenOn']]->setValue($document, time());
             $recomputeChangeSet = true;
         }
@@ -55,17 +56,17 @@ class StampSubscriber extends AbstractStampSubscriber {
      *
      * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
      */
-    public function postThaw(LifecycleEventArgs $eventArgs) {
-
+    public function postThaw(LifecycleEventArgs $eventArgs)
+    {
         $recomputeChangeSet = false;
         $document = $eventArgs->getDocument();
         $metadata = $eventArgs->getDocumentManager()->getClassMetadata(get_class($document));
 
-        if(isset($metadata->freeze['thawedBy'])){
+        if (isset($metadata->freeze['thawedBy'])) {
             $metadata->reflFields[$metadata->freeze['thawedBy']]->setValue($document, $this->getUsername());
             $recomputeChangeSet = true;
         }
-        if(isset($metadata->freeze['thawedOn'])){
+        if (isset($metadata->freeze['thawedOn'])) {
             $metadata->reflFields[$metadata->freeze['thawedOn']]->setValue($document, time());
             $recomputeChangeSet = true;
         }

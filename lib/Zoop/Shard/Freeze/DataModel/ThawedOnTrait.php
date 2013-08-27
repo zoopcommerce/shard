@@ -14,8 +14,8 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait ThawedOnTrait {
-
+trait ThawedOnTrait
+{
     /**
      * @ODM\Timestamp
      * @Shard\Freeze\ThawedOn
@@ -26,7 +26,8 @@ trait ThawedOnTrait {
      *
      * @return timestamp
      */
-    public function getThawedOn(){
+    public function getThawedOn()
+    {
         return $this->thawedOn;
     }
 }

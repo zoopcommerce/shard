@@ -25,19 +25,19 @@ class DocumentValidator implements DocumentValidatorInterface, DocumentManagerAw
      * @param object $document
      * @return boolean
      */
-    public function isValid($document) {
-
+    public function isValid($document)
+    {
         $metadata = $this->documentManager->getClassMetadata(get_class($document));
 
-        if ( ! isset($metadata->validator)){
+        if (! isset($metadata->validator)) {
             return new Result(['value' => true]);
         }
 
         $result = new DocumentValidatorResult(['value' => true]);
 
         // Field level validators
-        if (isset($metadata->validator['fields'])){
-            foreach ($metadata->validator['fields'] as $field => $validatorDefinition){
+        if (isset($metadata->validator['fields'])) {
+            foreach ($metadata->validator['fields'] as $field => $validatorDefinition) {
 
                 //check for hashed or encrypted values - if the field has been persisted, and is unchanged,
                 //it is assumed to be vaild. If the encrypted value is passed to the validators, then
@@ -49,7 +49,7 @@ class DocumentValidator implements DocumentValidatorInterface, DocumentManagerAw
                     if (isset($originalDocumentData) &&
                         isset($originalDocumentData[$field]) &&
                         $originalDocumentData[$field] == $metadata->reflFields[$field]->getValue($document)
-                    ){
+                    ) {
                         //encrypted value hasn't changed, so skip validation of it.
                         continue;
                     }
@@ -61,25 +61,25 @@ class DocumentValidator implements DocumentValidatorInterface, DocumentManagerAw
                 $validatorResult = $validator->isValid($value);
 
                 $result->addFieldResult($field, $validatorResult);
-                foreach ($validatorResult->getMessages() as $message){
+                foreach ($validatorResult->getMessages() as $message) {
                     $result->addMessage($field . ': ' . $message);
                 }
-                if ( ! $validatorResult->getValue()){
+                if (! $validatorResult->getValue()) {
                     $result->setValue(false);
                 }
             }
         }
 
         // Document level validators
-        if (isset($metadata->validator['document'])){
+        if (isset($metadata->validator['document'])) {
             $validator = ValidatorFactory::create($metadata->validator['document']);
             $validatorResult = $validator->isValid($value);
 
             $result->addClassResult($validatorResult);
-            foreach ($validatorResult->getMessages() as $message){
+            foreach ($validatorResult->getMessages() as $message) {
                 $result->addMessage('document: ' . $message);
             }
-            if ( ! $validatorResult->getValue()){
+            if (! $validatorResult->getValue()) {
                 $result->setValue(false);
             }
         }

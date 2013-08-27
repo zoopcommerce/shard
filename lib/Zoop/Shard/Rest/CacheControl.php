@@ -23,35 +23,43 @@ class CacheControl extends AbstractOptions
 
     protected $maxAge;
 
-    public function getPublic() {
+    public function getPublic()
+    {
         return $this->public;
     }
 
-    public function setPublic($public) {
+    public function setPublic($public)
+    {
         $this->public = (bool) $public;
     }
 
-    public function getPrivate() {
+    public function getPrivate()
+    {
         return $this->private;
     }
 
-    public function setPrivate($private) {
+    public function setPrivate($private)
+    {
         $this->private = (bool) $private;
     }
 
-    public function getNoCache() {
+    public function getNoCache()
+    {
         return $this->noCache;
     }
 
-    public function setNoCache($noCache) {
+    public function setNoCache($noCache)
+    {
         $this->noCache = (bool) $noCache;
     }
 
-    public function getMaxAge() {
+    public function getMaxAge()
+    {
         return $this->maxAge;
     }
 
-    public function setMaxAge($maxAge) {
+    public function setMaxAge($maxAge)
+    {
         $this->maxAge = (integer) $maxAge;
     }
 }

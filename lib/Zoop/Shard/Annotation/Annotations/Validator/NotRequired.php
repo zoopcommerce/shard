@@ -19,9 +19,9 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class NotRequired extends Annotation
 {
-    const event = 'annotationNotRequiredValidator';
+    const EVENT = 'annotationNotRequiredValidator';
 
     public $value = true;
-    
+
     public $class = 'Zoop\Mystique\NotRequired';
 }

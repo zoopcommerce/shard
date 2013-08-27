@@ -19,7 +19,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class ReferenceSerializer extends Annotation
 {
-    const event = 'annotationSerializerReferenceSerializer';
+    const EVENT = 'annotationSerializerReferenceSerializer';
 
     public $value;
 }

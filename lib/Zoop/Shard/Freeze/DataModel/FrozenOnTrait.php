@@ -14,8 +14,8 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait FrozenOnTrait {
-
+trait FrozenOnTrait
+{
     /**
      * @ODM\Timestamp
      * @Shard\Freeze\FrozenOn
@@ -26,7 +26,8 @@ trait FrozenOnTrait {
      *
      * @return timestamp
      */
-    public function getFrozenOn(){
+    public function getFrozenOn()
+    {
         return $this->frozenOn;
     }
 }

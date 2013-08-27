@@ -29,20 +29,22 @@ class State extends BsonFilter
     protected $parameters = array(
         'includeStateList' => true,
         'states' => []
-   );
+    );
 
     /**
      * Set the filter to return only documents which are
      * in the State list
      */
-    public function includeStateList(){
+    public function includeStateList()
+    {
         $this->parameters['includeStateList'] = true;
     }
 
     /**
      * Set the filter to return only documents which are not in the State list
      */
-    public function excludeStateList(){
+    public function excludeStateList()
+    {
         $this->parameters['includeStateList'] = false;
     }
 
@@ -50,7 +52,8 @@ class State extends BsonFilter
      *
      * @param array $states
      */
-    public function setStates(array $states){
+    public function setStates(array $states)
+    {
         $this->parameters['states'] = $states;
     }
 
@@ -58,7 +61,8 @@ class State extends BsonFilter
      *
      * @param string $state
      */
-    public function addState($state){
+    public function addState($state)
+    {
         $this->parameters['states'][] = (string) $state;
     }
 
@@ -66,8 +70,9 @@ class State extends BsonFilter
      *
      * @param string $state
      */
-    public function removeState($state){
-        if (isset($this->parameters['states'][$state])){
+    public function removeState($state)
+    {
+        if (isset($this->parameters['states'][$state])) {
             unset($this->parameters['states'][$state]);
         }
     }

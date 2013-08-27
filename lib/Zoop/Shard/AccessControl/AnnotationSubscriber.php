@@ -16,15 +16,16 @@ use Zoop\Shard\Annotation\EventType;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class AnnotationSubscriber implements EventSubscriber {
-
+class AnnotationSubscriber implements EventSubscriber
+{
     /**
      *
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return [
-            Shard\AccessControl::event
+            Shard\AccessControl::EVENT
         ];
     }
 
@@ -37,17 +38,23 @@ class AnnotationSubscriber implements EventSubscriber {
         $annotation = $eventArgs->getAnnotation();
         $metadata = $eventArgs->getMetadata();
 
-        if ($annotation->value){
+        if ($annotation->value) {
             $metadata->permissions = [];
             $eventManager = $eventArgs->getEventManager();
-            foreach ($annotation->value as $permissionAnnotation){
-                if (defined(get_class($permissionAnnotation) . '::event')) {
+            foreach ($annotation->value as $permissionAnnotation) {
+                if (defined(get_class($permissionAnnotation) . '::EVENT')) {
 
                     // Raise annotation event
-                    if ($eventManager->hasListeners($permissionAnnotation::event)) {
+                    if ($eventManager->hasListeners($permissionAnnotation::EVENT)) {
                         $eventManager->dispatchEvent(
-                            $permissionAnnotation::event,
-                            new AnnotationEventArgs($metadata, EventType::document, $permissionAnnotation, $eventArgs->getReflection(), $eventManager)
+                            $permissionAnnotation::EVENT,
+                            new AnnotationEventArgs(
+                                $metadata,
+                                EventType::DOCUMENT,
+                                $permissionAnnotation,
+                                $eventArgs->getReflection(),
+                                $eventManager
+                            )
                         );
                     }
                 }

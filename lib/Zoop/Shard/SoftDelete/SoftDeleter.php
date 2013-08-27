@@ -19,17 +19,20 @@ class SoftDeleter implements DocumentManagerAwareInterface
 
     use DocumentManagerAwareTrait;
 
-    public function isSoftDeleted($document){
+    public function isSoftDeleted($document)
+    {
         $metadata = $this->documentManager->getClassMetadata(get_class($document));
         return $metadata->reflFields[$metadata->softDelete['flag']]->getValue($document);
     }
 
-    public function softDelete($document){
+    public function softDelete($document)
+    {
         $metadata = $this->documentManager->getClassMetadata(get_class($document));
         $metadata->reflFields[$metadata->softDelete['flag']]->setValue($document, true);
     }
 
-    public function restore($document){
+    public function restore($document)
+    {
         $metadata = $this->documentManager->getClassMetadata(get_class($document));
         $metadata->reflFields[$metadata->softDelete['flag']]->setValue($document, false);
     }

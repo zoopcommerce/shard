@@ -14,8 +14,8 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait FrozenByTrait {
-
+trait FrozenByTrait
+{
     /**
      * @ODM\String
      * @ODM\Index
@@ -28,7 +28,8 @@ trait FrozenByTrait {
      *
      * @return string
      */
-    public function getFrozenBy(){
+    public function getFrozenBy()
+    {
         return $this->frozenBy;
     }
 }

@@ -15,8 +15,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  *     @Shard\Permission\Basic(roles="superadmin", allow="update::*"                             )
  * })
  */
-class FieldPermissions {
-
+class FieldPermissions
+{
     /**
      * @ODM\Id(strategy="UUID")
      */
@@ -32,23 +32,28 @@ class FieldPermissions {
      */
     protected $address;
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function setName($name) {
+    public function setName($name)
+    {
         $this->name = (string) $name;
     }
 
-    public function getAddress() {
+    public function getAddress()
+    {
         return $this->address;
     }
 
-    public function setAddress($address) {
+    public function setAddress($address)
+    {
         $this->address = $address;
     }
 }

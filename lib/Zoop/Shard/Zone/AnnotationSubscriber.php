@@ -22,9 +22,10 @@ class AnnotationSubscriber implements EventSubscriber
      *
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return [
-            Shard\Zones::event
+            Shard\Zones::EVENT
         ];
     }
 

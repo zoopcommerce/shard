@@ -10,36 +10,38 @@ use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\TestAsset\User;
 use Zoop\Shard\Test\SoftDelete\TestAsset\Document\Simple;
 
-class SoftDeleteTest extends BaseTest implements EventSubscriber {
-
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.softdelete' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    'user' => function(){
-                        $user = new User();
-                        $user->setUsername('toby');
-                        return $user;
-                    }
+class SoftDeleteTest extends BaseTest implements EventSubscriber
+{
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.softdelete' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                        'user' => function () {
+                            $user = new User();
+                            $user->setUsername('toby');
+                            return $user;
+                        }
+                    ]
                 ]
             ]
-        ]);
+        );
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
         $this->softDeleter = $manifest->getServiceManager()->get('softDeleter');
     }
 
-    public function testBasicFunction(){
-
+    public function testBasicFunction()
+    {
         $documentManager = $this->documentManager;
         $testDoc = new Simple();
 
@@ -84,8 +86,8 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber {
         $this->assertFalse($this->softDeleter->isSoftDeleted($testDoc));
     }
 
-    public function testFilter() {
-
+    public function testFilter()
+    {
         $documentManager = $this->documentManager;
         $documentManager->getFilterCollection()->enable('softDelete');
 
@@ -104,7 +106,7 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber {
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(array('lucy', 'miriam'), $docNames);
 
-        if ($testDocs[0]->getName() == 'lucy'){
+        if ($testDocs[0]->getName() == 'lucy') {
             $this->softDeleter->softDelete($testDocs[0]);
         } else {
             $this->softDeleter->softDelete($testDocs[1]);
@@ -137,7 +139,7 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber {
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(array('lucy', 'miriam'), $docNames);
 
-        if ($testDocs[0]->getName() == 'lucy'){
+        if ($testDocs[0]->getName() == 'lucy') {
             $this->softDeleter->restore($testDocs[0]);
         } else {
             $this->softDeleter->restore($testDocs[1]);
@@ -152,12 +154,13 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber {
         $this->assertEquals(array('lucy', 'miriam'), $docNames);
     }
 
-    protected function getTestDocs(){
+    protected function getTestDocs()
+    {
         $repository = $this->documentManager->getRepository('Zoop\Shard\Test\SoftDelete\TestAsset\Document\Simple');
         $testDocs = $repository->findAll();
         $returnDocs = array();
         $returnNames = array();
-        foreach ($testDocs as $testDoc){
+        foreach ($testDocs as $testDoc) {
             $returnDocs[] = $testDoc;
             $returnNames[] = $testDoc->getName();
         }
@@ -165,8 +168,8 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber {
         return array($returnDocs, $returnNames);
     }
 
-    public function testEvents() {
-
+    public function testEvents()
+    {
         $subscriber = $this;
 
         $documentManager = $this->documentManager;
@@ -183,10 +186,10 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber {
         $documentManager->clear();
 
         $calls = $subscriber->getCalls();
-        $this->assertFalse(isset($calls[Events::preSoftDelete]));
-        $this->assertFalse(isset($calls[Events::postSoftDelete]));
-        $this->assertFalse(isset($calls[Events::preRestore]));
-        $this->assertFalse(isset($calls[Events::postRestore]));
+        $this->assertFalse(isset($calls[Events::PRE_SOFT_DELETE]));
+        $this->assertFalse(isset($calls[Events::POST_SOFT_DELETE]));
+        $this->assertFalse(isset($calls[Events::PRE_RESTORE]));
+        $this->assertFalse(isset($calls[Events::POST_RESTORE]));
 
         $repository = $documentManager->getRepository(get_class($testDoc));
         $testDoc = null;
@@ -200,10 +203,10 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber {
         $documentManager->flush();
 
         $calls = $subscriber->getCalls();
-        $this->assertTrue(isset($calls[Events::preSoftDelete]));
-        $this->assertTrue(isset($calls[Events::postSoftDelete]));
-        $this->assertFalse(isset($calls[Events::preRestore]));
-        $this->assertFalse(isset($calls[Events::postRestore]));
+        $this->assertTrue(isset($calls[Events::PRE_SOFT_DELETE]));
+        $this->assertTrue(isset($calls[Events::POST_SOFT_DELETE]));
+        $this->assertFalse(isset($calls[Events::PRE_RESTORE]));
+        $this->assertFalse(isset($calls[Events::POST_RESTORE]));
 
         $testDoc = null;
         $testDoc = $repository->find($id);
@@ -215,7 +218,7 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber {
         $documentManager->flush();
 
         $calls = $subscriber->getCalls();
-        $this->assertTrue(isset($calls[Events::softDeletedUpdateDenied]));
+        $this->assertTrue(isset($calls[Events::SOFT_DELETED_UPDATE_DENIED]));
 
         $this->softDeleter->restore($testDoc);
         $subscriber->reset();
@@ -223,10 +226,10 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber {
         $documentManager->flush();
 
         $calls = $subscriber->getCalls();
-        $this->assertFalse(isset($calls[Events::preSoftDelete]));
-        $this->assertFalse(isset($calls[Events::postSoftDelete]));
-        $this->assertTrue(isset($calls[Events::preRestore]));
-        $this->assertTrue(isset($calls[Events::postRestore]));
+        $this->assertFalse(isset($calls[Events::PRE_SOFT_DELETE]));
+        $this->assertFalse(isset($calls[Events::POST_SOFT_DELETE]));
+        $this->assertTrue(isset($calls[Events::PRE_RESTORE]));
+        $this->assertTrue(isset($calls[Events::POST_RESTORE]));
 
         $testDoc = null;
         $testDoc = $repository->find($id);
@@ -240,10 +243,10 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber {
         $documentManager->flush();
 
         $calls = $subscriber->getCalls();
-        $this->assertTrue(isset($calls[Events::preSoftDelete]));
-        $this->assertFalse(isset($calls[Events::postSoftDelete]));
-        $this->assertFalse(isset($calls[Events::preRestore]));
-        $this->assertFalse(isset($calls[Events::postRestore]));
+        $this->assertTrue(isset($calls[Events::PRE_SOFT_DELETE]));
+        $this->assertFalse(isset($calls[Events::POST_SOFT_DELETE]));
+        $this->assertFalse(isset($calls[Events::PRE_RESTORE]));
+        $this->assertFalse(isset($calls[Events::POST_RESTORE]));
 
         $testDoc = null;
         $testDoc = $repository->find($id);
@@ -265,10 +268,10 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber {
         $documentManager->flush();
 
         $calls = $subscriber->getCalls();
-        $this->assertFalse(isset($calls[Events::preSoftDelete]));
-        $this->assertFalse(isset($calls[Events::postSoftDelete]));
-        $this->assertTrue(isset($calls[Events::preRestore]));
-        $this->assertFalse(isset($calls[Events::postRestore]));
+        $this->assertFalse(isset($calls[Events::PRE_SOFT_DELETE]));
+        $this->assertFalse(isset($calls[Events::POST_SOFT_DELETE]));
+        $this->assertTrue(isset($calls[Events::PRE_RESTORE]));
+        $this->assertFalse(isset($calls[Events::POST_RESTORE]));
     }
 
     protected $calls = array();
@@ -276,57 +279,67 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber {
     protected $rollbackDelete = false;
     protected $rollbackRestore = false;
 
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return array(
-            Events::preSoftDelete,
-            Events::postSoftDelete,
-            Events::preRestore,
-            Events::postRestore,
-            Events::softDeletedUpdateDenied
+            Events::PRE_SOFT_DELETE,
+            Events::POST_SOFT_DELETE,
+            Events::PRE_RESTORE,
+            Events::POST_RESTORE,
+            Events::SOFT_DELETED_UPDATE_DENIED
         );
     }
 
-    public function reset() {
+    public function reset()
+    {
         $this->calls = array();
         $this->rollbackDelete = false;
         $this->rollbackRestore = false;
     }
 
-    public function preSoftDelete(LifecycleEventArgs $eventArgs) {
-        $this->calls[Events::preSoftDelete] = $eventArgs;
+    public function preSoftDelete(LifecycleEventArgs $eventArgs)
+    {
+        $this->calls[Events::PRE_SOFT_DELETE] = $eventArgs;
         if ($this->rollbackDelete) {
             $this->softDeleter->restore($eventArgs->getDocument());
         }
     }
 
-    public function preRestore(LifecycleEventArgs $eventArgs) {
-        $this->calls[Events::preRestore] = $eventArgs;
+    public function preRestore(LifecycleEventArgs $eventArgs)
+    {
+        $this->calls[Events::PRE_RESTORE] = $eventArgs;
         if ($this->rollbackRestore) {
             $this->softDeleter->softDelete($eventArgs->getDocument());
         }
     }
 
-    public function getRollbackDelete() {
+    public function getRollbackDelete()
+    {
         return $this->rollbackDelete;
     }
 
-    public function setRollbackDelete($rollbackDelete) {
+    public function setRollbackDelete($rollbackDelete)
+    {
         $this->rollbackDelete = $rollbackDelete;
     }
 
-    public function getRollbackRestore() {
+    public function getRollbackRestore()
+    {
         return $this->rollbackRestore;
     }
 
-    public function setRollbackRestore($rollbackRestore) {
+    public function setRollbackRestore($rollbackRestore)
+    {
         $this->rollbackRestore = $rollbackRestore;
     }
 
-    public function getCalls() {
+    public function getCalls()
+    {
         return $this->calls;
     }
 
-    public function __call($name, $arguments){
+    public function __call($name, $arguments)
+    {
         $this->calls[$name] = $arguments[0];
     }
 }

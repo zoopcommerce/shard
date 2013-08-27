@@ -18,17 +18,17 @@ final class Events
      * Triggered when user attempts to create a document they don't have permission
      * for
      */
-    const createDenied = 'createDenied';
+    const CREATE_DENIED = 'createDenied';
 
     /**
      * Triggers when user attempts to update a document they don't have permission
      * for
      */
-    const updateDenied = 'updateDenied';
+    const UPDATE_DENIED = 'updateDenied';
 
     /**
      * Triggers wehn user attempts to delete a document they don't have permission
      * for
      */
-    const deleteDenied = 'deleteDenied';
+    const DELETE_DENIED = 'deleteDenied';
 }

@@ -15,9 +15,9 @@ use Doctrine\Common\Annotations\Annotation;
  * @Annotation
  * @Target({"PROPERTY"})
  */
-final class ThawedBy extends Annotation {
-
-    const event = 'annotationFreezeThawedBy';
+final class ThawedBy extends Annotation
+{
+    const EVENT = 'annotationFreezeThawedBy';
 
     public $value = true;
 }

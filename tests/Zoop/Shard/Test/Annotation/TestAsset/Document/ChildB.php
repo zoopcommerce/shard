@@ -15,8 +15,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  *     @Shard\Validator(class = "ChildBValidator")
  * })
  */
-class ChildB extends ParentClass {
-
+class ChildB extends ParentClass
+{
     /**
      * @Shard\Serializer\Ignore("none")
      */

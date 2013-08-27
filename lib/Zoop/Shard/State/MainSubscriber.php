@@ -25,7 +25,8 @@ class MainSubscriber implements EventSubscriber
      *
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return array(
             ODMEvents::onFlush
         );
@@ -35,7 +36,7 @@ class MainSubscriber implements EventSubscriber
      *
      * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
      */
-    public function onFlush(OnFlushEventArgs  $eventArgs)
+    public function onFlush(OnFlushEventArgs $eventArgs)
     {
         $documentManager = $eventArgs->getDocumentManager();
         $unitOfWork = $documentManager->getUnitOfWork();
@@ -43,29 +44,30 @@ class MainSubscriber implements EventSubscriber
         foreach ($unitOfWork->getScheduledDocumentInsertions() as $document) {
 
             $metadata = $documentManager->getClassMetadata(get_class($document));
-            if ( ! isset($metadata->state)){
+            if (! isset($metadata->state)) {
                 continue;
             }
 
             $field = array_keys($metadata->state)[0];
 
-            if (count($metadata->state[$field]) > 0 && ! in_array($metadata->reflFields[$field]->getValue($document), $metadata->state[$field])){
-
+            if (count($metadata->state[$field]) > 0 &&
+                ! in_array($metadata->reflFields[$field]->getValue($document), $metadata->state[$field])
+            ) {
                 $unitOfWork->detach($document);
                 $eventManager = $documentManager->getEventManager();
-                if ($eventManager->hasListeners(Events::badState)) {
+                if ($eventManager->hasListeners(Events::BAD_STATE)) {
                     $eventManager->dispatchEvent(
-                        Events::badState,
+                        Events::BAD_STATE,
                         $eventArgs
                     );
                 }
             }
         }
 
-        foreach ($unitOfWork->getScheduledDocumentUpdates() AS $document) {
+        foreach ($unitOfWork->getScheduledDocumentUpdates() as $document) {
 
             $metadata = $documentManager->getClassMetadata(get_class($document));
-            if ( ! isset($metadata->state)){
+            if (! isset($metadata->state)) {
                 continue;
             }
 
@@ -81,11 +83,11 @@ class MainSubscriber implements EventSubscriber
             $toState = $changeSet[$field][1];
 
             //stop state change if the new state is not on the defined state list
-            if (count($metadata->state[$field]) > 0 && ! in_array($toState, $metadata->state[$field])){
+            if (count($metadata->state[$field]) > 0 && ! in_array($toState, $metadata->state[$field])) {
                 $metadata->reflFields[$field]->setValue($document, $fromState);
-                if ($eventManager->hasListeners(Events::badState)) {
+                if ($eventManager->hasListeners(Events::BAD_STATE)) {
                     $eventManager->dispatchEvent(
-                        Events::badState,
+                        Events::BAD_STATE,
                         $eventArgs
                     );
                 }
@@ -94,23 +96,23 @@ class MainSubscriber implements EventSubscriber
             }
 
             // Raise preTransition
-            if ($eventManager->hasListeners(Events::preTransition)) {
+            if ($eventManager->hasListeners(Events::PRE_TRANSITION)) {
                 $eventManager->dispatchEvent(
-                    Events::preTransition,
+                    Events::PRE_TRANSITION,
                     new TransitionEventArgs(new Transition($fromState, $toState), $document, $documentManager)
                 );
             }
 
-            if ($document->getState() == $fromState){
+            if ($document->getState() == $fromState) {
                 //State change has been rolled back
                 $unitOfWork->recomputeSingleDocumentChangeSet($metadata, $document);
                 continue;
             }
 
             // Raise onTransition
-            if ($eventManager->hasListeners(Events::onTransition)) {
+            if ($eventManager->hasListeners(Events::ON_TRANSITION)) {
                 $eventManager->dispatchEvent(
-                    Events::onTransition,
+                    Events::ON_TRANSITION,
                     new TransitionEventArgs(new Transition($fromState, $toState), $document, $documentManager)
                 );
             }
@@ -119,9 +121,9 @@ class MainSubscriber implements EventSubscriber
             $unitOfWork->recomputeSingleDocumentChangeSet($metadata, $document);
 
             // Raise postTransition - this is when workflow vars should be updated
-            if ($eventManager->hasListeners(Events::postTransition)) {
+            if ($eventManager->hasListeners(Events::POST_TRANSITION)) {
                 $eventManager->dispatchEvent(
-                    Events::postTransition,
+                    Events::POST_TRANSITION,
                     new TransitionEventArgs(new Transition($fromState, $toState), $document, $documentManager)
                 );
             }

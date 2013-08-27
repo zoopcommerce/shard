@@ -20,7 +20,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class State extends Annotation
 {
-    const event = 'annotationState';
+    const EVENT = 'annotationState';
 
     public $value = [];
 }

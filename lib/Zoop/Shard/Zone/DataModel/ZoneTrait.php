@@ -15,8 +15,8 @@ use Zoop\Shard\Annotations as Shard;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait ZoneTrait {
-
+trait ZoneTrait
+{
     /**
      * @ODM\Collection
      * @Shard\Zones
@@ -28,8 +28,14 @@ trait ZoneTrait {
      *
      * @param array $zones An array of strings which are zone names
      */
-    public function setZones(array $zones){
-        $this->zones = array_map(function($zone){return (string) $zone;}, $zones);
+    public function setZones(array $zones)
+    {
+        $this->zones = array_map(
+            function ($zone) {
+                return (string) $zone;
+            },
+            $zones
+        );
     }
 
     /**
@@ -37,7 +43,8 @@ trait ZoneTrait {
      *
      * @param string $zone
      */
-    public function addZone($zone){
+    public function addZone($zone)
+    {
         $this->zones[] = (string) $zone;
     }
 
@@ -45,9 +52,9 @@ trait ZoneTrait {
      *
      * @param string $zone
      */
-    public function removeZone($zone){
-        if(($key = array_search($zone, $this->zones)) !== false)
-        {
+    public function removeZone($zone)
+    {
+        if (($key = array_search($zone, $this->zones)) !== false) {
             unset($this->zones[$key]);
         }
     }
@@ -57,7 +64,8 @@ trait ZoneTrait {
      *
      * @return array
      */
-    public function getZones(){
+    public function getZones()
+    {
         return $this->zones;
     }
 }

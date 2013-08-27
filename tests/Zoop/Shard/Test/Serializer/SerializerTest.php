@@ -10,30 +10,32 @@ use Zoop\Shard\Test\Serializer\TestAsset\Document\Profile;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\HasDiscriminator;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\ClassName;
 
-class SerializerTest extends BaseTest {
-
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.serializer' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+class SerializerTest extends BaseTest
+{
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.serializer' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                    ]
                 ]
             ]
-        ]);
+        );
 
         $this->serializer = $manifest->getServiceManager()->get('serializer');
     }
 
-    public function testSerializer(){
-
+    public function testSerializer()
+    {
         $user = new User();
         $user->setUsername('superdweebie');
         $user->setPassword('secret'); //uses Serialize Ignore annotation
@@ -60,8 +62,8 @@ class SerializerTest extends BaseTest {
         $this->assertEquals($correct, $array);
     }
 
-    public function testApplySerializeMetadataToArray(){
-
+    public function testApplySerializeMetadataToArray()
+    {
         $array = array(
             'id' => null,
             'username' => 'superdweebie',
@@ -99,8 +101,8 @@ class SerializerTest extends BaseTest {
         $this->assertEquals($correct, $array);
     }
 
-    public function testSerializeDiscriminator() {
-
+    public function testSerializeDiscriminator()
+    {
         $testDoc = new HasDiscriminator();
         $testDoc->setName('superdweebie');
 
@@ -114,8 +116,8 @@ class SerializerTest extends BaseTest {
         $this->assertEquals($correct, $array);
     }
 
-    public function testSerializeClassName() {
-
+    public function testSerializeClassName()
+    {
         $testDoc = new ClassName();
         $testDoc->setName('superdweebie');
 
@@ -129,8 +131,8 @@ class SerializerTest extends BaseTest {
         $this->assertEquals($correct, $array);
     }
 
-    public function testUnserializer(){
-
+    public function testUnserializer()
+    {
         $data = array(
             'id' => 1234567890,
             'username' => 'superdweebie',
@@ -162,8 +164,8 @@ class SerializerTest extends BaseTest {
         $this->assertEquals('Roediger', $user->getProfile()->getLastname());
     }
 
-    public function testUnserializeClassName() {
-
+    public function testUnserializeClassName()
+    {
         $data = array(
             '_className' => 'Zoop\Shard\Test\Serializer\TestAsset\Document\ClassName',
             'id' => null,

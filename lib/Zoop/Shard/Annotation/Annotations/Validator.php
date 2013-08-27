@@ -16,17 +16,13 @@ use Doctrine\Common\Annotations\Annotation;
  *
  * @Annotation
  */
-final class Validator extends Annotation {
-
-    const event = 'annotationValidator';
+final class Validator extends Annotation
+{
+    const EVENT = 'annotationValidator';
 
     /**
      * The FQCN of the validator to use
      * Class must implement Zoop\Mystique\ValidatorInteface
-     *
-     * In the context of a Dojo annotation, class must be
-     * the a module name. The module must inherit from
-     * the Zoop\Mystique\BaseValidator module
      *
      * @var string
      */

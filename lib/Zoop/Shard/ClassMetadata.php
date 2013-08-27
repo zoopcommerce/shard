@@ -26,46 +26,46 @@ class ClassMetadata extends DoctrineClassMetadata
     {
         $serialized = parent::__sleep();
 
-        if (isset($this->accessControl)){
+        if (isset($this->accessControl)) {
             $serialized[] = 'accessControl';
         }
-        if (isset($this->password)){
+        if (isset($this->password)) {
             $serialized[] = 'password';
         }
-        if (isset($this->crypt)){
+        if (isset($this->crypt)) {
             $serialized[] = 'crypt';
         }
-        if (isset($this->generator)){
+        if (isset($this->generator)) {
             $serialized[] = 'generator';
         }
-        if (isset($this->freeze)){
+        if (isset($this->freeze)) {
             $serialized[] = 'freeze';
         }
-        if (isset($this->owner)){
+        if (isset($this->owner)) {
             $serialized[] = 'owner';
         }
-        if (isset($this->permissions)){
+        if (isset($this->permissions)) {
             $serialized[] = 'permissions';
         }
-        if (isset($this->roles)){
+        if (isset($this->roles)) {
             $serialized[] = 'roles';
         }
-        if (isset($this->serializer)){
+        if (isset($this->serializer)) {
             $serialized[] = 'serializer';
         }
-        if (isset($this->softDelete)){
+        if (isset($this->softDelete)) {
             $serialized[] = 'softDelete';
         }
-        if (isset($this->stamp)){
+        if (isset($this->stamp)) {
             $serialized[] = 'stamp';
         }
-        if (isset($this->state)){
+        if (isset($this->state)) {
             $serialized[] = 'state';
         }
-        if (isset($this->validator)){
+        if (isset($this->validator)) {
             $serialized[] = 'validator';
         }
-        if (isset($this->zones)){
+        if (isset($this->zones)) {
             $serialized[] = 'zones';
         }
 

@@ -15,8 +15,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait OwnerTrait {
-
+trait OwnerTrait
+{
     /**
      * @ODM\String
      * @Shard\Owner
@@ -31,7 +31,8 @@ trait OwnerTrait {
      *
      * @return string
      */
-    public function getOwner() {
+    public function getOwner()
+    {
         return $this->owner;
     }
 
@@ -39,7 +40,8 @@ trait OwnerTrait {
      *
      * @param string $owner
      */
-    public function setOwner($owner) {
+    public function setOwner($owner)
+    {
         $this->owner = (string) $owner;
     }
 }

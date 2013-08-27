@@ -14,8 +14,8 @@ use Zoop\Shard\AbstractExtension;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Extension extends AbstractExtension {
-
+class Extension extends AbstractExtension
+{
     protected $serviceManagerConfig = [
         'factories' => [
             'endpointmap' => 'Zoop\Shard\Rest\EndpointMapFactory'
@@ -32,11 +32,13 @@ class Extension extends AbstractExtension {
 
     protected $endpointMap = [];
 
-    public function getEndpointMap() {
+    public function getEndpointMap()
+    {
         return $this->endpointMap;
     }
 
-    public function setEndpointMap($endpointMap) {
+    public function setEndpointMap($endpointMap)
+    {
         $this->endpointMap = $endpointMap;
     }
 }

@@ -8,14 +8,15 @@ namespace Zoop\Shard\AccessControl;
 
 use Doctrine\Common\EventArgs as BaseEventArgs;
 use Doctrine\ODM\MongoDB\DocumentManager;
+
 /**
  * Arguments for access control events
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class EventArgs extends BaseEventArgs {
-
+class EventArgs extends BaseEventArgs
+{
     /**
      * The document with the changed field
      *
@@ -55,7 +56,8 @@ class EventArgs extends BaseEventArgs {
      *
      * @return object
      */
-    public function getDocument() {
+    public function getDocument()
+    {
         return $this->document;
     }
 
@@ -63,16 +65,18 @@ class EventArgs extends BaseEventArgs {
      *
      * @return \Doctrine\ODM\MongoDB\DocumentManager
      */
-    public function getDocumentManager() {
+    public function getDocumentManager()
+    {
         return $this->documentManager;
     }
 
-    public function getAction() {
+    public function getAction()
+    {
         return $this->action;
     }
 
-    public function setAction($action) {
+    public function setAction($action)
+    {
         $this->action = (string) $action;
     }
-
 }

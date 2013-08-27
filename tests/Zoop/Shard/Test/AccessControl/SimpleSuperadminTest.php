@@ -8,43 +8,45 @@ use Zoop\Shard\Test\AccessControl\TestAsset\Document\Simple;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\TestAsset\RoleAwareUser;
 
-class SimpleSuperadminTest extends BaseTest {
-
+class SimpleSuperadminTest extends BaseTest
+{
     protected $calls = array();
 
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.accessControl' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    'user' => function(){
-                        $user = new RoleAwareUser();
-                        $user->setUsername('toby');
-                        $user->addRole('superadmin');
-                        return $user;
-                    }
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.accessControl' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                        'user' => function () {
+                            $user = new RoleAwareUser();
+                            $user->setUsername('toby');
+                            $user->addRole('superadmin');
+                            return $user;
+                        }
+                    ]
                 ]
             ]
-       ]);
+        );
 
-       $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
-
+        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
     }
 
-    public function testUpdateAllow(){
+    public function testUpdateAllow()
+    {
         $this->calls = array();
         $documentManager = $this->documentManager;
         $eventManager = $documentManager->getEventManager();
 
-        $eventManager->addEventListener(AccessControlEvents::updateDenied, $this);
+        $eventManager->addEventListener(AccessControlEvents::UPDATE_DENIED, $this);
 
         $testDoc = new Simple();
         $testDoc->setName('nathan');
@@ -60,7 +62,7 @@ class SimpleSuperadminTest extends BaseTest {
 
         $documentManager->flush();
 
-        $this->assertFalse(isset($this->calls[AccessControlEvents::updateDenied]));
+        $this->assertFalse(isset($this->calls[AccessControlEvents::UPDATE_DENIED]));
 
         $documentManager->clear();
         $testDoc = $repository->find($id);
@@ -68,12 +70,13 @@ class SimpleSuperadminTest extends BaseTest {
         $this->assertEquals('changed', $testDoc->getName());
     }
 
-    public function testDeleteControlAllow(){
+    public function testDeleteControlAllow()
+    {
         $this->calls = array();
         $documentManager = $this->documentManager;
         $eventManager = $documentManager->getEventManager();
 
-        $eventManager->addEventListener(AccessControlEvents::deleteDenied, $this);
+        $eventManager->addEventListener(AccessControlEvents::DELETE_DENIED, $this);
 
         $testDoc = new Simple();
         $testDoc->setName('kate');
@@ -89,7 +92,7 @@ class SimpleSuperadminTest extends BaseTest {
 
         $documentManager->flush();
 
-        $this->assertFalse(isset($this->calls[AccessControlEvents::deleteDenied]));
+        $this->assertFalse(isset($this->calls[AccessControlEvents::DELETE_DENIED]));
 
         $documentManager->clear();
         $testDoc = $repository->find($id);
@@ -97,7 +100,8 @@ class SimpleSuperadminTest extends BaseTest {
         $this->assertNull($testDoc);
     }
 
-    public function __call($name, $arguments){
+    public function __call($name, $arguments)
+    {
         $this->calls[$name] = $arguments;
     }
 }

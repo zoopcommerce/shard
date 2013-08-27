@@ -14,8 +14,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait RestoredByTrait {
-
+trait RestoredByTrait
+{
     /**
      * @ODM\String
      * @ODM\Index
@@ -28,7 +28,8 @@ trait RestoredByTrait {
      *
      * @return string
      */
-    public function getRestoredBy(){
+    public function getRestoredBy()
+    {
         return $this->restoredBy;
     }
 }

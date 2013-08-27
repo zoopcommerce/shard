@@ -15,9 +15,9 @@ use Doctrine\Common\Annotations\Annotation;
  * @Annotation
  * @Target({"PROPERTY"})
  */
-final class UpdatedOn extends Annotation {
-
-    const event = 'annotationStampUpdatedOn';
+final class UpdatedOn extends Annotation
+{
+    const EVENT = 'annotationStampUpdatedOn';
 
     public $value = true;
 }

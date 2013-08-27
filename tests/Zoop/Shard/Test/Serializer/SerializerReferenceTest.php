@@ -12,41 +12,45 @@ use Zoop\Shard\Test\Serializer\TestAsset\Document\Flavour;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\FlavourEager;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\Ingredient;
 
-class SerializerReferenceTest extends BaseTest {
-
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.serializer' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+class SerializerReferenceTest extends BaseTest
+{
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.serializer' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                    ]
                 ]
             ]
-        ]);
+        );
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
         $this->serializer = $manifest->getServiceManager()->get('serializer');
     }
 
-    public function testEagerSerializer(){
-
+    public function testEagerSerializer()
+    {
         $documentManager = $this->documentManager;
 
         //bake the eager cake. Hmm yum.
         $cake = new CakeEager();
-        $cake->setIngredients([
-            $this->createIngredient('flour'),
-            $this->createIngredient('sugar'),
-            $this->createIngredient('water'),
-            $this->createIngredient('eggs')
-        ]);
+        $cake->setIngredients(
+            [
+                $this->createIngredient('flour'),
+                $this->createIngredient('sugar'),
+                $this->createIngredient('water'),
+                $this->createIngredient('eggs')
+            ]
+        );
 
         $flavour = new FlavourEager('chocolate');
         $documentManager->persist($flavour);
@@ -58,7 +62,9 @@ class SerializerReferenceTest extends BaseTest {
         $id = $cake->getId();
         $documentManager->clear();
 
-        $cake = $documentManager->getRepository('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager')->findOneBy(['id' => $id]);
+        $cake = $documentManager
+            ->getRepository('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager')
+            ->findOneBy(['id' => $id]);
 
         $this->serializer->setMaxNestingDepth(1);
         $array = $this->serializer->toArray($cake);
@@ -85,18 +91,20 @@ class SerializerReferenceTest extends BaseTest {
         $this->assertEquals('coconut', $cake->getIngredients()[3]->getName());
     }
 
-    public function testRefLazySerializer(){
-
+    public function testRefLazySerializer()
+    {
         $documentManager = $this->documentManager;
 
         //bake the lazy cake. Hmm yum.
         $cake = new CakeRefLazy();
-        $cake->setIngredients([
-            $this->createIngredient('flour'),
-            $this->createIngredient('sugar'),
-            $this->createIngredient('water'),
-            $this->createIngredient('eggs')
-        ]);
+        $cake->setIngredients(
+            [
+                $this->createIngredient('flour'),
+                $this->createIngredient('sugar'),
+                $this->createIngredient('water'),
+                $this->createIngredient('eggs')
+            ]
+        );
 
         $flavour = new Flavour('carrot');
         $documentManager->persist($flavour);
@@ -108,7 +116,9 @@ class SerializerReferenceTest extends BaseTest {
         $id = $cake->getId();
         $documentManager->clear();
 
-        $cake = $documentManager->getRepository('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeRefLazy')->findOneBy(['id' => $id]);
+        $cake = $documentManager
+            ->getRepository('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeRefLazy')
+            ->findOneBy(['id' => $id]);
 
         $array = $this->serializer->toArray($cake);
 
@@ -134,18 +144,20 @@ class SerializerReferenceTest extends BaseTest {
         $this->assertEquals('coconut', $cake->getIngredients()[3]->getName());
     }
 
-    public function testEagerApplyToArray(){
-
+    public function testEagerApplyToArray()
+    {
         $documentManager = $this->documentManager;
 
         //bake the cake. Hmm yum.
         $cake = new CakeEager();
-        $cake->setIngredients([
-            $this->createIngredient('flour'),
-            $this->createIngredient('sugar'),
-            $this->createIngredient('water'),
-            $this->createIngredient('eggs')
-        ]);
+        $cake->setIngredients(
+            [
+                $this->createIngredient('flour'),
+                $this->createIngredient('sugar'),
+                $this->createIngredient('water'),
+                $this->createIngredient('eggs')
+            ]
+        );
 
         $flavour = new FlavourEager('black_forest');
         $documentManager->persist($flavour);
@@ -175,18 +187,20 @@ class SerializerReferenceTest extends BaseTest {
         $this->assertEquals('black_forest', $array['flavour']['name']);
     }
 
-    public function testRefLazyApplyToArray(){
-
+    public function testRefLazyApplyToArray()
+    {
         $documentManager = $this->documentManager;
 
         //bake the cake. Hmm yum.
         $cake = new CakeRefLazy();
-        $cake->setIngredients([
-            $this->createIngredient('flour'),
-            $this->createIngredient('sugar'),
-            $this->createIngredient('water'),
-            $this->createIngredient('eggs')
-        ]);
+        $cake->setIngredients(
+            [
+                $this->createIngredient('flour'),
+                $this->createIngredient('sugar'),
+                $this->createIngredient('water'),
+                $this->createIngredient('eggs')
+            ]
+        );
 
         $flavour = new Flavour('carrot');
         $documentManager->persist($flavour);
@@ -224,8 +238,8 @@ class SerializerReferenceTest extends BaseTest {
     }
 
 
-    public function testEagerSerializerWithNull(){
-
+    public function testEagerSerializerWithNull()
+    {
         $documentManager = $this->documentManager;
 
         //bake the eager cake. Hmm yum.
@@ -237,7 +251,9 @@ class SerializerReferenceTest extends BaseTest {
         $id = $cake->getId();
         $documentManager->clear();
 
-        $cake = $documentManager->getRepository('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager')->findOneBy(['id' => $id]);
+        $cake = $documentManager
+            ->getRepository('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager')
+            ->findOneBy(['id' => $id]);
 
         $array = $this->serializer->toArray($cake);
 
@@ -246,18 +262,20 @@ class SerializerReferenceTest extends BaseTest {
 
     }
 
-    public function testEagerSerializerWithSimpleReference() {
-
+    public function testEagerSerializerWithSimpleReference()
+    {
         $documentManager = $this->documentManager;
 
         //bake the eager cake. Hmm yum.
         $cake = new CakeEagerSimpleReference();
-        $cake->setIngredients([
-            $this->createIngredient('flour'),
-            $this->createIngredient('sugar'),
-            $this->createIngredient('water'),
-            $this->createIngredient('eggs')
-        ]);
+        $cake->setIngredients(
+            [
+                $this->createIngredient('flour'),
+                $this->createIngredient('sugar'),
+                $this->createIngredient('water'),
+                $this->createIngredient('eggs')
+            ]
+        );
 
         $flavour = new FlavourEager('chocolate');
         $documentManager->persist($flavour);
@@ -269,7 +287,9 @@ class SerializerReferenceTest extends BaseTest {
         $id = $cake->getId();
         $documentManager->clear();
 
-        $cake = $documentManager->getRepository('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEagerSimpleReference')->findOneBy(['id' => $id]);
+        $cake = $documentManager
+            ->getRepository('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEagerSimpleReference')
+            ->findOneBy(['id' => $id]);
 
         $array = $this->serializer->toArray($cake);
 
@@ -286,18 +306,20 @@ class SerializerReferenceTest extends BaseTest {
         $this->assertEquals('coconut', $cake->getIngredients()[3]->getName());
     }
 
-    public function testSimpleLazySerializerWithSimpleReference() {
-
+    public function testSimpleLazySerializerWithSimpleReference()
+    {
         $documentManager = $this->documentManager;
 
         //bake the cake. Hmm yum.
         $cake = new CakeSimpleLazySimpleReference();
-        $cake->setIngredients([
-            $this->createIngredient('flour'),
-            $this->createIngredient('sugar'),
-            $this->createIngredient('water'),
-            $this->createIngredient('eggs')
-        ]);
+        $cake->setIngredients(
+            [
+                $this->createIngredient('flour'),
+                $this->createIngredient('sugar'),
+                $this->createIngredient('water'),
+                $this->createIngredient('eggs')
+            ]
+        );
 
         $flavour = new Flavour('carrot');
         $documentManager->persist($flavour);
@@ -332,7 +354,8 @@ class SerializerReferenceTest extends BaseTest {
         $this->assertEquals('Flavour', $pieces[0]);
     }
 
-    protected function createIngredient($name){
+    protected function createIngredient($name)
+    {
         $ingredient = new Ingredient($name);
         $this->documentManager->persist($ingredient);
         return $ingredient;

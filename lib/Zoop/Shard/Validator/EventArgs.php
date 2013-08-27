@@ -16,8 +16,8 @@ use Zoop\Mystique\Result;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class EventArgs extends BaseEventArgs {
-
+class EventArgs extends BaseEventArgs
+{
     /**
      * The document with the changed field
      *
@@ -57,7 +57,8 @@ class EventArgs extends BaseEventArgs {
      *
      * @return object
      */
-    public function getDocument() {
+    public function getDocument()
+    {
         return $this->document;
     }
 
@@ -65,15 +66,18 @@ class EventArgs extends BaseEventArgs {
      *
      * @return \Doctrine\ODM\MongoDB\DocumentManager
      */
-    public function getDocumentManager() {
+    public function getDocumentManager()
+    {
         return $this->documentManager;
     }
 
-    public function getResult() {
+    public function getResult()
+    {
         return $this->result;
     }
 
-    public function setResult(Result $result) {
+    public function setResult(Result $result)
+    {
         $this->result = $result;
     }
 }

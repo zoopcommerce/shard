@@ -15,16 +15,16 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class BlockCipherHelper implements ServiceLocatorAwareInterface {
-
+class BlockCipherHelper implements ServiceLocatorAwareInterface
+{
     use ServiceLocatorAwareTrait;
 
-    public function encryptDocument($document, $metadata){
-
+    public function encryptDocument($document, $metadata)
+    {
         if (isset($metadata->crypt['blockCipher'])) {
-            foreach ($metadata->crypt['blockCipher'] as $field => $config){
+            foreach ($metadata->crypt['blockCipher'] as $field => $config) {
                 $service = $this->serviceLocator->get($config['service']);
-                if (!$service instanceof BlockCipherServiceInterface){
+                if (! $service instanceof BlockCipherServiceInterface) {
                     throw new \Zoop\Shard\Exception\InvalidArgumentException();
                 }
                 $service->encryptField($field, $document, $metadata);
@@ -33,12 +33,12 @@ class BlockCipherHelper implements ServiceLocatorAwareInterface {
 
     }
 
-    public function decryptDocument($document, $metadata){
-
+    public function decryptDocument($document, $metadata)
+    {
         if (isset($metadata->crypt['blockCipher'])) {
-            foreach ($metadata->crypt['blockCipher'] as $field => $config){
+            foreach ($metadata->crypt['blockCipher'] as $field => $config) {
                 $service = $this->serviceLocator->get($config['service']);
-                if (!$service instanceof BlockCipherServiceInterface){
+                if (! $service instanceof BlockCipherServiceInterface) {
                     throw new \Zoop\Shard\Exception\InvalidArgumentException();
                 }
                 $service->decryptField($field, $document, $metadata);

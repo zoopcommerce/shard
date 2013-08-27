@@ -29,10 +29,14 @@ class Extension extends AbstractExtension
 
     protected $serviceManagerConfig = [
         'invokables' => [
-            'subscriber.accessControl.mainsubscriber' => 'Zoop\Shard\AccessControl\MainSubscriber',
-            'subscriber.accessControl.annotationsubscriber' => 'Zoop\Shard\AccessControl\AnnotationSubscriber',
-            'subscriber.accessControl.basicPermissionSubscriber' => 'Zoop\Shard\AccessControl\BasicPermissionSubscriber',
-            'accessController' => 'Zoop\Shard\AccessControl\AccessController'
+            'subscriber.accessControl.mainsubscriber' =>
+                'Zoop\Shard\AccessControl\MainSubscriber',
+            'subscriber.accessControl.annotationsubscriber' =>
+                'Zoop\Shard\AccessControl\AnnotationSubscriber',
+            'subscriber.accessControl.basicPermissionSubscriber' =>
+                'Zoop\Shard\AccessControl\BasicPermissionSubscriber',
+            'accessController' =>
+                'Zoop\Shard\AccessControl\AccessController'
         ]
     ];
 

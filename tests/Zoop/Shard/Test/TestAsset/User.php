@@ -12,7 +12,7 @@ use Zoop\Shard\User\DataModel\UserTrait;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Zoop\Shard\Annotation\Annotations as Shard;
 
-class User implements UserInterface {
-
+class User implements UserInterface
+{
     use UserTrait;
 }

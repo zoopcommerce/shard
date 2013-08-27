@@ -17,8 +17,8 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface {
-
+class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
+{
     use ServiceLocatorAwareTrait;
 
     /**
@@ -31,7 +31,8 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface {
      *
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         $events = [
             ODMEvents::onFlush
         ];
@@ -42,7 +43,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface {
      *
      * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
      */
-    public function onFlush(OnFlushEventArgs  $eventArgs)
+    public function onFlush(OnFlushEventArgs $eventArgs)
     {
         $documentManager = $eventArgs->getDocumentManager();
         $unitOfWork = $documentManager->getUnitOfWork();
@@ -52,17 +53,17 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface {
             $metadata = $documentManager->getClassMetadata(get_class($document));
 
             $result = $documentValidator->isValid($document, $metadata);
-            if ( ! $result->getValue()) {
+            if (! $result->getValue()) {
 
                 // Updates to invalid documents are not allowed. Roll them back
                 $unitOfWork->detach($document);
 
                 $eventManager = $documentManager->getEventManager();
 
-                // Raise invalidUpdate
-                if ($eventManager->hasListeners(Events::invalidUpdate)) {
+                // Raise INVALID_UPDATE
+                if ($eventManager->hasListeners(Events::INVALID_UPDATE)) {
                     $eventManager->dispatchEvent(
-                        Events::invalidUpdate,
+                        Events::INVALID_UPDATE,
                         new EventArgs($document, $documentManager, $result)
                     );
                 }
@@ -73,7 +74,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface {
             $metadata = $documentManager->getClassMetadata(get_class($document));
 
             $result = $documentValidator->isValid($document, $metadata);
-            if ( ! $result->getValue()) {
+            if (! $result->getValue()) {
 
                 //stop creation
                 $unitOfWork->detach($document);
@@ -81,9 +82,9 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface {
                 $eventManager = $documentManager->getEventManager();
 
                 // Raise invalidCreate
-                if ($eventManager->hasListeners(Events::invalidCreate)) {
+                if ($eventManager->hasListeners(Events::INVALID_CREATE)) {
                     $eventManager->dispatchEvent(
-                        Events::invalidCreate,
+                        Events::INVALID_CREATE,
                         new EventArgs($document, $documentManager, $result)
                     );
                 }
@@ -95,8 +96,9 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface {
      *
      * @return \Zoop\Mystique\ValidatorInterface
      */
-    protected function getDocumentValidator() {
-        if ( !isset($this->documentValidator)){
+    protected function getDocumentValidator()
+    {
+        if (! isset($this->documentValidator)) {
             $this->documentValidator = $this->serviceLocator->get('documentValidator');
         }
         return $this->documentValidator;

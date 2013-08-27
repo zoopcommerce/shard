@@ -20,5 +20,5 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Owner extends Annotation
 {
-    const event = 'annotationOwner';
+    const EVENT = 'annotationOwner';
 }

@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Cvv extends Annotation
 {
-    const event = 'annotationCvvValidator';
+    const EVENT = 'annotationCvvValidator';
 
     public $value = true;
 

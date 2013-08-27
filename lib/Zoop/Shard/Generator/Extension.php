@@ -14,8 +14,8 @@ use Zoop\Shard\AbstractExtension;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Extension extends AbstractExtension {
-
+class Extension extends AbstractExtension
+{
     protected $resourceMap;
 
     protected $serviceManagerConfig = [
@@ -24,11 +24,13 @@ class Extension extends AbstractExtension {
         ]
     ];
 
-    public function getResourceMap() {
+    public function getResourceMap()
+    {
         return $this->resourceMap;
     }
 
-    public function setResourceMap($resourceMap) {
+    public function setResourceMap($resourceMap)
+    {
         $this->resourceMap = $resourceMap;
     }
 }

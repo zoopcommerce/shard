@@ -18,10 +18,10 @@ final class Events
     /**
      * Fires if an invalid document is updated
      */
-    const invalidUpdate = 'invalidUpdate';
+    const INVALID_UPDATE = 'invalidUpdate';
 
     /**
      * Fires if an invalid document is persisted
      */
-    const invalidCreate = 'invalidCreate';
+    const INVALID_CREATE = 'invalidCreate';
 }

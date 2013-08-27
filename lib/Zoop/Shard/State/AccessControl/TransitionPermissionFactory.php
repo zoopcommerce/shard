@@ -17,7 +17,8 @@ use Zoop\Shard\AccessControl\PermissionFactoryInterface;
 class TransitionPermissionFactory implements PermissionFactoryInterface
 {
 
-    public static function get(ClassMetadata $metadata, array $options){
+    public static function get(ClassMetadata $metadata, array $options)
+    {
         return new TransitionPermission(
             $options['roles'],
             $options['allow'],
@@ -26,4 +27,3 @@ class TransitionPermissionFactory implements PermissionFactoryInterface
         );
     }
 }
-

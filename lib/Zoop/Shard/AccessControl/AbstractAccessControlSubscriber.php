@@ -22,9 +22,10 @@ abstract class AbstractAccessControlSubscriber implements EventSubscriber, Servi
 
     protected $accessController;
 
-    protected function getAccessController(){
-        if (!isset($this->accessController)){
-            if ($this->serviceLocator->has('accessController')){
+    protected function getAccessController()
+    {
+        if (! isset($this->accessController)) {
+            if ($this->serviceLocator->has('accessController')) {
                 $this->accessController = $this->serviceLocator->get('accessController');
             }
         }

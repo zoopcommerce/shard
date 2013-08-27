@@ -6,45 +6,52 @@ use Doctrine\Common\EventSubscriber;
 use Zoop\Shard\State\EventArgs as StateEventArgs;
 use Zoop\Shard\State\Events as StateEvents;
 
-class Subscriber implements EventSubscriber {
-
+class Subscriber implements EventSubscriber
+{
     protected $calls = array();
 
     protected $rollbackTransition = false;
 
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return array(
-            StateEvents::preTransition,
-            StateEvents::onTransition,
-            StateEvents::postTransition
+            StateEvents::PRE_TRANSITION,
+            StateEvents::ON_TRANSITION,
+            StateEvents::POST_TRANSITION
         );
     }
 
-    public function reset() {
+    public function reset()
+    {
         $this->calls = array();
         $this->rollbackTransition = false;
     }
 
-    public function preTransition(StateEventArgs $eventArgs) {
+    public function preTransition(StateEventArgs $eventArgs)
+    {
         $this->calls['preTransition'] = $eventArgs;
         if ($this->rollbackTransition) {
             $eventArgs->getDocument()->setState($eventArgs->getTransition()->getFrom());
         }
     }
 
-    public function getRollbackTransition() {
+    public function getRollbackTransition()
+    {
         return $this->rollbackTransition;
     }
 
-    public function setRollbackTransition($rollbackTransition) {
+    public function setRollbackTransition($rollbackTransition)
+    {
         $this->rollbackTransition = $rollbackTransition;
     }
 
-    public function getCalls() {
+    public function getCalls()
+    {
         return $this->calls;
     }
 
-    public function __call($name, $arguments){
+    public function __call($name, $arguments)
+    {
         $this->calls[$name] = $arguments[0];
     }
 }

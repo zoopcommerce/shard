@@ -23,13 +23,13 @@ class DocumentManagerDelegatorFactory implements DelegatorFactoryInterface
     public function createDelegatorWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName, $callback)
     {
 
-        if (isset($this->documentManagers[$name])){
+        if (isset($this->documentManagers[$name])) {
             return $this->documentManagers[$name];
         } else {
             $this->documentManagers[$name] = call_user_func($callback);
             $eventManager = $this->documentManagers[$name]->getEventManager();
-            if ($eventManager->hasListeners(Events::onBootstrap)) {
-                $eventManager->dispatchEvent(Events::onBootstrap, new BootstrapEventArgs);
+            if ($eventManager->hasListeners(Events::ON_BOOTSTRAP)) {
+                $eventManager->dispatchEvent(Events::ON_BOOTSTRAP, new BootstrapEventArgs);
             }
         }
 

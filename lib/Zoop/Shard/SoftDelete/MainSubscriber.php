@@ -31,7 +31,8 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
      *
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return [
             ODMEvents::onFlush
         ];
@@ -41,16 +42,16 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
      *
      * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
      */
-    public function onFlush(OnFlushEventArgs  $eventArgs)
+    public function onFlush(OnFlushEventArgs $eventArgs)
     {
         $documentManager = $eventArgs->getDocumentManager();
         $unitOfWork = $documentManager->getUnitOfWork();
         $softDeleter = $this->getSoftDeleter();
 
-        foreach ($unitOfWork->getScheduledDocumentUpdates() AS $document) {
+        foreach ($unitOfWork->getScheduledDocumentUpdates() as $document) {
 
             $metadata = $documentManager->getClassMetadata(get_class($document));
-            if ( !isset($metadata->softDelete) || ! ($field = $metadata->softDelete['flag'])){
+            if (! isset($metadata->softDelete) || ! ($field = $metadata->softDelete['flag'])) {
                 continue;
             }
 
@@ -63,9 +64,9 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                     $unitOfWork->clearDocumentChangeSet(spl_object_hash($document));
 
                     // Raise softDeletedUpdateDenied
-                    if ($eventManager->hasListeners(SoftDeleteEvents::softDeletedUpdateDenied)) {
+                    if ($eventManager->hasListeners(SoftDeleteEvents::SOFT_DELETED_UPDATE_DENIED)) {
                         $eventManager->dispatchEvent(
-                            SoftDeleteEvents::softDeletedUpdateDenied,
+                            SoftDeleteEvents::SOFT_DELETED_UPDATE_DENIED,
                             new LifecycleEventArgs($document, $documentManager)
                         );
                     }
@@ -79,18 +80,18 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                 // Trigger soft delete events
 
                 // Raise preSoftDelete
-                if ($eventManager->hasListeners(SoftDeleteEvents::preSoftDelete)) {
+                if ($eventManager->hasListeners(SoftDeleteEvents::PRE_SOFT_DELETE)) {
                     $eventManager->dispatchEvent(
-                        SoftDeleteEvents::preSoftDelete,
+                        SoftDeleteEvents::PRE_SOFT_DELETE,
                         new LifecycleEventArgs($document, $documentManager)
                     );
                 }
 
-                if($softDeleter->isSoftDeleted($document)){
+                if ($softDeleter->isSoftDeleted($document)) {
                     // Raise postSoftDelete
-                    if ($eventManager->hasListeners(SoftDeleteEvents::postSoftDelete)) {
+                    if ($eventManager->hasListeners(SoftDeleteEvents::POST_SOFT_DELETE)) {
                         $eventManager->dispatchEvent(
-                            SoftDeleteEvents::postSoftDelete,
+                            SoftDeleteEvents::POST_SOFT_DELETE,
                             new LifecycleEventArgs($document, $documentManager)
                         );
                     }
@@ -104,18 +105,18 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                 // Trigger restore events
 
                 // Raise preRestore
-                if ($eventManager->hasListeners(SoftDeleteEvents::preRestore)) {
+                if ($eventManager->hasListeners(SoftDeleteEvents::PRE_RESTORE)) {
                     $eventManager->dispatchEvent(
-                        SoftDeleteEvents::preRestore,
+                        SoftDeleteEvents::PRE_RESTORE,
                         new LifecycleEventArgs($document, $documentManager)
                     );
                 }
 
-                if( ! $softDeleter->isSoftDeleted($document)){
+                if (! $softDeleter->isSoftDeleted($document)) {
                     // Raise postRestore
-                    if ($eventManager->hasListeners(SoftDeleteEvents::postRestore)) {
+                    if ($eventManager->hasListeners(SoftDeleteEvents::POST_RESTORE)) {
                         $eventManager->dispatchEvent(
-                            SoftDeleteEvents::postRestore,
+                            SoftDeleteEvents::POST_RESTORE,
                             new LifecycleEventArgs($document, $documentManager)
                         );
                     }
@@ -128,8 +129,9 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         }
     }
 
-    protected function getSoftDeleter(){
-        if (!isset($this->softDeleter)){
+    protected function getSoftDeleter()
+    {
+        if (! isset($this->softDeleter)) {
             $this->softDeleter = $this->serviceLocator->get('softDeleter');
         }
         return $this->softDeleter;

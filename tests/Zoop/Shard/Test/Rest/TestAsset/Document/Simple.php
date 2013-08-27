@@ -9,14 +9,15 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 /**
  * @ODM\Document
  */
-class Simple {
-
+class Simple
+{
     /**
      * @ODM\Id(strategy="UUID")
      */
     protected $id;
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 }

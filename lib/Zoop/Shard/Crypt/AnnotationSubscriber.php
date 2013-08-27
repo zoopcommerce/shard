@@ -23,10 +23,11 @@ class AnnotationSubscriber implements EventSubscriber
     /**
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return [
-            Shard\Crypt\Hash::event,
-            Shard\Crypt\BlockCipher::event
+            Shard\Crypt\Hash::EVENT,
+            Shard\Crypt\BlockCipher::EVENT
         ];
     }
 

@@ -21,19 +21,23 @@ class Flavour
     /** @ODM\String */
     protected $name;
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function setName($name) {
+    public function setName($name)
+    {
         $this->name = $name;
     }
 
-    public function __construct($name){
+    public function __construct($name)
+    {
         $this->name = $name;
     }
 }

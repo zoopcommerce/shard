@@ -28,48 +28,58 @@ class Endpoint extends AbstractOptions
 
     protected $parent;
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function setName($name) {
+    public function setName($name)
+    {
         $this->name = $name;
     }
 
-    public function getClass() {
+    public function getClass()
+    {
         return $this->class;
     }
 
-    public function setClass($class) {
+    public function setClass($class)
+    {
         $this->class = $class;
     }
 
-    public function getProperty() {
+    public function getProperty()
+    {
         return $this->property;
     }
 
-    public function setProperty($property) {
+    public function setProperty($property)
+    {
         $this->property = $property;
     }
 
-    public function getCacheControl() {
-        if(!$this->cacheControl instanceof CacheControl){
+    public function getCacheControl()
+    {
+        if (! $this->cacheControl instanceof CacheControl) {
             $this->cacheControl = new CacheControl($this->cacheControl);
         }
         return $this->cacheControl;
     }
 
-    public function setCacheControl($cacheControl) {
+    public function setCacheControl($cacheControl)
+    {
         $this->cacheControl = $cacheControl;
     }
 
-    public function getEmbeddedLists() {
+    public function getEmbeddedLists()
+    {
         return $this->embeddedLists;
     }
 
-    public function setEmbeddedLists($embeddedLists) {
-        foreach ($embeddedLists as $property => $endpoint){
-            if (!$endpoint instanceof Endpoint){
+    public function setEmbeddedLists($embeddedLists)
+    {
+        foreach ($embeddedLists as $property => $endpoint) {
+            if (! $endpoint instanceof Endpoint) {
                 $endpoint = new Endpoint($endpoint);
                 $endpoint->setParent($this);
             }
@@ -77,11 +87,13 @@ class Endpoint extends AbstractOptions
         }
     }
 
-    public function getParent() {
+    public function getParent()
+    {
         return $this->parent;
     }
 
-    public function setParent($parent) {
+    public function setParent($parent)
+    {
         $this->parent = $parent;
     }
 }

@@ -19,8 +19,8 @@ use Zend\Stdlib\ArrayUtils;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Manifest extends AbstractExtension {
-
+class Manifest extends AbstractExtension
+{
     protected $defaultServiceManagerConfig = [
         'invokables' => [
             'documentManagerDelegatorFactory' => 'Zoop\Shard\DocumentManagerDelegatorFactory'
@@ -29,7 +29,6 @@ class Manifest extends AbstractExtension {
             'extension.accessControl' => 'Zoop\Shard\AccessControl\ExtensionFactory',
             'extension.annotation' => 'Zoop\Shard\Annotation\ExtensionFactory',
             'extension.crypt' => 'Zoop\Shard\Crypt\ExtensionFactory',
-            'extension.dojo' => 'Zoop\Shard\Dojo\ExtensionFactory',
             'extension.freeze' => 'Zoop\Shard\Freeze\ExtensionFactory',
             'extension.generator' => 'Zoop\Shard\Generator\ExtensionFactory',
             'extension.owner' => 'Zoop\Shard\Owner\ExtensionFactory',
@@ -61,64 +60,76 @@ class Manifest extends AbstractExtension {
 
     protected $initalized = false;
 
-    public function getExtensionConfigs() {
+    public function getExtensionConfigs()
+    {
         return $this->extensionConfigs;
     }
 
-    public function setExtensionConfigs(array $extensionConfigs) {
+    public function setExtensionConfigs(array $extensionConfigs)
+    {
         $this->extensionConfigs = $extensionConfigs;
     }
 
-    public function getLazySubscriberConfig() {
+    public function getLazySubscriberConfig()
+    {
         return $this->lazySubscriberConfig;
     }
 
-    public function setLazySubscriberConfig($lazySubscriberConfig) {
+    public function setLazySubscriberConfig($lazySubscriberConfig)
+    {
         $this->lazySubscriberConfig = $lazySubscriberConfig;
     }
 
-    public function getDocumentManager() {
+    public function getDocumentManager()
+    {
         return $this->documentManager;
     }
 
-    public function setDocumentManager($documentManager) {
+    public function setDocumentManager($documentManager)
+    {
         $this->documentManager = $documentManager;
     }
 
-    public function setServiceManager($serviceManager) {
+    public function setServiceManager($serviceManager)
+    {
         $this->serviceManager = $serviceManager;
     }
 
-    public function getServiceManager(){
+    public function getServiceManager()
+    {
         $this->initalize();
         return $this->serviceManager;
     }
 
-    public function getInitalized() {
+    public function getInitalized()
+    {
         return $this->initalized;
     }
 
-    public function setInitalized($initalized) {
+    public function setInitalized($initalized)
+    {
         $this->initalized = $initalized;
     }
 
-    protected function initalize() {
-        if ($this->initalized){
+    protected function initalize()
+    {
+        if ($this->initalized) {
             return;
         }
         $this->initalized = true;
 
-        if (isset($this->serviceManager)){
+        if (isset($this->serviceManager)) {
             $serviceManager = $this->serviceManager;
         } else {
-            $this->defaultServiceManagerConfig['delegators'][$this->documentManager] = ['documentManagerDelegatorFactory'];
+            $this->defaultServiceManagerConfig['delegators'][$this->documentManager] =
+                ['documentManagerDelegatorFactory'];
             $serviceManager = self::createServiceManager($this->defaultServiceManagerConfig);
             $this->serviceManager = $serviceManager;
         }
         $serviceManager->setService('manifest', $this);
 
-        foreach ($this->extensionConfigs as $name => $extensionConfig){
-            if (!$extensionConfig){
+        foreach ($this->extensionConfigs as $name => $extensionConfig) {
+            if (!$extensionConfig) {
                 unset($this->extensionConfigs[$name]);
                 continue;
             }
@@ -133,7 +144,7 @@ class Manifest extends AbstractExtension {
             'cli_commands' => [],
             'cli_helpers' => []
         ];
-        foreach ($this->extensionConfigs as $extensionConfig){
+        foreach ($this->extensionConfigs as $extensionConfig) {
             $config = ArrayUtils::merge(
                 $config,
                 array_intersect_key(
@@ -153,22 +164,25 @@ class Manifest extends AbstractExtension {
         $serviceManagerConfig->configureServiceManager($serviceManager);
 
         //Make sure default service manager config is included in the main service manager config variable
-        $this->serviceManagerConfig = ArrayUtils::merge($this->defaultServiceManagerConfig, $this->serviceManagerConfig);
+        $this->serviceManagerConfig = ArrayUtils::merge(
+            $this->defaultServiceManagerConfig,
+            $this->serviceManagerConfig
+        );
 
         //create lazySubscriber configuration
         $lazySubscriberConfig = [];
-        foreach ($this->extensionConfigs as $extensionConfig){
-            foreach ($extensionConfig['subscribers'] as $subscriber){
-                foreach ($serviceManager->get($subscriber)->getSubscribedEvents() as $event){
-                    if (!isset($lazySubscriberConfig[$event])){
+        foreach ($this->extensionConfigs as $extensionConfig) {
+            foreach ($extensionConfig['subscribers'] as $subscriber) {
+                foreach ($serviceManager->get($subscriber)->getSubscribedEvents() as $event) {
+                    if (! isset($lazySubscriberConfig[$event])) {
                         $lazySubscriberConfig[$event] = [];
                     }
                     $lazySubscriberConfig[$event][] = $subscriber;
                 }
             }
-            foreach ($this->subscribers as $subscriber){
-                foreach ($serviceManager->get($subscriber)->getSubscribedEvents() as $event){
-                    if (!isset($lazySubscriberConfig[$event])){
+            foreach ($this->subscribers as $subscriber) {
+                foreach ($serviceManager->get($subscriber)->getSubscribedEvents() as $event) {
+                    if (! isset($lazySubscriberConfig[$event])) {
                         $lazySubscriberConfig[$event] = [];
                     }
                     $lazySubscriberConfig[$event][] = $subscriber;
@@ -179,14 +193,16 @@ class Manifest extends AbstractExtension {
         $this->subscribers = ['subscriber.lazySubscriber'];
     }
 
-    protected function expandExtensionConfig($name){
-
+    protected function expandExtensionConfig($name)
+    {
         //Get extension
         $extension = $this->serviceManager->get($name);
 
         //ensure dependencies get expaned also
-        foreach ($extension->getDependencies() as $dependencyName => $dependencyConfig){
-            if ( ! isset($this->extensionConfigs[$dependencyName]) || is_bool($this->extensionConfigs[$dependencyName])){
+        foreach ($extension->getDependencies() as $dependencyName => $dependencyConfig) {
+            if (! isset($this->extensionConfigs[$dependencyName]) ||
+                is_bool($this->extensionConfigs[$dependencyName])
+            ) {
                 $this->expandExtensionConfig($dependencyName);
             }
         }
@@ -194,20 +210,29 @@ class Manifest extends AbstractExtension {
         $this->extensionConfigs[$name] = $extension->toArray();
     }
 
-    public static function createServiceManager($config = []){
-
+    public static function createServiceManager($config = [])
+    {
         $serviceManager = new ServiceManager(new Config($config));
 
-        $serviceManager->addInitializer(function($instance, ServiceLocatorInterface $serviceLocator){
-            if ($instance instanceof DocumentManagerAwareInterface) {
-                $instance->setDocumentManager($serviceLocator->get($serviceLocator->get('manifest')->getDocumentManager()));
+        $serviceManager->addInitializer(
+            function ($instance, ServiceLocatorInterface $serviceLocator) {
+                if ($instance instanceof DocumentManagerAwareInterface) {
+                    $instance->setDocumentManager(
+                        $serviceLocator->get(
+                            $serviceLocator->get('manifest')->getDocumentManager()
+                        )
+                    );
+                }
             }
-        });
-        $serviceManager->addInitializer(function($instance, ServiceLocatorInterface $serviceLocator){
-            if ($instance instanceof ServiceLocatorAwareInterface) {
-                $instance->setServiceLocator($serviceLocator);
+        );
+
+        $serviceManager->addInitializer(
+            function ($instance, ServiceLocatorInterface $serviceLocator) {
+                if ($instance instanceof ServiceLocatorAwareInterface) {
+                    $instance->setServiceLocator($serviceLocator);
+                }
             }
-        });
+        );
 
         return $serviceManager;
     }

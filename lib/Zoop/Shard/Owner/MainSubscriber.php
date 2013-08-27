@@ -15,13 +15,14 @@ use Zoop\Shard\Stamp\AbstractStampSubscriber;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class MainSubscriber extends AbstractStampSubscriber {
-
+class MainSubscriber extends AbstractStampSubscriber
+{
     /**
      *
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return [
             ODMEvents::prePersist
         ];
@@ -31,14 +32,15 @@ class MainSubscriber extends AbstractStampSubscriber {
      *
      * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
      */
-    public function prePersist(LifecycleEventArgs $eventArgs) {
+    public function prePersist(LifecycleEventArgs $eventArgs)
+    {
         $document = $eventArgs->getDocument();
         $metadata = $eventArgs->getDocumentManager()->getClassMetadata(get_class($document));
 
-        if(isset($metadata->owner)){
+        if (isset($metadata->owner)) {
             $reflField = $metadata->reflFields[$metadata->owner];
             $owner = $reflField->getValue($document);
-            if (!isset($owner)){
+            if (! isset($owner)) {
                 $reflField->setValue($document, $this->getUsername());
             }
         }

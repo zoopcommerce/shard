@@ -11,18 +11,46 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 /**
  * @ODM\Document
  * @Shard\AccessControl({
- *     @Shard\Permission\State     (roles="*",           states="published", allow="read"                                                      ),
- *     @Shard\Permission\State     (roles="writer",      states="draft",     allow={"create", "update", "read"}                                ),
- *     @Shard\Permission\Transition(roles="writer",                          allow="draft->review"                                             ),
- *     @Shard\Permission\State     (roles="reviewer",    states="review",    allow={"update", "read"}                                          ),
- *     @Shard\Permission\Transition(roles="reviewer",                        allow={"review->draft", "review->published"}, deny="draft->review"),
- *     @Shard\Permission\Basic     (roles="admin",                           allow="*"                                                         ),
- *     @Shard\Permission\State     (roles="glob",        states={"d*", "r*"},allow={"read", "create"}                                          ),
- *     @Shard\Permission\Transition(roles="glob",                            allow="draft->*"                                                  )
+ *     @Shard\Permission\State(
+ *         roles="*",
+ *         states="published", allow="read"
+ *     ),
+ *     @Shard\Permission\State(
+ *         roles="writer",
+ *         states="draft",
+ *         allow={"create", "update", "read"}
+ *     ),
+ *     @Shard\Permission\Transition(
+ *         roles="writer",
+ *         allow="draft->review"
+ *     ),
+ *     @Shard\Permission\State(
+ *         roles="reviewer",
+ *         states="review",
+ *         allow={"update", "read"}
+ *     ),
+ *     @Shard\Permission\Transition(
+ *         roles="reviewer",
+ *         allow={"review->draft", "review->published"},
+ *         deny="draft->review"
+ *     ),
+ *     @Shard\Permission\Basic(
+ *         roles="admin",
+ *         allow="*"
+ *     ),
+ *     @Shard\Permission\State(
+ *         roles="glob",
+ *         states={"d*", "r*"},
+ *         allow={"read", "create"}
+ *     ),
+ *     @Shard\Permission\Transition(
+ *         roles="glob",
+ *         allow="draft->*"
+ *     )
  * })
  */
-class AccessControlled {
-
+class AccessControlled
+{
     use StateTrait;
 
     /**
@@ -35,15 +63,18 @@ class AccessControlled {
      */
     protected $name;
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function setName($name) {
+    public function setName($name)
+    {
         $this->name = $name;
     }
 }

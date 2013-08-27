@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class GreaterThanEqual extends Annotation
 {
-    const event = 'annotationGreaterThanEqualValidator';
+    const EVENT = 'annotationGreaterThanEqualValidator';
 
     public $value = true;
 

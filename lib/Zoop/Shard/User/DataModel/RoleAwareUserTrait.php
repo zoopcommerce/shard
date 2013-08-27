@@ -13,8 +13,8 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait RoleAwareUserTrait {
-
+trait RoleAwareUserTrait
+{
     /**
      * @ODM\Collection
      */
@@ -24,7 +24,8 @@ trait RoleAwareUserTrait {
      *
      * @param array $roles
      */
-    public function setRoles(array $roles){
+    public function setRoles(array $roles)
+    {
         $this->roles = $roles;
         return $this;
     }
@@ -33,7 +34,8 @@ trait RoleAwareUserTrait {
      *
      * @param string $role
      */
-    public function addRole($role){
+    public function addRole($role)
+    {
         $this->roles[] = (string) $role;
         return $this;
     }
@@ -42,9 +44,9 @@ trait RoleAwareUserTrait {
      *
      * @param string $role
      */
-    public function removeRole($role){
-        if(($key = array_search((string)$role, $this->roles)) !== false)
-        {
+    public function removeRole($role)
+    {
+        if (($key = array_search((string)$role, $this->roles)) !== false) {
             unset($this->roles[$key]);
         }
     }
@@ -53,7 +55,8 @@ trait RoleAwareUserTrait {
      *
      * @return array
      */
-    public function getRoles(){
+    public function getRoles()
+    {
         return $this->roles;
     }
 
@@ -62,7 +65,8 @@ trait RoleAwareUserTrait {
      * @param string $role
      * @return boolean
      */
-    public function hasRole($role){
+    public function hasRole($role)
+    {
         return in_array((string)$role, $this->roles);
     }
 }

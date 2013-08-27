@@ -31,14 +31,16 @@ class SoftDelete extends BsonFilter
      * Set the filter to return only documents which are not
      * soft deleted
      */
-    public function onlyNotSoftDeleted(){
+    public function onlyNotSoftDeleted()
+    {
         $this->parameters['softDeleted'] = false;
     }
 
     /**
      * Set the filter to return only documents which are soft deleted
      */
-    public function onlySoftDeleted(){
+    public function onlySoftDeleted()
+    {
         $this->parameters['softDeleted'] = true;
     }
 

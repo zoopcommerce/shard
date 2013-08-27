@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Date extends Annotation
 {
-    const event = 'annotationDateValidator';
+    const EVENT = 'annotationDateValidator';
 
     public $value = true;
 

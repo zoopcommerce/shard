@@ -18,5 +18,5 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Generator extends Annotation
 {
-    const event = 'annotationGenerator';
+    const EVENT = 'annotationGenerator';
 }

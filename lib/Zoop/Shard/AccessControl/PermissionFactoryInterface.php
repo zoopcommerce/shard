@@ -14,7 +14,7 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
  * @author  Tim Roediger <superdweebie@gmail.com>
  *
  */
-interface PermissionFactoryInterface {
-
+interface PermissionFactoryInterface
+{
     public static function get(ClassMetadata $metatdata, array $options);
 }

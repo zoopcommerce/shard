@@ -19,7 +19,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class BlockCipher extends Annotation
 {
-    const event = 'annotationCryptBlockCipher';
+    const EVENT = 'annotationCryptBlockCipher';
 
     public $service = 'crypt.blockcipher.zendservice';
 

@@ -8,46 +8,48 @@ use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\Freeze\TestAsset\Document\AccessControlled;
 use Zoop\Shard\Test\TestAsset\RoleAwareUser;
 
-class AccessControlAllowTest extends BaseTest {
-
+class AccessControlAllowTest extends BaseTest
+{
     protected $calls = array();
 
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.freeze' => true,
-                'extension.accessControl' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    'user' => function(){
-                        $user = new RoleAwareUser();
-                        $user->setUsername('toby');
-                        $user->addRole('admin');
-                        return $user;
-                    }
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.freeze' => true,
+                    'extension.accessControl' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                        'user' => function () {
+                            $user = new RoleAwareUser();
+                            $user->setUsername('toby');
+                            $user->addRole('admin');
+                            return $user;
+                        }
+                    ]
                 ]
             ]
-        ]);
+        );
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
         $this->freezer = $manifest->getServiceManager()->get('freezer');
     }
 
-    public function testFreezeAllow(){
-
+    public function testFreezeAllow()
+    {
         $this->calls = array();
 
         $documentManager = $this->documentManager;
         $eventManager = $documentManager->getEventManager();
 
-        $eventManager->addEventListener(Events::freezeDenied, $this);
+        $eventManager->addEventListener(Events::FREEZE_DENIED, $this);
 
         $testDoc = new AccessControlled();
 
@@ -68,17 +70,17 @@ class AccessControlAllowTest extends BaseTest {
 
         $testDoc = $repository->find($id);
         $this->assertTrue($this->freezer->isFrozen($testDoc));
-        $this->assertFalse(isset($this->calls[Events::freezeDenied]));
+        $this->assertFalse(isset($this->calls[Events::FREEZE_DENIED]));
     }
 
-    public function testThawGrant(){
-
+    public function testThawGrant()
+    {
         $this->calls = array();
 
         $documentManager = $this->documentManager;
         $eventManager = $documentManager->getEventManager();
 
-        $eventManager->addEventListener(Events::thawDenied, $this);
+        $eventManager->addEventListener(Events::THAW_DENIED, $this);
 
         $testDoc = new AccessControlled();
         $this->freezer->freeze($testDoc);
@@ -99,10 +101,11 @@ class AccessControlAllowTest extends BaseTest {
 
         $testDoc = $repository->find($id);
         $this->assertFalse($this->freezer->isFrozen($testDoc));
-        $this->assertFalse(isset($this->calls[Events::thawDenied]));
+        $this->assertFalse(isset($this->calls[Events::THAW_DENIED]));
     }
 
-    public function __call($name, $arguments){
+    public function __call($name, $arguments)
+    {
         $this->calls[$name] = $arguments;
     }
 }

@@ -10,8 +10,8 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Zoop\Shard\Annotation\Annotations as Shard;
 
 /** @ODM\Document */
-class Stamped {
-
+class Stamped
+{
     use FreezeableTrait;
     use FreezeStampTrait;
 
@@ -25,15 +25,18 @@ class Stamped {
      */
     protected $name;
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function setName($name) {
+    public function setName($name)
+    {
         $this->name = $name;
     }
 }

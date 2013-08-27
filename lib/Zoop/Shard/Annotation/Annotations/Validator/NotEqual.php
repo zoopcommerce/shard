@@ -18,11 +18,11 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class NotEqual extends Annotation
 {
-    const event = 'annotationNotEqualValidator';
+    const EVENT = 'annotationNotEqualValidator';
 
     public $value = true;
 
     public $compareValue;
-    
+
     public $class = 'Zoop\Mystique\NotEqual';
 }

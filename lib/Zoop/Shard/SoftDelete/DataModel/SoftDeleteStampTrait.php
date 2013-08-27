@@ -16,9 +16,11 @@ use Zoop\Shard\SoftDelete\DataModel\RestoredByTrait;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait SoftDeleteStampTrait {
-   use SoftDeletedOnTrait;
-   use SoftDeletedByTrait;
-   use RestoredByTrait;
-   use RestoredOnTrait;
+trait SoftDeleteStampTrait
+{
+    use SoftDeletedOnTrait;
+    use SoftDeletedByTrait;
+    use RestoredByTrait;
+    use RestoredOnTrait;
+
 }

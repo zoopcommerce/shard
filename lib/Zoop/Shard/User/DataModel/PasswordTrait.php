@@ -17,8 +17,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait PasswordTrait {
-
+trait PasswordTrait
+{
     /**
      * @ODM\String
      * @Shard\Serializer\Ignore("ignore_when_serializing"))
@@ -41,7 +41,8 @@ trait PasswordTrait {
      *
      * @return string
      */
-    public function getPassword() {
+    public function getPassword()
+    {
         return $this->password;
     }
 
@@ -49,18 +50,21 @@ trait PasswordTrait {
      *
      * @param string $plaintext
      */
-    public function setPassword($plaintext) {
+    public function setPassword($plaintext)
+    {
         $this->password = (string) $plaintext;
     }
 
-    public function getSalt(){
-        if (!isset($this->salt)){
+    public function getSalt()
+    {
+        if (!isset($this->salt)) {
             $this->salt = SaltGenerator::generateSalt();
         }
         return $this->salt;
     }
 
-    public function setSalt($value){
+    public function setSalt($value)
+    {
         return $this->salt = (string) $value;
     }
 }

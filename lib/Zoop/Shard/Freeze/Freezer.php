@@ -19,17 +19,20 @@ class Freezer implements DocumentManagerAwareInterface
 
     use DocumentManagerAwareTrait;
 
-    public function isFrozen($document){
+    public function isFrozen($document)
+    {
         $metadata = $this->documentManager->getClassMetadata(get_class($document));
         return $metadata->reflFields[$metadata->freeze['flag']]->getValue($document);
     }
 
-    public function freeze($document){
+    public function freeze($document)
+    {
         $metadata = $this->documentManager->getClassMetadata(get_class($document));
         $metadata->reflFields[$metadata->freeze['flag']]->setValue($document, true);
     }
 
-    public function thaw($document){
+    public function thaw($document)
+    {
         $metadata = $this->documentManager->getClassMetadata(get_class($document));
         $metadata->reflFields[$metadata->freeze['flag']]->setValue($document, false);
     }

@@ -30,7 +30,8 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
      *
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return [
             ODMEvents::onFlush
         ];
@@ -40,17 +41,17 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
      *
      * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
      */
-    public function onFlush(OnFlushEventArgs  $eventArgs)
+    public function onFlush(OnFlushEventArgs $eventArgs)
     {
         $documentManager = $eventArgs->getDocumentManager();
         $unitOfWork = $documentManager->getUnitOfWork();
         $eventManager = $documentManager->getEventManager();
         $freezer = $this->getFreezer();
 
-        foreach ($unitOfWork->getScheduledDocumentUpdates() AS $document) {
+        foreach ($unitOfWork->getScheduledDocumentUpdates() as $document) {
 
             $metadata = $documentManager->getClassMetadata(get_class($document));
-            if ( !isset($metadata->freeze) || ! ($field = $metadata->freeze['flag'])){
+            if (! isset($metadata->freeze) || ! ($field = $metadata->freeze['flag'])) {
                 continue;
             }
 
@@ -62,9 +63,9 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                     $unitOfWork->clearDocumentChangeSet(spl_object_hash($document));
 
                     // Raise frozenUpdateDenied
-                    if ($eventManager->hasListeners(Events::frozenUpdateDenied)) {
+                    if ($eventManager->hasListeners(Events::FROZEN_UPDATE_DENIED)) {
                         $eventManager->dispatchEvent(
-                            Events::frozenUpdateDenied,
+                            Events::FROZEN_UPDATE_DENIED,
                             new AccessControlEventArgs($document, $documentManager, 'update')
                         );
                     }
@@ -78,18 +79,18 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                 // Trigger freeze events
 
                 // Raise preFreeze
-                if ($eventManager->hasListeners(Events::preFreeze)) {
+                if ($eventManager->hasListeners(Events::PRE_FREEZE)) {
                     $eventManager->dispatchEvent(
-                        Events::preFreeze,
+                        Events::PRE_FREEZE,
                         new LifecycleEventArgs($document, $documentManager)
                     );
                 }
 
-                if($freezer->isFrozen($document)){
+                if ($freezer->isFrozen($document)) {
                     // Raise postFreeze
-                    if ($eventManager->hasListeners(Events::postFreeze)) {
+                    if ($eventManager->hasListeners(Events::POST_FREEZE)) {
                         $eventManager->dispatchEvent(
-                            Events::postFreeze,
+                            Events::POST_FREEZE,
                             new LifecycleEventArgs($document, $documentManager)
                         );
                     }
@@ -103,18 +104,18 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                 // Trigger thaw events
 
                 // Raise preThaw
-                if ($eventManager->hasListeners(Events::preThaw)) {
+                if ($eventManager->hasListeners(Events::PRE_THAW)) {
                     $eventManager->dispatchEvent(
-                        Events::preThaw,
+                        Events::PRE_THAW,
                         new LifecycleEventArgs($document, $documentManager)
                     );
                 }
 
-                if(!$freezer->isFrozen($document)){
+                if (! $freezer->isFrozen($document)) {
                     // Raise postThaw
-                    if ($eventManager->hasListeners(Events::postThaw)) {
+                    if ($eventManager->hasListeners(Events::POST_THAW)) {
                         $eventManager->dispatchEvent(
-                            Events::postThaw,
+                            Events::POST_THAW,
                             new LifecycleEventArgs($document, $documentManager)
                         );
                     }
@@ -126,10 +127,12 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             }
         }
 
-        foreach ($unitOfWork->getScheduledDocumentDeletions() AS $document) {
+        foreach ($unitOfWork->getScheduledDocumentDeletions() as $document) {
 
             $metadata = $documentManager->getClassMetadata(get_class($document));
-            if ( !isset($metadata->freeze) || ! ($field = $metadata->freeze['flag']) || ! $freezer->isFrozen($document)){
+            if (! isset($metadata->freeze) ||
+                ! ($field = $metadata->freeze['flag']) || ! $freezer->isFrozen($document)
+            ) {
                 continue;
             }
 
@@ -137,17 +140,18 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             $documentManager->persist($document);
 
             // Raise frozenDeleteDenied
-            if ($eventManager->hasListeners(Events::frozenDeleteDenied)) {
+            if ($eventManager->hasListeners(Events::FROZEN_DELETE_DENIED)) {
                 $eventManager->dispatchEvent(
-                    Events::frozenDeleteDenied,
+                    Events::FROZEN_DELETE_DENIED,
                     new AccessControlEventArgs($document, $documentManager, 'delete')
                 );
             }
         }
     }
 
-    protected function getFreezer(){
-        if (!isset($this->freezer)){
+    protected function getFreezer()
+    {
+        if (! isset($this->freezer)) {
             $this->freezer = $this->serviceLocator->get('freezer');
         }
         return $this->freezer;

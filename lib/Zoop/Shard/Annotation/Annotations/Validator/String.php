@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class String extends Annotation
 {
-    const event = 'annotationStringValidator';
+    const EVENT = 'annotationStringValidator';
 
     public $value = true;
 

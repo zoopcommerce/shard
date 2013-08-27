@@ -25,10 +25,11 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
      *
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return [
-            Events::preFreeze,
-            Events::preThaw
+            Events::PRE_FREEZE,
+            Events::PRE_THAW
         ];
     }
 
@@ -38,22 +39,22 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
      */
     public function preFreeze(LifecycleEventArgs $eventArgs)
     {
-        if (! ($accessController = $this->getAccessController())){
+        if (! ($accessController = $this->getAccessController())) {
             //Access control is not enabled
             return;
         }
 
         $document = $eventArgs->getDocument();
 
-        if ( ! $accessController->areAllowed([Actions::freeze], null, $document)->getAllowed()) {
+        if (! $accessController->areAllowed([Actions::FREEZE], null, $document)->getAllowed()) {
             //stop freeze
             $this->getFreezer()->thaw($document);
 
             $eventManager = $eventArgs->getDocumentManager()->getEventManager();
-            if ($eventManager->hasListeners(Events::freezeDenied)) {
+            if ($eventManager->hasListeners(Events::FREEZE_DENIED)) {
                 $eventManager->dispatchEvent(
-                    Events::freezeDenied,
-                    new AccessControlEventArgs($document, $eventArgs->getDocumentManager(), Actions::freeze)
+                    Events::FREEZE_DENIED,
+                    new AccessControlEventArgs($document, $eventArgs->getDocumentManager(), Actions::FREEZE)
                 );
             }
         }
@@ -66,29 +67,30 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
     public function preThaw(LifecycleEventArgs $eventArgs)
     {
 
-        if (! ($accessController = $this->getAccessController())){
+        if (! ($accessController = $this->getAccessController())) {
             //Access control is not enabled
             return;
         }
 
         $document = $eventArgs->getDocument();
 
-        if ( ! $accessController->areAllowed([Actions::thaw], null, $document)->getAllowed()) {
+        if (! $accessController->areAllowed([Actions::THAW], null, $document)->getAllowed()) {
             //stop thaw
             $this->getFreezer()->freeze($document);
 
             $eventManager = $eventArgs->getDocumentManager()->getEventManager();
-            if ($eventManager->hasListeners(Events::thawDenied)) {
+            if ($eventManager->hasListeners(Events::THAW_DENIED)) {
                 $eventManager->dispatchEvent(
-                    Events::thawDenied,
-                    new AccessControlEventArgs($document, $eventArgs->getDocumentManager(), Actions::thaw)
+                    Events::THAW_DENIED,
+                    new AccessControlEventArgs($document, $eventArgs->getDocumentManager(), Actions::THAW)
                 );
             }
         }
     }
 
-    protected function getFreezer(){
-        if (!isset($this->freezer)){
+    protected function getFreezer()
+    {
+        if (! isset($this->freezer)) {
             $this->freezer = $this->serviceLocator->get('freezer');
         }
         return $this->freezer;

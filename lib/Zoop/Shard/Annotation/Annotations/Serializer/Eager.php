@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Eager extends Annotation
 {
-    const event = 'annotationSerializerEager';
+    const EVENT = 'annotationSerializerEager';
 
     public $value = true;
 }

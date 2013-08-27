@@ -23,13 +23,13 @@ abstract class AbstractExtensionFactory implements FactoryInterface
     {
         $config = $serviceLocator->get('manifest')->getExtensionConfigs();
 
-        if (isset($config[$this->extensionServiceName])){
+        if (isset($config[$this->extensionServiceName])) {
             $config = $config[$this->extensionServiceName];
         } else {
             return [];
         }
 
-        if (is_bool($config)){
+        if (is_bool($config)) {
             return [];
         }
 

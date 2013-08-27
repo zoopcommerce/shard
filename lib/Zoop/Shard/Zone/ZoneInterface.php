@@ -15,8 +15,8 @@ namespace Zoop\Shard\Zone;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-interface ZoneInterface {
-
+interface ZoneInterface
+{
     /**
      * Set all possible zones
      *

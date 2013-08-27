@@ -18,23 +18,24 @@ use Zoop\Shard\Annotation\EventType;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class AnnotationSubscriber implements EventSubscriber {
-
+class AnnotationSubscriber implements EventSubscriber
+{
     /**
      *
      * @return array
      */
-    public function getSubscribedEvents() {
+    public function getSubscribedEvents()
+    {
         return [
-            Shard\Stamp\CreatedBy::event,
-            Shard\Stamp\CreatedOn::event,
-            Shard\Stamp\UpdatedOn::event,
-            Shard\Stamp\UpdatedBy::event,
+            Shard\Stamp\CreatedBy::EVENT,
+            Shard\Stamp\CreatedOn::EVENT,
+            Shard\Stamp\UpdatedOn::EVENT,
+            Shard\Stamp\UpdatedBy::EVENT,
         ];
     }
 
-    public function annotationStampCreatedBy(AnnotationEventArgs $eventArgs){
-
+    public function annotationStampCreatedBy(AnnotationEventArgs $eventArgs)
+    {
         $field = $eventArgs->getReflection()->getName();
         $metadata = $eventArgs->getMetadata();
         $eventManager = $eventArgs->getEventManager();
@@ -43,22 +44,30 @@ class AnnotationSubscriber implements EventSubscriber {
 
         //Add sythentic annotation to create extra permission that will prevent
         //updates on the createdby field when access control is enabled.
-        $permissionAnnotation = new Shard\Permission\Basic([
-            'roles' => BasicPermission::wild,
-            'deny' => Actions::update($field)
-        ]);
+        $permissionAnnotation = new Shard\Permission\Basic(
+            [
+                'roles' => BasicPermission::WILD,
+                'deny' => Actions::update($field)
+            ]
+        );
 
         // Raise annotation event
-        if ($eventManager->hasListeners($permissionAnnotation::event)) {
+        if ($eventManager->hasListeners($permissionAnnotation::EVENT)) {
             $eventManager->dispatchEvent(
-                $permissionAnnotation::event,
-                new AnnotationEventArgs($metadata, EventType::document, $permissionAnnotation, $metadata->getReflectionClass(), $eventManager)
+                $permissionAnnotation::EVENT,
+                new AnnotationEventArgs(
+                    $metadata,
+                    EventType::DOCUMENT,
+                    $permissionAnnotation,
+                    $metadata->getReflectionClass(),
+                    $eventManager
+                )
             );
         }
     }
 
-    public function annotationStampCreatedOn(AnnotationEventArgs $eventArgs){
-
+    public function annotationStampCreatedOn(AnnotationEventArgs $eventArgs)
+    {
         $field = $eventArgs->getReflection()->getName();
         $metadata = $eventArgs->getMetadata();
         $eventManager = $eventArgs->getEventManager();
@@ -67,31 +76,41 @@ class AnnotationSubscriber implements EventSubscriber {
 
         //Add sythentic annotation to create extra permission that will prevent
         //updates on the createdby field when access control is enabled.
-        $permissionAnnotation = new Shard\Permission\Basic([
-            'roles' => BasicPermission::wild,
-            'deny' => Actions::update($field)
-        ]);
+        $permissionAnnotation = new Shard\Permission\Basic(
+            [
+                'roles' => BasicPermission::WILD,
+                'deny' => Actions::update($field)
+            ]
+        );
 
         // Raise annotation event
-        if ($eventManager->hasListeners($permissionAnnotation::event)) {
+        if ($eventManager->hasListeners($permissionAnnotation::EVENT)) {
             $eventManager->dispatchEvent(
-                $permissionAnnotation::event,
-                new AnnotationEventArgs($metadata, EventType::document, $permissionAnnotation, $metadata->getReflectionClass(), $eventManager)
+                $permissionAnnotation::EVENT,
+                new AnnotationEventArgs(
+                    $metadata,
+                    EventType::DOCUMENT,
+                    $permissionAnnotation,
+                    $metadata->getReflectionClass(),
+                    $eventManager
+                )
             );
         }
     }
 
-    public function annotationStampUpdatedBy(AnnotationEventArgs $eventArgs){
+    public function annotationStampUpdatedBy(AnnotationEventArgs $eventArgs)
+    {
         $metadata = $eventArgs->getMetadata();
-        if (!isset($metadata->stamp)){
+        if (! isset($metadata->stamp)) {
             $metadata->stamp = [];
         }
         $metadata->stamp['updatedBy'] = $eventArgs->getReflection()->getName();
     }
 
-    public function annotationStampUpdatedOn(AnnotationEventArgs $eventArgs){
+    public function annotationStampUpdatedOn(AnnotationEventArgs $eventArgs)
+    {
         $metadata = $eventArgs->getMetadata();
-        if (!isset($metadata->stamp)){
+        if (! isset($metadata->stamp)) {
             $metadata->stamp = [];
         }
         $metadata->stamp['updatedOn'] = $eventArgs->getReflection()->getName();

@@ -16,15 +16,16 @@ use Zoop\Shard\AccessControl\Events as AccessControlEvents;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class MainSubscriber extends AbstractAccessControlSubscriber {
-
+class MainSubscriber extends AbstractAccessControlSubscriber
+{
     /**
      *
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return [
-            ManifestEvents::onBootstrap,
+            ManifestEvents::ON_BOOTSTRAP,
             ODMEvents::onFlush
         ];
     }
@@ -44,19 +45,19 @@ class MainSubscriber extends AbstractAccessControlSubscriber {
         $unitOfWork = $documentManager->getUnitOfWork();
         $eventManager = $documentManager->getEventManager();
         $accessController = $this->getAccessController();
-        
+
         foreach ($unitOfWork->getScheduledDocumentInsertions() as $document) {
 
             //Check create permissions
-            if ( ! $accessController->areAllowed([Actions::create], null, $document)->getAllowed()) {
+            if (! $accessController->areAllowed([Actions::CREATE], null, $document)->getAllowed()) {
 
                 //stop creation
                 $metadata = $documentManager->getClassMetadata(get_class($document));
 
-                if ($metadata->isEmbeddedDocument){
+                if ($metadata->isEmbeddedDocument) {
                     list($mapping, $parent) = $unitOfWork->getParentAssociation($document);
                     $parentMetadata = $documentManager->getClassMetadata(get_class($parent));
-                    if ($mapping['type'] == 'many'){
+                    if ($mapping['type'] == 'many') {
                         $collection = $parentMetadata->reflFields[$mapping['fieldName']]->getValue($parent);
                         $collection->removeElement($document);
                         $unitOfWork->recomputeSingleDocumentChangeSet($parentMetadata, $parent);
@@ -66,10 +67,10 @@ class MainSubscriber extends AbstractAccessControlSubscriber {
                 }
                 $unitOfWork->detach($document);
 
-                if ($eventManager->hasListeners(AccessControlEvents::createDenied)) {
+                if ($eventManager->hasListeners(AccessControlEvents::CREATE_DENIED)) {
                     $eventManager->dispatchEvent(
-                        AccessControlEvents::createDenied,
-                        new EventArgs($document, $documentManager, Actions::create)
+                        AccessControlEvents::CREATE_DENIED,
+                        new EventArgs($document, $documentManager, Actions::CREATE)
                     );
                 }
             }
@@ -83,11 +84,11 @@ class MainSubscriber extends AbstractAccessControlSubscriber {
             //Assemble all the actions that require permission
             $changeSet = $unitOfWork->getDocumentChangeSet($document);
 
-            if (count($changeSet) == 0){
+            if (count($changeSet) == 0) {
                 continue;
             }
-            
-            foreach ($changeSet as $field => $change){
+
+            foreach ($changeSet as $field => $change) {
                 $actions[] = Actions::update($field);
             }
 
@@ -96,19 +97,19 @@ class MainSubscriber extends AbstractAccessControlSubscriber {
                 $metadata = $documentManager->getClassMetadata(get_class($document));
 
                 //roll back changes
-                if (!isset($changeSet)){
+                if (!isset($changeSet)) {
                     $changeSet = $unitOfWork->getDocumentChangeSet($document);
                 }
-                foreach ($changeSet as $field => $change){
+                foreach ($changeSet as $field => $change) {
                     $metadata->reflFields[$field]->setValue($document, $change[0]);
                 }
 
                 //stop updates
                 $unitOfWork->clearDocumentChangeSet(spl_object_hash($document));
 
-                if ($eventManager->hasListeners(AccessControlEvents::updateDenied)) {
+                if ($eventManager->hasListeners(AccessControlEvents::UPDATE_DENIED)) {
                     $eventManager->dispatchEvent(
-                        AccessControlEvents::updateDenied,
+                        AccessControlEvents::UPDATE_DENIED,
                         new EventArgs($document, $documentManager, 'update')
                     );
                 }
@@ -118,14 +119,14 @@ class MainSubscriber extends AbstractAccessControlSubscriber {
 
         //Check delete permsisions
         foreach ($unitOfWork->getScheduledDocumentDeletions() as $document) {
-            if ( ! $accessController->areAllowed([Actions::delete], null, $document)->getAllowed()) {
+            if (! $accessController->areAllowed([Actions::DELETE], null, $document)->getAllowed()) {
                 //stop delete
                 $documentManager->persist($document);
 
-                if ($eventManager->hasListeners(AccessControlEvents::deleteDenied)) {
+                if ($eventManager->hasListeners(AccessControlEvents::DELETE_DENIED)) {
                     $eventManager->dispatchEvent(
-                        AccessControlEvents::deleteDenied,
-                        new EventArgs($document, $documentManager, Actions::delete)
+                        AccessControlEvents::DELETE_DENIED,
+                        new EventArgs($document, $documentManager, Actions::DELETE)
                     );
                 }
             }

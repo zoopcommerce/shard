@@ -16,9 +16,11 @@ use Zoop\Shard\Stamp\DataModel\UpdatedByTrait;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait StampTrait {
-   use CreatedOnTrait;
-   use CreatedByTrait;
-   use UpdatedOnTrait;
-   use UpdatedByTrait;
+trait StampTrait
+{
+    use CreatedOnTrait;
+    use CreatedByTrait;
+    use UpdatedOnTrait;
+    use UpdatedByTrait;
+
 }

@@ -16,8 +16,8 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 class BasicPermissionFactory implements PermissionFactoryInterface
 {
 
-    public static function get(ClassMetadata $metadata, array $options){
+    public static function get(ClassMetadata $metadata, array $options)
+    {
         return new BasicPermission($options['roles'], $options['allow'], $options['deny']);
     }
 }
-

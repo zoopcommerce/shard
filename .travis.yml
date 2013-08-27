@@ -4,19 +4,21 @@ php:
   - 5.4
   - 5.5
 
-matrix:
-  allow_failures:
-    - php: 5.5
-
 env:
   - MONGO_VERSION=1.2.12
 
 services: mongodb
 
+matrix:
+  allow_failures:
+    - php: 5.5
+
 before_script:
   - echo "extension = mongo.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-  - composer update --prefer-source --dev
+  - composer install --dev
 
 script:
   - cd ./tests
-  - phpunit
+  - ../vendor/bin/phpunit --coverage-clover ./build/clover.xml
+  - php build/coverage-checker.php build/clover.xml 25
+  - ../vendor/bin/phpcs --standard=PSR2 ../lib/ ../tests/Zoop/

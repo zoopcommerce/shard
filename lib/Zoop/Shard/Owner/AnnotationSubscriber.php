@@ -15,19 +15,21 @@ use Zoop\Shard\Annotation\AnnotationEventArgs;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class AnnotationSubscriber implements EventSubscriber {
-
+class AnnotationSubscriber implements EventSubscriber
+{
     /**
      *
      * @return array
      */
-    public function getSubscribedEvents() {
+    public function getSubscribedEvents()
+    {
         return [
-            Shard\Owner::event,
+            Shard\Owner::EVENT,
         ];
     }
 
-    public function annotationOwner(AnnotationEventArgs $eventArgs){
+    public function annotationOwner(AnnotationEventArgs $eventArgs)
+    {
         $metadata = $eventArgs->getMetadata();
         $metadata->owner = $eventArgs->getReflection()->getName();
     }

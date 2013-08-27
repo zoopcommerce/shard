@@ -20,5 +20,5 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Freeze extends Annotation
 {
-    const event = 'annotationFreeze';
+    const EVENT = 'annotationFreeze';
 }

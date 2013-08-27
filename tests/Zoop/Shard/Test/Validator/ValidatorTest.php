@@ -7,37 +7,42 @@ use Zoop\Shard\Validator\Events;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\Validator\TestAsset\Document\Simple;
 
-class ValidatorTest extends BaseTest {
+class ValidatorTest extends BaseTest
+{
 
     protected $calls = [];
 
-    public function setUp(){
+    public function setUp()
+    {
 
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.validator' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.validator' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                    ]
                 ]
             ]
-        ]);
+        );
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
 
         $eventManager = $this->documentManager->getEventManager();
-        $eventManager->addEventListener(Events::invalidCreate, $this);
-        $eventManager->addEventListener(Events::invalidUpdate, $this);
+        $eventManager->addEventListener(Events::INVALID_CREATE, $this);
+        $eventManager->addEventListener(Events::INVALID_UPDATE, $this);
 
         $this->calls = array();
     }
 
-    public function testRequired(){
+    public function testRequired()
+    {
         $documentManager = $this->documentManager;
 
         $testDoc = new Simple();
@@ -45,9 +50,12 @@ class ValidatorTest extends BaseTest {
         $documentManager->persist($testDoc);
         $documentManager->flush();
 
-        $this->assertTrue(isset($this->calls[Events::invalidCreate]));
-        $this->assertFalse(isset($this->calls[Events::invalidUpdate]));
-        $this->assertCount(1, $this->calls[Events::invalidCreate][0]->getResult()->getFieldResults()['name']->getMessages());
+        $this->assertTrue(isset($this->calls[Events::INVALID_CREATE]));
+        $this->assertFalse(isset($this->calls[Events::INVALID_UPDATE]));
+        $this->assertCount(
+            1,
+            $this->calls[Events::INVALID_CREATE][0]->getResult()->getFieldResults()['name']->getMessages()
+        );
 
         $id = $testDoc->getId();
         $documentManager->clear();
@@ -58,8 +66,8 @@ class ValidatorTest extends BaseTest {
         $this->assertNull($testDoc);
     }
 
-    public function testInvalidCreate(){
-
+    public function testInvalidCreate()
+    {
         $documentManager = $this->documentManager;
 
         $testDoc = new Simple();
@@ -68,9 +76,12 @@ class ValidatorTest extends BaseTest {
         $documentManager->persist($testDoc);
         $documentManager->flush();
 
-        $this->assertTrue(isset($this->calls[Events::invalidCreate]));
-        $this->assertFalse(isset($this->calls[Events::invalidUpdate]));
-        $this->assertCount(2, $this->calls[Events::invalidCreate][0]->getResult()->getFieldResults()['name']->getMessages());
+        $this->assertTrue(isset($this->calls[Events::INVALID_CREATE]));
+        $this->assertFalse(isset($this->calls[Events::INVALID_UPDATE]));
+        $this->assertCount(
+            2,
+            $this->calls[Events::INVALID_CREATE][0]->getResult()->getFieldResults()['name']->getMessages()
+        );
 
         $id = $testDoc->getId();
         $documentManager->clear();
@@ -81,8 +92,8 @@ class ValidatorTest extends BaseTest {
         $this->assertNull($testDoc);
     }
 
-    public function testValidCreate(){
-
+    public function testValidCreate()
+    {
         $documentManager = $this->documentManager;
 
         $testDoc = new Simple();
@@ -91,8 +102,8 @@ class ValidatorTest extends BaseTest {
         $documentManager->persist($testDoc);
         $documentManager->flush();
 
-        $this->assertFalse(isset($this->calls[Events::invalidCreate]));
-        $this->assertFalse(isset($this->calls[Events::invalidUpdate]));
+        $this->assertFalse(isset($this->calls[Events::INVALID_CREATE]));
+        $this->assertFalse(isset($this->calls[Events::INVALID_UPDATE]));
 
         $id = $testDoc->getId();
         $documentManager->clear();
@@ -103,8 +114,8 @@ class ValidatorTest extends BaseTest {
         $this->assertEquals('valid', $testDoc->getName());
     }
 
-    public function testInvalidUpdate() {
-
+    public function testInvalidUpdate()
+    {
         $documentManager = $this->documentManager;
 
         $testDoc = new Simple();
@@ -121,9 +132,12 @@ class ValidatorTest extends BaseTest {
         $testDoc->setName('invalid');
         $documentManager->flush();
 
-        $this->assertFalse(isset($this->calls[Events::invalidCreate]));
-        $this->assertTrue(isset($this->calls[Events::invalidUpdate]));
-        $this->assertCount(2, $this->calls[Events::invalidUpdate][0]->getResult()->getFieldResults()['name']->getMessages());
+        $this->assertFalse(isset($this->calls[Events::INVALID_CREATE]));
+        $this->assertTrue(isset($this->calls[Events::INVALID_UPDATE]));
+        $this->assertCount(
+            2,
+            $this->calls[Events::INVALID_UPDATE][0]->getResult()->getFieldResults()['name']->getMessages()
+        );
 
         $documentManager->clear();
         $testDoc = $repository->find($id);
@@ -131,8 +145,8 @@ class ValidatorTest extends BaseTest {
         $this->assertEquals('valid', $testDoc->getName());
     }
 
-    public function testValidUpdate() {
-
+    public function testValidUpdate()
+    {
         $documentManager = $this->documentManager;
 
         $testDoc = new Simple();
@@ -149,8 +163,8 @@ class ValidatorTest extends BaseTest {
         $testDoc->setName('alsoValid');
         $documentManager->flush();
 
-        $this->assertFalse(isset($this->calls[Events::invalidCreate]));
-        $this->assertFalse(isset($this->calls[Events::invalidUpdate]));
+        $this->assertFalse(isset($this->calls[Events::INVALID_CREATE]));
+        $this->assertFalse(isset($this->calls[Events::INVALID_UPDATE]));
 
         $documentManager->clear();
         $testDoc = $repository->find($id);
@@ -158,7 +172,8 @@ class ValidatorTest extends BaseTest {
         $this->assertEquals('alsoValid', $testDoc->getName());
     }
 
-    public function __call($name, $arguments){
+    public function __call($name, $arguments)
+    {
         $this->calls[$name] = $arguments;
     }
 }

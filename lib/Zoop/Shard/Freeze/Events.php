@@ -18,36 +18,36 @@ final class Events
     /**
      * Fires before freeze happens
      */
-    const preFreeze = 'preFreeze';
+    const PRE_FREEZE = 'preFreeze';
 
     /**
      * Fires after freeze happens
      */
-    const postFreeze = 'postFreeze';
+    const POST_FREEZE = 'postFreeze';
 
     /**
      * Fires before a frozen document is thawed
      */
-    const preThaw = 'preThaw';
+    const PRE_THAW = 'preThaw';
 
     /**
      * Fires after a frozen document is thawed
      */
-    const postThaw = 'postThaw';
+    const POST_THAW = 'postThaw';
 
     /**
      * Triggered when active user attempts to freeze a document they don't have permission
      * for
      */
-    const freezeDenied = 'freezeDenied';
+    const FREEZE_DENIED = 'freezeDenied';
 
     /**
      * Triggers when active user attempts to thaw a document they don't have permission
      * for
      */
-    const thawDenied = 'thawDenied';
+    const THAW_DENIED = 'thawDenied';
 
-    const frozenUpdateDenied = 'frozenUpdateDenied';
+    const FROZEN_UPDATE_DENIED = 'frozenUpdateDenied';
 
-    const frozenDeleteDenied = 'frozenDeleteDenied';
+    const FROZEN_DELETE_DENIED = 'frozenDeleteDenied';
 }

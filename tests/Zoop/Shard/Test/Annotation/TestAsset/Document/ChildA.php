@@ -9,5 +9,6 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 /**
  * @ODM\Document
  */
-class ChildA extends ParentClass {
+class ChildA extends ParentClass
+{
 }

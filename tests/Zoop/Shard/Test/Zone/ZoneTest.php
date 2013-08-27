@@ -6,29 +6,33 @@ use Zoop\Shard\Manifest;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\Zone\TestAsset\Document\Simple;
 
-class ZoneTest extends BaseTest {
+class ZoneTest extends BaseTest
+{
+    public function setUp()
+    {
 
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.zone' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.zone' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                    ]
                 ]
             ]
-        ]);
+        );
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
     }
 
-    public function testBasicFunction(){
+    public function testBasicFunction()
+    {
 
         $documentManager = $this->documentManager;
         $testDoc = new Simple();
@@ -57,7 +61,8 @@ class ZoneTest extends BaseTest {
         $this->assertEquals(['zone1', 'zone2'], $zones);
     }
 
-    public function testFilter() {
+    public function testFilter()
+    {
 
         $documentManager = $this->documentManager;
         $documentManager->getFilterCollection()->enable('zone');
@@ -121,12 +126,13 @@ class ZoneTest extends BaseTest {
         $this->assertEquals(['lucy', 'miriam'], $docNames);
     }
 
-    protected function getTestDocs(){
+    protected function getTestDocs()
+    {
         $repository = $this->documentManager->getRepository('Zoop\Shard\Test\Zone\TestAsset\Document\Simple');
         $testDocs = $repository->findAll();
         $returnDocs = [];
         $returnNames = [];
-        foreach ($testDocs as $testDoc){
+        foreach ($testDocs as $testDoc) {
             $returnDocs[] = $testDoc;
             $returnNames[] = $testDoc->getName();
         }

@@ -14,7 +14,7 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
  * @author  Tim Roediger <superdweebie@gmail.com>
  *
  */
-interface PermissionsListInterface {
-
+interface PermissionsListInterface
+{
     public static function getPermissionsList(ClassMetadata $targetDocument);
 }

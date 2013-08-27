@@ -10,36 +10,38 @@ use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\Freeze\TestAsset\Document\Simple;
 use Zoop\Shard\Test\TestAsset\User;
 
-class FreezeTest extends BaseTest implements EventSubscriber {
-
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.freeze' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    'user' => function(){
-                        $user = new User();
-                        $user->setUsername('toby');
-                        return $user;
-                    }
+class FreezeTest extends BaseTest implements EventSubscriber
+{
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.freeze' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                        'user' => function () {
+                            $user = new User();
+                            $user->setUsername('toby');
+                            return $user;
+                        }
+                    ]
                 ]
             ]
-        ]);
+        );
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
         $this->freezer = $manifest->getServiceManager()->get('freezer');
     }
 
-    public function testBasicFunction(){
-
+    public function testBasicFunction()
+    {
         $documentManager = $this->documentManager;
         $testDoc = new Simple();
 
@@ -92,8 +94,8 @@ class FreezeTest extends BaseTest implements EventSubscriber {
         $this->assertFalse($this->freezer->isFrozen($testDoc));
     }
 
-    public function testFilter() {
-
+    public function testFilter()
+    {
         $documentManager = $this->documentManager;
         $documentManager->getFilterCollection()->enable('freeze');
 
@@ -112,7 +114,7 @@ class FreezeTest extends BaseTest implements EventSubscriber {
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(array('lucy', 'miriam'), $docNames);
 
-        if ($testDocs[0]->getName() == 'lucy'){
+        if ($testDocs[0]->getName() == 'lucy') {
             $this->freezer->freeze($testDocs[0]);
         } else {
             $this->freezer->freeze($testDocs[1]);
@@ -145,7 +147,7 @@ class FreezeTest extends BaseTest implements EventSubscriber {
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(array('lucy', 'miriam'), $docNames);
 
-        if ($testDocs[0]->getName() == 'lucy'){
+        if ($testDocs[0]->getName() == 'lucy') {
             $this->freezer->thaw($testDocs[0]);
         } else {
             $this->freezer->thaw($testDocs[1]);
@@ -160,12 +162,13 @@ class FreezeTest extends BaseTest implements EventSubscriber {
         $this->assertEquals(array('lucy', 'miriam'), $docNames);
     }
 
-    protected function getTestDocs(){
+    protected function getTestDocs()
+    {
         $repository = $this->documentManager->getRepository('Zoop\Shard\Test\Freeze\TestAsset\Document\Simple');
         $testDocs = $repository->findAll();
         $returnDocs = array();
         $returnNames = array();
-        foreach ($testDocs as $testDoc){
+        foreach ($testDocs as $testDoc) {
             $returnDocs[] = $testDoc;
             $returnNames[] = $testDoc->getName();
         }
@@ -173,8 +176,8 @@ class FreezeTest extends BaseTest implements EventSubscriber {
         return array($returnDocs, $returnNames);
     }
 
-    public function testEvents() {
-
+    public function testEvents()
+    {
         $subscriber = $this;
 
         $documentManager = $this->documentManager;
@@ -191,10 +194,10 @@ class FreezeTest extends BaseTest implements EventSubscriber {
         $documentManager->clear();
 
         $calls = $this->calls;
-        $this->assertFalse(isset($calls[Events::preFreeze]));
-        $this->assertFalse(isset($calls[Events::postFreeze]));
-        $this->assertFalse(isset($calls[Events::preThaw]));
-        $this->assertFalse(isset($calls[Events::postThaw]));
+        $this->assertFalse(isset($calls[Events::PRE_FREEZE]));
+        $this->assertFalse(isset($calls[Events::POST_FREEZE]));
+        $this->assertFalse(isset($calls[Events::PRE_THAW]));
+        $this->assertFalse(isset($calls[Events::POST_THAW]));
 
         $repository = $documentManager->getRepository(get_class($testDoc));
         $testDoc = $repository->find($id);
@@ -207,10 +210,10 @@ class FreezeTest extends BaseTest implements EventSubscriber {
         $documentManager->flush();
 
         $calls = $this->calls;
-        $this->assertTrue(isset($calls[Events::preFreeze]));
-        $this->assertTrue(isset($calls[Events::postFreeze]));
-        $this->assertFalse(isset($calls[Events::preThaw]));
-        $this->assertFalse(isset($calls[Events::postThaw]));
+        $this->assertTrue(isset($calls[Events::PRE_FREEZE]));
+        $this->assertTrue(isset($calls[Events::POST_FREEZE]));
+        $this->assertFalse(isset($calls[Events::PRE_THAW]));
+        $this->assertFalse(isset($calls[Events::POST_THAW]));
 
         $testDoc = null;
         $testDoc = $repository->find($id);
@@ -222,14 +225,14 @@ class FreezeTest extends BaseTest implements EventSubscriber {
         $documentManager->flush();
 
         $calls = $this->calls;
-        $this->assertTrue(isset($calls[Events::frozenUpdateDenied]));
+        $this->assertTrue(isset($calls[Events::FROZEN_UPDATE_DENIED]));
         $subscriber->reset();
 
         $documentManager->remove($testDoc);
         $documentManager->flush();
 
         $calls = $this->calls;
-        $this->assertTrue(isset($calls[Events::frozenDeleteDenied]));
+        $this->assertTrue(isset($calls[Events::FROZEN_DELETE_DENIED]));
 
         $documentManager->clear();
         $testDoc = $repository->find($id);
@@ -240,10 +243,10 @@ class FreezeTest extends BaseTest implements EventSubscriber {
         $documentManager->flush();
 
         $calls = $this->calls;
-        $this->assertFalse(isset($calls[Events::preFreeze]));
-        $this->assertFalse(isset($calls[Events::postFreeze]));
-        $this->assertTrue(isset($calls[Events::preThaw]));
-        $this->assertTrue(isset($calls[Events::postThaw]));
+        $this->assertFalse(isset($calls[Events::PRE_FREEZE]));
+        $this->assertFalse(isset($calls[Events::POST_FREEZE]));
+        $this->assertTrue(isset($calls[Events::PRE_THAW]));
+        $this->assertTrue(isset($calls[Events::POST_THAW]));
 
         $testDoc = null;
         $testDoc = $repository->find($id);
@@ -257,10 +260,10 @@ class FreezeTest extends BaseTest implements EventSubscriber {
         $documentManager->flush();
 
         $calls = $this->calls;
-        $this->assertTrue(isset($calls[Events::preFreeze]));
-        $this->assertFalse(isset($calls[Events::postFreeze]));
-        $this->assertFalse(isset($calls[Events::preThaw]));
-        $this->assertFalse(isset($calls[Events::postThaw]));
+        $this->assertTrue(isset($calls[Events::PRE_FREEZE]));
+        $this->assertFalse(isset($calls[Events::POST_FREEZE]));
+        $this->assertFalse(isset($calls[Events::PRE_THAW]));
+        $this->assertFalse(isset($calls[Events::POST_THAW]));
 
         $testDoc = null;
         $testDoc = $repository->find($id);
@@ -282,10 +285,10 @@ class FreezeTest extends BaseTest implements EventSubscriber {
         $documentManager->flush();
 
         $calls = $this->calls;
-        $this->assertFalse(isset($calls[Events::preFreeze]));
-        $this->assertFalse(isset($calls[Events::postFreeze]));
-        $this->assertTrue(isset($calls[Events::preThaw]));
-        $this->assertFalse(isset($calls[Events::postThaw]));
+        $this->assertFalse(isset($calls[Events::PRE_FREEZE]));
+        $this->assertFalse(isset($calls[Events::POST_FREEZE]));
+        $this->assertTrue(isset($calls[Events::PRE_THAW]));
+        $this->assertFalse(isset($calls[Events::POST_THAW]));
     }
 
     protected $calls = array();
@@ -293,58 +296,68 @@ class FreezeTest extends BaseTest implements EventSubscriber {
     protected $rollbackFreeze = false;
     protected $rollbackThaw = false;
 
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return array(
-            Events::preFreeze,
-            Events::postFreeze,
-            Events::preThaw,
-            Events::postThaw,
-            Events::frozenUpdateDenied,
-            Events::frozenDeleteDenied
+            Events::PRE_FREEZE,
+            Events::POST_FREEZE,
+            Events::PRE_THAW,
+            Events::POST_THAW,
+            Events::FROZEN_UPDATE_DENIED,
+            Events::FROZEN_DELETE_DENIED
         );
     }
 
-    public function reset() {
+    public function reset()
+    {
         $this->calls = array();
         $this->rollbackFreeze = false;
         $this->rollbackThaw = false;
     }
 
-    public function preFreeze(LifecycleEventArgs $eventArgs) {
-        $this->calls[Events::preFreeze] = $eventArgs;
+    public function preFreeze(LifecycleEventArgs $eventArgs)
+    {
+        $this->calls[Events::PRE_FREEZE] = $eventArgs;
         if ($this->rollbackFreeze) {
             $this->freezer->thaw($eventArgs->getDocument());
         }
     }
 
-    public function preThaw(LifecycleEventArgs $eventArgs) {
-        $this->calls[Events::preThaw] = $eventArgs;
+    public function preThaw(LifecycleEventArgs $eventArgs)
+    {
+        $this->calls[Events::PRE_THAW] = $eventArgs;
         if ($this->rollbackThaw) {
             $this->freezer->freeze($eventArgs->getDocument());
         }
     }
 
-    public function getRollbackFreeze() {
+    public function getRollbackFreeze()
+    {
         return $this->rollbackFreeze;
     }
 
-    public function setRollbackFreeze($rollbackFreeze) {
+    public function setRollbackFreeze($rollbackFreeze)
+    {
         $this->rollbackFreeze = $rollbackFreeze;
     }
 
-    public function getRollbackThaw() {
+    public function getRollbackThaw()
+    {
         return $this->rollbackThaw;
     }
 
-    public function setRollbackThaw($rollbackThaw) {
+    public function setRollbackThaw($rollbackThaw)
+    {
         $this->rollbackThaw = $rollbackThaw;
     }
 
-    public function getCalls() {
+    public function getCalls()
+    {
         return $this->calls;
     }
 
-    public function __call($name, $arguments){
+    public function __call($name, $arguments)
+    {
         $this->calls[$name] = $arguments[0];
     }
 }

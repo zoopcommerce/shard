@@ -16,8 +16,8 @@ use Zoop\Shard\AccessControl\PermissionFactoryInterface;
  */
 class StatePermissionFactory implements PermissionFactoryInterface
 {
-    public static function get(ClassMetadata $metadata, array $options){
-
+    public static function get(ClassMetadata $metadata, array $options)
+    {
         return new StatePermission(
             $options['roles'],
             $options['allow'],
@@ -27,4 +27,3 @@ class StatePermissionFactory implements PermissionFactoryInterface
         );
     }
 }
-

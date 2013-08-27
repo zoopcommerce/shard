@@ -8,43 +8,45 @@ use Zoop\Shard\Test\AccessControl\TestAsset\Document\Simple;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\TestAsset\RoleAwareUser;
 
-class SimpleCreatorTest extends BaseTest {
-
+class SimpleCreatorTest extends BaseTest
+{
     protected $calls = array();
 
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.accessControl' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    'user' => function(){
-                        $user = new RoleAwareUser();
-                        $user->setUsername('toby');
-                        $user->addRole('creator');
-                        return $user;
-                    }
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.accessControl' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                        'user' => function () {
+                            $user = new RoleAwareUser();
+                            $user->setUsername('toby');
+                            $user->addRole('creator');
+                            return $user;
+                        }
+                    ]
                 ]
             ]
-       ]);
+        );
 
-       $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
     }
-/*
-    public function testCreateAllow(){
 
+    public function testCreateAllow()
+    {
         $this->calls = array();
         $documentManager = $this->documentManager;
         $eventManager = $documentManager->getEventManager();
 
-        $eventManager->addEventListener(AccessControlEvents::createDenied, $this);
+        $eventManager->addEventListener(AccessControlEvents::CREATE_DENIED, $this);
 
         $testDoc = new Simple();
 
@@ -52,16 +54,16 @@ class SimpleCreatorTest extends BaseTest {
         $documentManager->flush();
 
         $this->assertNotNull($testDoc->getId());
-        $this->assertFalse(isset($this->calls[AccessControlEvents::createDenied]));
+        $this->assertFalse(isset($this->calls[AccessControlEvents::CREATE_DENIED]));
     }
 
-    public function testUpdateDeny(){
-
+    public function testUpdateDeny()
+    {
         $this->calls = array();
         $documentManager = $this->documentManager;
         $eventManager = $documentManager->getEventManager();
 
-        $eventManager->addEventListener(AccessControlEvents::updateDenied, $this);
+        $eventManager->addEventListener(AccessControlEvents::UPDATE_DENIED, $this);
 
         $testDoc = new Simple();
         $testDoc->setName('lucy');
@@ -73,16 +75,17 @@ class SimpleCreatorTest extends BaseTest {
 
         $documentManager->flush();
 
-        $this->assertTrue(isset($this->calls[AccessControlEvents::updateDenied]));
+        $this->assertTrue(isset($this->calls[AccessControlEvents::UPDATE_DENIED]));
         $this->assertEquals('lucy', $testDoc->getName());
     }
 
-    public function testDeleteDeny(){
+    public function testDeleteDeny()
+    {
         $this->calls = array();
         $documentManager = $this->documentManager;
         $eventManager = $documentManager->getEventManager();
 
-        $eventManager->addEventListener(AccessControlEvents::deleteDenied, $this);
+        $eventManager->addEventListener(AccessControlEvents::DELETE_DENIED, $this);
 
         $testDoc = new Simple();
         $testDoc->setName('lucy');
@@ -93,11 +96,11 @@ class SimpleCreatorTest extends BaseTest {
         $documentManager->remove($testDoc);
         $documentManager->flush();
 
-        $this->assertTrue(isset($this->calls[AccessControlEvents::deleteDenied]));
+        $this->assertTrue(isset($this->calls[AccessControlEvents::DELETE_DENIED]));
     }
-*/
-    public function testReadDeny(){
 
+    public function testReadDeny()
+    {
         $documentManager = $this->documentManager;
 
         $toby = new Simple();
@@ -117,17 +120,19 @@ class SimpleCreatorTest extends BaseTest {
         $this->assertNull($miriam);
     }
 
-    protected function getAllNames($repository){
+    protected function getAllNames($repository)
+    {
         $names = array();
         $documents = $repository->findAll();
-        foreach ($documents as $document){
+        foreach ($documents as $document) {
             $names[] = $document->getName();
         }
         sort($names);
         return $names;
     }
 
-    public function __call($name, $arguments){
+    public function __call($name, $arguments)
+    {
         $this->calls[$name] = $arguments;
     }
 }

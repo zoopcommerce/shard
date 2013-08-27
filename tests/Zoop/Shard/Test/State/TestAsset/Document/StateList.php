@@ -7,8 +7,8 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Zoop\Shard\Annotation\Annotations as Shard;
 
 /** @ODM\Document */
-class StateList {
-
+class StateList
+{
     /**
      * @ODM\Id(strategy="UUID")
      */
@@ -32,26 +32,31 @@ class StateList {
      *
      * @param string $state
      */
-    public function setState($state){
+    public function setState($state)
+    {
         $this->state = (string) $state;
     }
 
     /**
      * @return string
      */
-    public function getState(){
+    public function getState()
+    {
         return $this->state;
     }
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function setName($name) {
+    public function setName($name)
+    {
         $this->name = $name;
     }
 }

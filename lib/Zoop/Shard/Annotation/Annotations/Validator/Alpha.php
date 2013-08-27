@@ -17,7 +17,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Alpha extends Annotation
 {
-    const event = 'annotationAlphaValidator';
+    const EVENT = 'annotationAlphaValidator';
 
     public $value = true;
 

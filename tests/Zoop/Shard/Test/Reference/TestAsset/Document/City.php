@@ -9,8 +9,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 /**
  * @ODM\Document
  */
-class City {
-
+class City
+{
     /**
      * @ODM\Id(strategy="UUID")
      */

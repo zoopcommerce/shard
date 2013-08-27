@@ -13,7 +13,5 @@ namespace Zoop\Shard\Annotation;
  */
 final class Events
 {
-
-    const postBuildMetadata = 'postBuildMetadata';
-
+    const POST_BUILD_METADATA = 'postBuildMetadata';
 }

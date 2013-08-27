@@ -11,11 +11,11 @@ namespace Zoop\Shard\Annotation;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class EventType {
+class EventType
+{
+    const DOCUMENT = 'document';
 
-    const document = 'document';
+    const FIELD = 'field';
 
-    const field = 'field';
-
-    const method = 'method';
+    const METHOD = 'method';
 }

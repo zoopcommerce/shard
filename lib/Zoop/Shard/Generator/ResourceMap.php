@@ -25,36 +25,40 @@ class ResourceMap implements ServiceLocatorAwareInterface, DocumentManagerAwareI
 
     protected $map = [];
 
-    public function getMap(){
+    public function getMap()
+    {
         return $this->map;
     }
 
-    public function setMap(array $map) {
+    public function setMap(array $map)
+    {
         $this->map = $map;
     }
 
-    public function setResourceConfig($name, $config){
+    public function setResourceConfig($name, $config)
+    {
         $this->map[$name] = $config;
     }
 
-    public function has($name){
+    public function has($name)
+    {
         return isset($this->map[$name]);
     }
 
     public function get($name)
     {
-        if (! isset($this->map[$name])){
+        if (! isset($this->map[$name])) {
             throw new \Exception('Resource does not exist in resource map');
         }
 
         $cacheDriver = $this->documentManager->getConfiguration()->getMetadataCacheImpl();
         $id = $this->cacheSalt . $name;
-        if ($resourceValue = $cacheDriver->fetch($id)){
+        if ($resourceValue = $cacheDriver->fetch($id)) {
             return $resourceValue;
         }
 
         $config = $this->map[$name];
-        if (isset($config['options'])){
+        if (isset($config['options'])) {
             $options = $config['options'];
         } else {
             $options = null;

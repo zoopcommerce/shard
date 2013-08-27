@@ -29,14 +29,16 @@ class Freeze extends BsonFilter
     /**
      * Set the filter to return only documents which are not frozen
      */
-    public function onlyNotFrozen(){
+    public function onlyNotFrozen()
+    {
         $this->parameters['frozen'] = false;
     }
 
     /**
      * Set the filter to return only documents which are frozen
      */
-    public function onlyFrozen(){
+    public function onlyFrozen()
+    {
         $this->parameters['frozen'] = true;
     }
 

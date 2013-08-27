@@ -13,8 +13,8 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait ThawedByTrait {
-
+trait ThawedByTrait
+{
     /**
      * @ODM\String
      * @ODM\Index
@@ -27,7 +27,8 @@ trait ThawedByTrait {
      *
      * @return string
      */
-    public function getThawedBy(){
+    public function getThawedBy()
+    {
         return $this->thawedBy;
     }
 }

@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class LessThan extends Annotation
 {
-    const event = 'annotationLessThanValidator';
+    const EVENT = 'annotationLessThanValidator';
 
     public $value = true;
 

@@ -8,30 +8,32 @@ use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\State\TestAsset\Document\Simple;
 use Zoop\Shard\Test\State\TestAsset\Subscriber;
 
-class StateTest extends BaseTest {
-
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.state' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+class StateTest extends BaseTest
+{
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.state' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                    ]
                 ]
             ]
-        ]);
+        );
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
     }
 
-    public function testBasicFunction(){
-
+    public function testBasicFunction()
+    {
         $documentManager = $this->documentManager;
         $testDoc = new Simple();
 
@@ -59,8 +61,8 @@ class StateTest extends BaseTest {
         $this->assertEquals('state2', $testDoc->getState());
     }
 
-    public function testFilter() {
-
+    public function testFilter()
+    {
         $documentManager = $this->documentManager;
         $documentManager->getFilterCollection()->enable('state');
 
@@ -104,12 +106,13 @@ class StateTest extends BaseTest {
         $this->assertEquals(array('lucy', 'miriam'), $docNames);
     }
 
-    protected function getTestDocs(){
+    protected function getTestDocs()
+    {
         $repository = $this->documentManager->getRepository('Zoop\Shard\Test\State\TestAsset\Document\Simple');
         $testDocs = $repository->findAll();
         $returnDocs = array();
         $returnNames = array();
-        foreach ($testDocs as $testDoc){
+        foreach ($testDocs as $testDoc) {
             $returnDocs[] = $testDoc;
             $returnNames[] = $testDoc->getName();
         }
@@ -117,8 +120,8 @@ class StateTest extends BaseTest {
         return array($returnDocs, $returnNames);
     }
 
-    public function testEvents() {
-
+    public function testEvents()
+    {
         $subscriber = new Subscriber();
 
         $documentManager = $this->documentManager;
@@ -135,9 +138,9 @@ class StateTest extends BaseTest {
         $documentManager->clear();
 
         $calls = $subscriber->getCalls();
-        $this->assertFalse(isset($calls[Events::preTransition]));
-        $this->assertFalse(isset($calls[Events::onTransition]));
-        $this->assertFalse(isset($calls[Events::postTransition]));
+        $this->assertFalse(isset($calls[Events::PRE_TRANSITION]));
+        $this->assertFalse(isset($calls[Events::ON_TRANSITION]));
+        $this->assertFalse(isset($calls[Events::POST_TRANSITION]));
 
         $repository = $documentManager->getRepository(get_class($testDoc));
         $testDoc = $repository->find($id);
@@ -148,9 +151,9 @@ class StateTest extends BaseTest {
         $documentManager->flush();
 
         $calls = $subscriber->getCalls();
-        $this->assertTrue(isset($calls[Events::preTransition]));
-        $this->assertTrue(isset($calls[Events::onTransition]));
-        $this->assertTrue(isset($calls[Events::postTransition]));
+        $this->assertTrue(isset($calls[Events::PRE_TRANSITION]));
+        $this->assertTrue(isset($calls[Events::ON_TRANSITION]));
+        $this->assertTrue(isset($calls[Events::POST_TRANSITION]));
 
         $documentManager->clear();
         $testDoc = $repository->find($id);
@@ -162,9 +165,9 @@ class StateTest extends BaseTest {
         $documentManager->flush();
 
         $calls = $subscriber->getCalls();
-        $this->assertTrue(isset($calls[Events::preTransition]));
-        $this->assertFalse(isset($calls[Events::onTransition]));
-        $this->assertFalse(isset($calls[Events::postTransition]));
+        $this->assertTrue(isset($calls[Events::PRE_TRANSITION]));
+        $this->assertFalse(isset($calls[Events::ON_TRANSITION]));
+        $this->assertFalse(isset($calls[Events::POST_TRANSITION]));
 
         $this->assertEquals('state2', $testDoc->getState());
     }

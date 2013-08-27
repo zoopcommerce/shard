@@ -9,54 +9,60 @@ use Zoop\Shard\Test\Serializer\TestAsset\Document\SecretIngredient;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\Ingredient;
 use Zoop\Shard\Test\TestAsset\RoleAwareUser;
 
-class AccessControlledReferenceAllowTest extends BaseTest {
-
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.accessControl' => true,
-                'extension.serializer' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    'user' => function(){
-                        $user = new RoleAwareUser();
-                        $user->setUsername('toby');
-                        $user->addRole('user');
-                        return $user;
-                    }
+class AccessControlledReferenceAllowTest extends BaseTest
+{
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.accessControl' => true,
+                    'extension.serializer' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                        'user' => function () {
+                            $user = new RoleAwareUser();
+                            $user->setUsername('toby');
+                            $user->addRole('user');
+                            return $user;
+                        }
+                    ]
                 ]
             ]
-        ]);
+        );
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
         $this->serializer = $manifest->getServiceManager()->get('serializer');
     }
 
-    public function testSerializeAllow(){
-
+    public function testSerializeAllow()
+    {
         $documentManager = $this->documentManager;
 
         //bake the cake. Hmm yum.
         $cake = new CakeWithSecrets();
-        $cake->setIngredients([
-            new Ingredient('flour'),
-            new Ingredient('sugar')
-        ]);
+        $cake->setIngredients(
+            [
+                new Ingredient('flour'),
+                new Ingredient('sugar')
+            ]
+        );
 
         $chocolate = new SecretIngredient('chocolate');
         $strawberry = new SecretIngredient('strawberry');
 
-        $cake->setSecretIngredients([
-            $chocolate,
-            $strawberry
-        ]);
+        $cake->setSecretIngredients(
+            [
+                $chocolate,
+                $strawberry
+            ]
+        );
 
         //Persist cake and clear out documentManager
         $documentManager->persist($cake);
@@ -64,7 +70,9 @@ class AccessControlledReferenceAllowTest extends BaseTest {
         $id = $cake->getId();
         $documentManager->clear();
 
-        $cake = $documentManager->getRepository('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeWithSecrets')->findOneBy(['id' => $id]);
+        $cake = $documentManager
+            ->getRepository('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeWithSecrets')
+            ->findOneBy(['id' => $id]);
 
         $this->serializer->setMaxNestingDepth(1);
         $array = $this->serializer->toArray($cake, $documentManager);

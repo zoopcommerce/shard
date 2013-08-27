@@ -16,9 +16,9 @@ use Doctrine\Common\Annotations\Annotation;
  *
  * @Annotation
  */
-final class Chain extends Annotation {
-
-    const event = 'annotationChainValidator';
+final class Chain extends Annotation
+{
+    const EVENT = 'annotationChainValidator';
 
     public $value = [];
 

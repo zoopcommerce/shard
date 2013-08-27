@@ -15,8 +15,8 @@ use Zoop\Shard\Annotations as Shard;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait UpdatedOnTrait {
-
+trait UpdatedOnTrait
+{
     /**
      * @ODM\Date
      * @Shard\Stamp\UpdatedOn
@@ -27,7 +27,8 @@ trait UpdatedOnTrait {
      *
      * @return date
      */
-    public function getUpdatedOn(){
+    public function getUpdatedOn()
+    {
         return $this->updatedOn;
     }
 }

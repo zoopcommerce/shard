@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Slug extends Annotation
 {
-    const event = 'annotationSlugValidator';
+    const EVENT = 'annotationSlugValidator';
 
     public $value = true;
 

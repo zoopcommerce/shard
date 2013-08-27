@@ -22,8 +22,8 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareInterface {
-
+class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareInterface
+{
     use ServiceLocatorAwareTrait;
     use DocumentManagerAwareTrait;
 
@@ -46,18 +46,21 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
 
     protected $classNameField;
 
-    public function setTypeSerializers(array $typeSerializers) {
+    public function setTypeSerializers(array $typeSerializers)
+    {
         $this->typeSerializers = $typeSerializers;
     }
 
     /**
      * @param int $maxNestingDepth
      */
-    public function setMaxNestingDepth($maxNestingDepth){
+    public function setMaxNestingDepth($maxNestingDepth)
+    {
         $this->maxNestingDepth = (int) $maxNestingDepth;
     }
 
-    public function setClassNameField($classNameField) {
+    public function setClassNameField($classNameField)
+    {
         $this->classNameField = (string) $classNameField;
     }
 
@@ -67,7 +70,8 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
      * @param DocumentManager $documentManager
      * @return array
      */
-    public function toArray($document){
+    public function toArray($document)
+    {
         return $this->serialize($document);
     }
 
@@ -77,15 +81,16 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
      * @param DocumentManager $documentManager
      * @return string
      */
-    public function toJson($document){
+    public function toJson($document)
+    {
         return json_encode($this->serialize($document));
     }
 
-    public function applySerializeMetadataToField($value, $field, $className){
-
+    public function applySerializeMetadataToField($value, $field, $className)
+    {
         $classMetadata = $this->documentManager->getClassMetadata($className);
 
-        if ( ! $this->isSerializableField($field, $classMetadata)){
+        if (! $this->isSerializableField($field, $classMetadata)) {
             return null;
         }
 
@@ -99,7 +104,7 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                 );
             case isset($mapping['embedded']) && $mapping['type'] == 'many':
                 $return = [];
-                foreach($value as $index => $embedArray){
+                foreach ($value as $index => $embedArray) {
                     $return[$index] = $this->applySerializeMetadataToArray(
                         $embedArray,
                         $mapping['targetDocument']
@@ -121,7 +126,7 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                 if ($this->nestingDepth < $this->maxNestingDepth) {
                     $this->nestingDepth++;
                     $return = [];
-                    foreach($value as $index => $referenceDocument){
+                    foreach ($value as $index => $referenceDocument) {
                         $return[$index] = $this->getReferenceSerializer($field, $classMetadata)->serialize(
                             is_array($referenceDocument) ? $referenceDocument['$id'] : $referenceDocument,
                             $mapping
@@ -147,27 +152,27 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
      * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
      * @return array
      */
-    public function applySerializeMetadataToArray(array $array, $className) {
-
+    public function applySerializeMetadataToArray(array $array, $className)
+    {
         $classMetadata = $this->documentManager->getClassMetadata($className);
         $fieldList = $this->fieldListForSerialize($classMetadata);
         $return = array_merge($array, $this->serializeClassNameAndDiscriminator($classMetadata));
 
-        foreach ($classMetadata->fieldMappings as $field=>$mapping){
+        foreach ($classMetadata->fieldMappings as $field => $mapping) {
 
-            if ( ! in_array($field, $fieldList)){
-                if (isset($return[$field])){
+            if (! in_array($field, $fieldList)) {
+                if (isset($return[$field])) {
                     unset($return[$field]);
                 }
                 continue;
             }
 
-            if ( isset($mapping['id']) && $mapping['id'] && isset($array['_id'])){
+            if (isset($mapping['id']) && $mapping['id'] && isset($array['_id'])) {
                 $return[$field] = $array['_id'];
                 unset($return['_id']);
             }
 
-            if ( ! isset($return[$field])){
+            if (! isset($return[$field])) {
                 continue;
             }
 
@@ -177,8 +182,8 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
         return $return;
     }
 
-    protected function serializeClassNameAndDiscriminator(ClassMetadata $metadata) {
-
+    protected function serializeClassNameAndDiscriminator(ClassMetadata $metadata)
+    {
         $return = array();
 
         if (isset($metadata->serializer['className']) &&
@@ -197,8 +202,11 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
         return $return;
     }
 
-    protected function removeClassNameAndDiscriminatorFromArray(array $array, $classNameField, $discriminatorField = null) {
-
+    protected function removeClassNameAndDiscriminatorFromArray(
+        array $array,
+        $classNameField,
+        $discriminatorField = null
+    ) {
         if (isset($array[$classNameField])) {
             unset($array[$classNameField]);
         }
@@ -210,12 +218,12 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
         return $array;
     }
 
-    public function fieldListForUnserialize(ClassMetadata $classMetadata){
-
+    public function fieldListForUnserialize(ClassMetadata $classMetadata)
+    {
         $return = [];
 
-        foreach ($classMetadata->fieldMappings as $field=>$mapping){
-            if ($this->isUnserializableField($field, $classMetadata)){
+        foreach ($classMetadata->fieldMappings as $field => $mapping) {
+            if ($this->isUnserializableField($field, $classMetadata)) {
                 $return[] = $field;
             }
         }
@@ -223,25 +231,25 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
         return $return;
     }
 
-    public function isUnserializableField($field, ClassMetadata $classMetadata){
-
+    public function isUnserializableField($field, ClassMetadata $classMetadata)
+    {
         if (isset($classMetadata->serializer['fields'][$field]['ignore']) &&
             (
                 $classMetadata->serializer['fields'][$field]['ignore'] == self::IGNORE_WHEN_UNSERIALIZING ||
                 $classMetadata->serializer['fields'][$field]['ignore'] == self::IGNORE_ALWAYS
             )
-        ){
-           return false;
+        ) {
+            return false;
         }
         return true;
     }
 
-    public function fieldListForSerialize(ClassMetadata $classMetadata){
-
+    public function fieldListForSerialize(ClassMetadata $classMetadata)
+    {
         $return = [];
 
-        foreach ($classMetadata->fieldMappings as $field=>$mapping){
-            if ($this->isSerializableField($field, $classMetadata)){
+        foreach ($classMetadata->fieldMappings as $field => $mapping) {
+            if ($this->isSerializableField($field, $classMetadata)) {
                 $return[] = $field;
             }
         }
@@ -249,9 +257,9 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
         return $return;
     }
 
-    public function isSerializableField($field, ClassMetadata $classMetadata){
-
-        if (!isset($classMetadata->fieldMappings[$field])){
+    public function isSerializableField($field, ClassMetadata $classMetadata)
+    {
+        if (! isset($classMetadata->fieldMappings[$field])) {
             return false;
         }
         if (isset($classMetadata->serializer['fields'][$field]['ignore']) &&
@@ -259,8 +267,8 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                 $classMetadata->serializer['fields'][$field]['ignore'] == self::IGNORE_WHEN_SERIALIZING ||
                 $classMetadata->serializer['fields'][$field]['ignore'] == self::IGNORE_ALWAYS
             )
-        ){
-           return false;
+        ) {
+            return false;
         }
         return true;
     }
@@ -272,16 +280,16 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
      * @return array
      * @throws \BadMethodCallException
      */
-    protected function serialize($document){
-
+    protected function serialize($document)
+    {
         $metadata = $this->documentManager->getClassMetadata(get_class($document));
         $return = $this->serializeClassNameAndDiscriminator($metadata);
 
-        if ($document instanceof Proxy){
+        if ($document instanceof Proxy) {
             $document->__load();
         }
 
-        foreach ($this->fieldListForSerialize($metadata) as $field){
+        foreach ($this->fieldListForSerialize($metadata) as $field) {
 
             $mapping = $metadata->fieldMappings[$field];
             $rawValue = $metadata->reflFields[$field]->getValue($document);
@@ -291,10 +299,10 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                     $return[$field] = $this->serialize($rawValue);
                     break;
                 case $rawValue && isset($mapping['embedded']) && $mapping['type'] == 'many':
-                    if (count($rawValue) == 0){
+                    if (count($rawValue) == 0) {
                         break;
                     }
-                    foreach($rawValue as $embedDocument){
+                    foreach ($rawValue as $embedDocument) {
                         $return[$field][] = $this->serialize($embedDocument);
                     }
                     break;
@@ -304,28 +312,28 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                         $referenceMetadata = $this->documentManager->getClassMetadata($mapping['targetDocument']);
                         $serializedDocument = $this->getReferenceSerializer($field, $metadata)->serialize(
                             $rawValue instanceof Proxy ?
-                                $rawValue->{'get' . ucfirst($referenceMetadata->identifier)}() :
-                                $referenceMetadata->reflFields[$referenceMetadata->identifier]->getValue($rawValue),
+                            $rawValue->{'get' . ucfirst($referenceMetadata->identifier)}() :
+                            $referenceMetadata->reflFields[$referenceMetadata->identifier]->getValue($rawValue),
                             $mapping
                         );
-                        if ($serializedDocument){
+                        if ($serializedDocument) {
                             $return[$field] = $serializedDocument;
                         }
                         $this->nestingDepth--;
                     }
                     break;
                 case $rawValue && isset($mapping['reference']) && $mapping['type'] == 'many':
-                    if (count($rawValue) == 0){
+                    if (count($rawValue) == 0) {
                         break;
                     }
                     if ($this->nestingDepth < $this->maxNestingDepth) {
                         $this->nestingDepth++;
-                        foreach($rawValue->getMongoData() as $referenceDocument){
+                        foreach ($rawValue->getMongoData() as $referenceDocument) {
                             $serializedDocument = $this->getReferenceSerializer($field, $metadata)->serialize(
                                 is_array($referenceDocument) ? $referenceDocument['$id'] : (string) $referenceDocument,
                                 $mapping
                             );
-                            if ($serializedDocument){
+                            if ($serializedDocument) {
                                 $return[$field][] = $serializedDocument;
                             }
                         }
@@ -342,8 +350,9 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
         return $return;
     }
 
-    protected function getReferenceSerializer($field, $metadata){
-        if (isset($metadata->serializer['fields'][$field]['referenceSerializer'])){
+    protected function getReferenceSerializer($field, $metadata)
+    {
+        if (isset($metadata->serializer['fields'][$field]['referenceSerializer'])) {
             $name = $metadata->serializer['fields'][$field]['referenceSerializer'];
         } else {
             $name = 'serializer.reference.refLazy';
@@ -351,7 +360,8 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
         return $this->serviceLocator->get($name);
     }
 
-    protected function getTypeSerializer($type){
+    protected function getTypeSerializer($type)
+    {
         return $this->serviceLocator->get($this->typeSerializers[$type]);
     }
 
@@ -406,11 +416,11 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
         $document = null
     ) {
 
-        if ( ! isset($className)){
+        if (! isset($className)) {
             $className = $data[$this->classNameField];
         }
 
-        if ( !isset($className) || !class_exists($className)){
+        if (! isset($className) || ! class_exists($className)) {
             throw new Exception\ClassNotFoundException(sprintf('ClassName %s could not be loaded', $className));
         }
 
@@ -418,14 +428,14 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
         $metadata = $this->documentManager->getClassMetadata($className);
 
         // Check for reference
-        if (isset($data['$ref'])){
+        if (isset($data['$ref'])) {
             $pieces = explode('/', $data['$ref']);
             $id = $pieces[count($pieces) - 1];
             return $documentManager->getReference($className, $id);
         }
 
         // Attempt to load prexisting document from db
-        if (!isset($document) && isset($data[$metadata->identifier])){
+        if (! isset($document) && isset($data[$metadata->identifier])) {
             $document = $documentManager
                 ->createQueryBuilder()
                 ->find($metadata->name)
@@ -433,16 +443,16 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                 ->getQuery()
                 ->getSingleResult();
         }
-        if (isset($document)){
+        if (isset($document)) {
             $newInstance = false;
         } else {
             $newInstance = true;
             $document = $metadata->newInstance();
         }
 
-        foreach ($this->fieldListForUnserialize($metadata) as $field){
+        foreach ($this->fieldListForUnserialize($metadata) as $field) {
 
-            if ($field == $metadata->identifier && !$newInstance){
+            if ($field == $metadata->identifier && !$newInstance) {
                 continue;
             }
 
@@ -460,30 +470,32 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                     break;
                 case isset($mapping['embedded']) && $mapping['type'] == 'many':
                     $newArray = [];
-                    if (isset($data[$field])){
-//TODO: come back and finish this new loop
-//                        $embeddedCollection = $metadata->reflFields[$field]->getValue($document);
-//                        for($i = 0; $i < count($data[$field]); $i++){
-//                            $newArray[] = $this->unserialize(
-//                                $data[$field][$i],
-//                                $mapping['targetDocument'],
-//                                $mode,
-//                                $embeddedCollection[$i]
-//                            );
-//                        }
-                        foreach($data[$field] as $embedData){
-                            $newArray[] = $this->unserialize(
-                                $embedData,
-                                $mapping['targetDocument'],
-                                $mode
-                            );
+                    if (isset($data[$field])) {
+                        if (! ($embeddedCollection = $metadata->reflFields[$field]->getValue($document))) {
+                            $embeddedCollection = new ArrayCollection;
                         }
-                        $value = new ArrayCollection($newArray);
+                        for ($i = 0; $i < count($data[$field]); $i++) {
+                            if (count($embeddedCollection) > $i - 1) {
+                                $embeddedCollection[$i] = $this->unserialize(
+                                    $data[$field][$i],
+                                    $mapping['targetDocument'],
+                                    $mode,
+                                    $embeddedCollection[$i]
+                                );
+                            } else {
+                                $embeddedCollection[] = $this->unserialize(
+                                    $data[$field][$i],
+                                    $mapping['targetDocument'],
+                                    $mode
+                                );
+                            }
+                        }
+                        $value = $embeddedCollection;
                         break;
                     }
                     switch ($mode) {
                         case self::UNSERIALIZE_PATCH:
-                            if ($metadata->reflFields[$field]->getValue($document) == null){
+                            if ($metadata->reflFields[$field]->getValue($document) == null) {
                                 $value = new ArrayCollection([]);
                             }
                             break;
@@ -493,11 +505,11 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                     }
                     break;
                 case isset($mapping['reference']) && $mapping['type'] == 'one' && isset($data[$field]):
-                    if (isset($data[$field]['$ref'])){
+                    if (isset($data[$field]['$ref'])) {
                         $pieces = explode('/', $data[$field]['$ref']);
                         $id = $pieces[count($pieces) - 1];
                         $value = $documentManager->getReference($mapping['targetDocument'], $id);
-                    } else if (is_array($data[$field])) {
+                    } elseif (is_array($data[$field])) {
                         $value = $this->unserialize(
                             $data[$field],
                             $mapping['targetDocument'],
@@ -509,19 +521,25 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                     break;
                 case isset($mapping['reference']) && $mapping['type'] == 'many':
                     $newArray = [];
-                    if (isset($data[$field])){
-                        foreach($data[$field] as $value){
+                    if (isset($data[$field])) {
+                        foreach ($data[$field] as $value) {
 
                             //extract id for a reference, otherwise, unserialize array
                             unset($id);
-                            if (is_array($value)){
-                                if (isset($value['$ref'])){
+                            if (is_array($value)) {
+                                if (isset($value['$ref'])) {
                                     $pieces = explode('/', $value['$ref']);
                                     $id = $pieces[count($pieces) - 1];
                                 } else {
-                                    $value = $this->removeClassNameAndDiscriminatorFromArray($value, $this->classNameField);
-                                    $identifier = $documentManager->getClassMetadata($mapping['targetDocument'])->identifier;
-                                    if (count($value) == 1 && isset($value[$identifier])){
+                                    $value = $this->removeClassNameAndDiscriminatorFromArray(
+                                        $value,
+                                        $this->classNameField
+                                    );
+                                    $identifier = $documentManager
+                                        ->getClassMetadata($mapping['targetDocument'])
+                                        ->identifier;
+
+                                    if (count($value) == 1 && isset($value[$identifier])) {
                                         $id = $value[$identifier];
                                     }
                                 }
@@ -529,7 +547,7 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                                 $id = $value;
                             }
 
-                            if (isset($id)){
+                            if (isset($id)) {
                                 $newArray[] = $documentManager->getReference($mapping['targetDocument'], $id);
                             } else {
                                 $newArray[] = $this->unserialize(
@@ -544,7 +562,7 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                     }
                     switch ($mode) {
                         case self::UNSERIALIZE_PATCH:
-                            if ($metadata->reflFields[$field]->getValue($document) == null){
+                            if ($metadata->reflFields[$field]->getValue($document) == null) {
                                 $value = new ArrayCollection([]);
                             }
                             break;
@@ -563,9 +581,9 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                     $value = $data[$field];
                     break;
             }
-            if (isset($value)){
+            if (isset($value)) {
                 $metadata->reflFields[$field]->setValue($document, $value);
-            } else if ($mode == self::UNSERIALIZE_UPDATE){
+            } elseif ($mode == self::UNSERIALIZE_UPDATE) {
                 $metadata->reflFields[$field]->setValue($document, null);
             }
         }

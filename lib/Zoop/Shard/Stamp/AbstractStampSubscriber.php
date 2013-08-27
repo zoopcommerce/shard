@@ -17,15 +17,16 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-abstract class AbstractStampSubscriber implements EventSubscriber, ServiceLocatorAwareInterface {
-
+abstract class AbstractStampSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
+{
     use ServiceLocatorAwareTrait;
 
     /**
      *
      * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
      */
-    protected function recomputeChangeset(LifecycleEventArgs $eventArgs) {
+    protected function recomputeChangeset(LifecycleEventArgs $eventArgs)
+    {
         $documentManager = $eventArgs->getDocumentManager();
         $document = $eventArgs->getDocument();
         $unitOfWork = $documentManager->getUnitOfWork();
@@ -33,7 +34,8 @@ abstract class AbstractStampSubscriber implements EventSubscriber, ServiceLocato
         $unitOfWork->recomputeSingleDocumentChangeSet($metadata, $document);
     }
 
-    protected function getUsername(){
+    protected function getUsername()
+    {
         return $this->serviceLocator->get('user')->getUsername();
     }
 }

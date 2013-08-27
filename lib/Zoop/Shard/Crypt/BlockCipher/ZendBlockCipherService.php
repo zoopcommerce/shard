@@ -16,12 +16,13 @@ use Zoop\Common\Crypt\SaltInterface;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class ZendBlockCipherService implements BlockCipherServiceInterface, ServiceLocatorAwareInterface {
-
+class ZendBlockCipherService implements BlockCipherServiceInterface, ServiceLocatorAwareInterface
+{
     use ServiceLocatorAwareTrait;
 
-    public function encryptValue($plaintext, $key, $salt = null){
-        if ( ! isset($plaintext) || $plaintext == ''){
+    public function encryptValue($plaintext, $key, $salt = null)
+    {
+        if (! isset($plaintext) || $plaintext == '') {
             return $plaintext;
         }
 
@@ -33,20 +34,21 @@ class ZendBlockCipherService implements BlockCipherServiceInterface, ServiceLoca
         return $cipher->encrypt($plaintext);
     }
 
-    public function decryptValue($encryptedText, $key){
+    public function decryptValue($encryptedText, $key)
+    {
         $cipher = BlockCipher::factory('mcrypt', array('algorithm' => 'aes'));
         $cipher->setKey($key);
         return $cipher->decrypt($encryptedText);
     }
 
-    public function encryptField($field, $document, $metadata){
-
-        if (isset($metadata->crypt['blockCipher'][$field]['salt'])){
+    public function encryptField($field, $document, $metadata)
+    {
+        if (isset($metadata->crypt['blockCipher'][$field]['salt'])) {
             $saltInterface = $this->serviceLocator->get($metadata->crypt['blockCipher'][$field]['salt']);
         } else {
             $saltInterface = $document;
         }
-        if ($saltInterface instanceof SaltInterface){
+        if ($saltInterface instanceof SaltInterface) {
             $salt = $saltInterface->getSalt();
         } else {
             $salt = null;
@@ -64,8 +66,8 @@ class ZendBlockCipherService implements BlockCipherServiceInterface, ServiceLoca
         );
     }
 
-    public function decryptField($field, $document, $metadata){
-
+    public function decryptField($field, $document, $metadata)
+    {
         $key = $this->serviceLocator->get($metadata->crypt['blockCipher'][$field]['key'])->getKey();
 
         $metadata->reflFields[$field]->setValue(

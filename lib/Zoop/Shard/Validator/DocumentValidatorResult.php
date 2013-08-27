@@ -20,27 +20,33 @@ class DocumentValidatorResult extends Result
 
     protected $fieldResults = [];
 
-    public function getClassResults() {
+    public function getClassResults()
+    {
         return $this->classResults;
     }
 
-    public function setClassResults(array $classResults) {
+    public function setClassResults(array $classResults)
+    {
         $this->classResults = $classResults;
     }
 
-    public function addClassResult(Result $result){
+    public function addClassResult(Result $result)
+    {
         $this->classResults[] = $result;
     }
 
-    public function getFieldResults() {
+    public function getFieldResults()
+    {
         return $this->fieldResults;
     }
 
-    public function setFieldResults(array $fieldResults) {
+    public function setFieldResults(array $fieldResults)
+    {
         $this->fieldResults = $fieldResults;
     }
 
-    public function addFieldResult($field, Result $result){
+    public function addFieldResult($field, Result $result)
+    {
         $this->fieldResults[$field] = $result;
     }
 }

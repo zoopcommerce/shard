@@ -22,7 +22,7 @@ use Doctrine\Common\Annotations\Annotation;
 final class ClassName extends Annotation
 {
 
-    const event = 'annotationSerializerClassName';
+    const EVENT = 'annotationSerializerClassName';
 
     public $value = true;
 }

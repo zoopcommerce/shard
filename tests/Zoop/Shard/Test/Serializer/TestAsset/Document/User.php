@@ -9,8 +9,8 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Zoop\Shard\Annotation\Annotations as Shard;
 
 /** @ODM\Document */
-class User {
-
+class User
+{
     /**
      * @ODM\Id(strategy="UUID")
      */
@@ -44,31 +44,38 @@ class User {
         $this->groups = new ArrayCollection();
     }
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function getUsername() {
+    public function getUsername()
+    {
         return $this->username;
     }
 
-    public function setUsername($username) {
+    public function setUsername($username)
+    {
         $this->username = $username;
     }
 
-    public function getPassword() {
+    public function getPassword()
+    {
         return $this->password;
     }
 
-    public function setPassword($password) {
+    public function setPassword($password)
+    {
         $this->password = $password;
     }
 
-    public function location() {
+    public function location()
+    {
         return $this->location;
     }
 
-    public function defineLocation($location) {
+    public function defineLocation($location)
+    {
         $this->location = $location;
     }
 
@@ -77,7 +84,8 @@ class User {
         return $this->groups;
     }
 
-    public function setGroups(array $groups){
+    public function setGroups(array $groups)
+    {
         $this->groups = $groups;
     }
 
@@ -86,11 +94,13 @@ class User {
         $this->groups[] = $group;
     }
 
-    public function getProfile() {
+    public function getProfile()
+    {
         return $this->profile;
     }
 
-    public function setProfile(Profile $profile) {
+    public function setProfile(Profile $profile)
+    {
         $this->profile = $profile;
     }
 }

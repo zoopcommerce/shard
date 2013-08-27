@@ -27,31 +27,38 @@ class FlavourEager
      */
     protected $cakes;
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function setName($name) {
+    public function setName($name)
+    {
         $this->name = $name;
     }
 
-    public function getCakes() {
+    public function getCakes()
+    {
         return $this->cakes;
     }
 
-    public function setCakes(array $cakes) {
+    public function setCakes(array $cakes)
+    {
         $this->cakes = $cakes;
     }
 
-    public function addCake(CakeEager $cake) {
+    public function addCake(CakeEager $cake)
+    {
         $this->cakes[] = $cake;
     }
 
-    public function __construct($name) {
+    public function __construct($name)
+    {
         $this->name = $name;
     }
 }

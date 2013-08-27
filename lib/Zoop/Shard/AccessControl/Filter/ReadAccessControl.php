@@ -23,11 +23,13 @@ class ReadAccessControl extends BsonFilter
 
     protected $accessController;
 
-    public function setAccessController(AccessController $accessController) {
+    public function setAccessController(AccessController $accessController)
+    {
         $this->accessController = $accessController;
     }
 
-    public function getAccessController() {
+    public function getAccessController()
+    {
         return $this->accessController;
     }
 
@@ -39,15 +41,15 @@ class ReadAccessControl extends BsonFilter
     public function addFilterCriteria(ClassMetadata $metadata)
     {
         $accessController = $this->accessController;
-        $result = $accessController->areAllowed([Actions::read], $metadata);
+        $result = $accessController->areAllowed([Actions::READ], $metadata);
 
-        if ($result->hasCriteria()){
-            if ($result->getAllowed()){
+        if ($result->hasCriteria()) {
+            if ($result->getAllowed()) {
                 return $result->getNew();
             } else {
                 $criteria = [];
-                foreach($result->getNew() as $field => $value){
-                    if ($value instanceof \MongoRegex){
+                foreach ($result->getNew() as $field => $value) {
+                    if ($value instanceof \MongoRegex) {
                         $critiera[$field] = ['$not' => $value];
                     } else {
                         $critiera[$field] = ['$ne' => $value];
@@ -56,7 +58,7 @@ class ReadAccessControl extends BsonFilter
                 return $critiera;
             }
         } else {
-            if ($result->getAllowed()){
+            if ($result->getAllowed()) {
                 return []; //allow read
             } else {
                 return [$metadata->identifier => ['$exists' => false]]; //deny read

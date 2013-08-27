@@ -15,8 +15,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait SoftDeleteableTrait {
-
+trait SoftDeleteableTrait
+{
     /**
      * @ODM\Boolean
      * @Shard\SoftDelete

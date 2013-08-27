@@ -33,22 +33,25 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     /**
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return [
             ODMEvents::prePersist,
             ODMEvents::onFlush
         ];
     }
 
-    public function getHashHelper() {
-        if (!isset($this->hashHelper)){
+    public function getHashHelper()
+    {
+        if (! isset($this->hashHelper)) {
             $this->hashHelper = $this->serviceLocator->get('crypt.hashhelper');
         }
         return $this->hashHelper;
     }
 
-    public function getBlockCipherHelper() {
-        if (!isset($this->blockCipherHelper)){
+    public function getBlockCipherHelper()
+    {
+        if (!isset($this->blockCipherHelper)) {
             $this->blockCipherHelper = $this->serviceLocator->get('crypt.blockcipherhelper');
         }
         return $this->blockCipherHelper;
@@ -66,26 +69,26 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         foreach ($unitOfWork->getScheduledDocumentUpdates() as $document) {
             $changeSet = $unitOfWork->getDocumentChangeSet($document);
             $metadata = $documentManager->getClassMetadata(get_class($document));
-            foreach ($changeSet as $field => $change){
+            foreach ($changeSet as $field => $change) {
                 $old = $change[0];
                 $new = $change[1];
 
                 // Check for change
-                if ($old == null || $old == $new){
+                if ($old == null || $old == $new) {
                     continue;
                 }
 
-                if ( ! isset($new) || $new == ''){
+                if (! isset($new) || $new == '') {
                     continue;
                 }
 
                 $requireRecompute = false;
 
-                if(isset($metadata->crypt['hash']) &&
+                if (isset($metadata->crypt['hash']) &&
                    isset($metadata->crypt['hash'][$field])
-                ){
+                ) {
                     $service = $this->serviceLocator->get($metadata->crypt['hash'][$field]['service']);
-                    if (!$service instanceof HashServiceInterface){
+                    if (! $service instanceof HashServiceInterface) {
                         throw new \Zoop\Shard\Exception\InvalidArgumentException();
                     }
                     $service->hashField($field, $document, $metadata);
@@ -93,16 +96,16 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 
                 } elseif (isset($metadata->crypt['blockCipher']) &&
                    isset($metadata->crypt['blockCipher'][$field])
-                ){
+                ) {
                     $service = $this->serviceLocator->get($metadata->crypt['blockCipher'][$field]['service']);
-                    if (!$service instanceof BlockCipherServiceInterface){
+                    if (! $service instanceof BlockCipherServiceInterface) {
                         throw new \Zoop\Shard\Exception\InvalidArgumentException();
                     }
                     $service->encryptField($field, $document, $metadata);
                     $requireRecompute = true;
                 }
 
-                if ($requireRecompute){
+                if ($requireRecompute) {
                     $unitOfWork->recomputeSingleDocumentChangeSet($metadata, $document);
                 }
             }
@@ -113,7 +116,8 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
      *
      * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
      */
-    public function prePersist(LifecycleEventArgs $eventArgs) {
+    public function prePersist(LifecycleEventArgs $eventArgs)
+    {
         $document = $eventArgs->getDocument();
         $documentManager = $eventArgs->getDocumentManager();
         $metadata = $documentManager->getClassMetadata(get_class($document));

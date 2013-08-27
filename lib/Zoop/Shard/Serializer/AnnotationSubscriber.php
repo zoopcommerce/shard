@@ -23,15 +23,16 @@ class AnnotationSubscriber implements EventSubscriber
      *
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return [
-            Shard\Serializer\ClassName::event,
-            Shard\Serializer\Discriminator::event,
-            Shard\Serializer\Eager::event,
-            Shard\Serializer\Ignore::event,
-            Shard\Serializer\RefLazy::event,
-            Shard\Serializer\ReferenceSerializer::event,
-            Shard\Serializer\SimpleLazy::event,
+            Shard\Serializer\ClassName::EVENT,
+            Shard\Serializer\Discriminator::EVENT,
+            Shard\Serializer\Eager::EVENT,
+            Shard\Serializer\Ignore::EVENT,
+            Shard\Serializer\RefLazy::EVENT,
+            Shard\Serializer\ReferenceSerializer::EVENT,
+            Shard\Serializer\SimpleLazy::EVENT,
         ];
     }
 
@@ -121,8 +122,9 @@ class AnnotationSubscriber implements EventSubscriber
             'serializer.reference.simpleLazy';
     }
 
-    protected function createMetadata($metadata){
-        if ( ! isset($metadata->serializer)){
+    protected function createMetadata($metadata)
+    {
+        if (! isset($metadata->serializer)) {
             $metadata->serializer = [
                 'fields'   => []
             ];

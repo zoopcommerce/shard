@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class RefLazy extends Annotation
 {
-    const event = 'annotationSerializerRefLazy';
+    const EVENT = 'annotationSerializerRefLazy';
 
     public $value = true;
 }

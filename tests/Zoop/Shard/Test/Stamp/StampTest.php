@@ -7,37 +7,39 @@ use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\Stamp\TestAsset\Document\Simple;
 use Zoop\Shard\Test\TestAsset\User;
 
-class StampTest extends BaseTest {
-
+class StampTest extends BaseTest
+{
     protected $subscriber;
 
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.stamp' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    'user' => function(){
-                        $user = new User();
-                        $user->setUsername('toby');
-                        return $user;
-                    }
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.stamp' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                        'user' => function () {
+                            $user = new User();
+                            $user->setUsername('toby');
+                            return $user;
+                        }
+                    ]
                 ]
             ]
-        ]);
+        );
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
     }
 
-    public function testStamp(){
-
+    public function testStamp()
+    {
         $documentManager = $this->documentManager;
         $testDoc = new Simple();
         $testDoc->setName('version1');

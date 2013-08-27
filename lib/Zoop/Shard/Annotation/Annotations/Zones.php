@@ -20,5 +20,5 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Zones extends Annotation
 {
-    const event = 'annotationZones';
+    const EVENT = 'annotationZones';
 }

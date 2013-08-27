@@ -18,37 +18,37 @@ final class Events
     /**
      * Fires before soft delete happens
      */
-    const preSoftDelete = 'preSoftDelete';
+    const PRE_SOFT_DELETE = 'preSoftDelete';
 
     /**
      * Fires after soft delete happens
      */
-    const postSoftDelete = 'postSoftDelete';
+    const POST_SOFT_DELETE = 'postSoftDelete';
 
     /**
      * Fires before a soft deleted document is restored
      */
-    const preRestore = 'preRestore';
+    const PRE_RESTORE = 'preRestore';
 
     /**
      * Fires after a soft deleted document is restored
      */
-    const postRestore = 'postRestore';
+    const POST_RESTORE = 'postRestore';
 
     /**
      * Fires if an updated is attempted on a soft deleted object
      */
-    const softDeletedUpdateDenied = 'softDeletedUpdateDenied';
+    const SOFT_DELETED_UPDATE_DENIED = 'softDeletedUpdateDenied';
 
     /**
      * Triggered when active user attempts to soft delete a document they don't have permission
      * for
      */
-    const softDeleteDenied = 'softDeleteDenied';
+    const SOFT_DELETE_DENIED = 'softDeleteDenied';
 
     /**
      * Triggers when active user attempts to restore a document they don't have permission
      * for
      */
-    const restoreDenied = 'restoreDenied';
+    const RESTORE_DENIED = 'restoreDenied';
 }

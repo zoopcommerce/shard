@@ -18,11 +18,11 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Equal extends Annotation
 {
-    const event = 'annotationEqualValidator';
+    const EVENT = 'annotationEqualValidator';
 
     public $value = true;
 
     public $compareValue;
-    
+
     public $class = 'Zoop\Mystique\Equal';
 }

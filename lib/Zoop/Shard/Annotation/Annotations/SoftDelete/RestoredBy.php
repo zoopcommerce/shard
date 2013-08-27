@@ -15,9 +15,9 @@ use Doctrine\Common\Annotations\Annotation;
  * @Annotation
  * @Target({"PROPERTY"})
  */
-final class RestoredBy extends Annotation {
-
-    const event = 'annotationSoftDeleteRestoredBy';
+final class RestoredBy extends Annotation
+{
+    const EVENT = 'annotationSoftDeleteRestoredBy';
 
     public $value = true;
 }

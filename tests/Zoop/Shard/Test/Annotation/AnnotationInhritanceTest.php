@@ -8,42 +8,37 @@ use Zoop\Shard\Test\Annotation\TestAsset\Document\ChildB;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\TestAsset\User;
 
-class AnnotationInheritaceTest extends BaseTest {
-
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.dojo' => [
-                    'file_paths' => [[
-                        'filter' => '',
-                        'path' => __DIR__ . '/../../../../Dojo'
-                    ]]
+class AnnotationInheritaceTest extends BaseTest
+{
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
-                'extension.serializer' => true,
-                'extension.validator' => true,
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    'user' => function(){
-                        $user = new User();
-                        return $user;
-                    }
+                'extension_configs' => [
+                    'extension.serializer' => true,
+                    'extension.validator' => true,
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                        'user' => function () {
+                            $user = new User();
+                            return $user;
+                        }
+                    ]
                 ]
-            ]
-       ]);
+           ]
+        );
 
-       $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
-
+        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
     }
 
-    public function testAnnotationInheritance(){
-
+    public function testAnnotationInheritance()
+    {
         $documentManager = $this->documentManager;
 
         $metadata = $documentManager->getClassMetadata(get_class(new ChildA));
@@ -54,8 +49,8 @@ class AnnotationInheritaceTest extends BaseTest {
         $this->assertEquals('ignore_always', $metadata->serializer['fields']['name']['ignore']);
     }
 
-    public function testAnnotationInheritanceOverride(){
-
+    public function testAnnotationInheritanceOverride()
+    {
         $documentManager = $this->documentManager;
 
         $metadata = $documentManager->getClassMetadata(get_class(new ChildB));

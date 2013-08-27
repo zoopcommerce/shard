@@ -20,7 +20,7 @@ use Zoop\Shard\Serializer\Serializer as Constants;
  */
 final class Ignore extends Annotation
 {
-    const event = 'annotationSerializerIgnore';
+    const EVENT = 'annotationSerializerIgnore';
 
     public $value = Constants::IGNORE_ALWAYS;
 }

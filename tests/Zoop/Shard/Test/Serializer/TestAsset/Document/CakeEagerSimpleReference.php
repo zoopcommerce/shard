@@ -12,8 +12,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  * @ODM\Document
  * @Shard\Serializer\ClassName
  */
-class CakeEagerSimpleReference {
-
+class CakeEagerSimpleReference
+{
     /**
      * @ODM\Id(strategy="UUID")
      */
@@ -36,7 +36,8 @@ class CakeEagerSimpleReference {
         $this->ingredients = new ArrayCollection();
     }
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
@@ -45,7 +46,8 @@ class CakeEagerSimpleReference {
         return $this->ingredients;
     }
 
-    public function setIngredients(array $ingredients){
+    public function setIngredients(array $ingredients)
+    {
         $this->ingredients = $ingredients;
     }
 
@@ -54,11 +56,13 @@ class CakeEagerSimpleReference {
         $this->ingredients[] = $ingredient;
     }
 
-    public function getFlavour() {
+    public function getFlavour()
+    {
         return $this->flavour;
     }
 
-    public function setFlavour($flavour) {
+    public function setFlavour($flavour)
+    {
         $this->flavour = $flavour;
     }
 }

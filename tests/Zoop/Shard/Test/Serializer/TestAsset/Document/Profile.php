@@ -13,23 +13,28 @@ class Profile
     /** @ODM\String */
     protected $lastname;
 
-    public function getFirstname() {
+    public function getFirstname()
+    {
         return $this->firstname;
     }
 
-    public function setFirstname($firstname) {
+    public function setFirstname($firstname)
+    {
         $this->firstname = $firstname;
     }
 
-    public function getLastname() {
+    public function getLastname()
+    {
         return $this->lastname;
     }
 
-    public function setLastname($lastname) {
+    public function setLastname($lastname)
+    {
         $this->lastname = $lastname;
     }
 
-    public function __construct($firstname, $lastname){
+    public function __construct($firstname, $lastname)
+    {
         $this->firstname = $firstname;
         $this->lastname = $lastname;
     }

@@ -19,7 +19,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Hash extends Annotation
 {
-    const event = 'annotationCryptHash';
+    const EVENT = 'annotationCryptHash';
 
     /**
      *

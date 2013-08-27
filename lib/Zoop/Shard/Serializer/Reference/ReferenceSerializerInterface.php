@@ -11,7 +11,7 @@ namespace Zoop\Shard\Serializer\Reference;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-interface ReferenceSerializerInterface{
-
+interface ReferenceSerializerInterface
+{
     public function serialize($id, array $mapping);
 }

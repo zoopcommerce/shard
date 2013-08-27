@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Password extends Annotation
 {
-    const event = 'annotationPasswordValidator';
+    const EVENT = 'annotationPasswordValidator';
 
     public $value = true;
 

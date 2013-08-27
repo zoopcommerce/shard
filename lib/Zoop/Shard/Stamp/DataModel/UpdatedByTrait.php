@@ -14,8 +14,8 @@ use Zoop\Shard\Annotations as Shard;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait UpdatedByTrait {
-
+trait UpdatedByTrait
+{
     /**
      * @ODM\String
      * @Shard\Stamp\UpdatedBy
@@ -26,8 +26,8 @@ trait UpdatedByTrait {
      *
      * @return string
      */
-    public function getUpdatedBy(){
+    public function getUpdatedBy()
+    {
         return $this->updatedBy;
     }
 }
-

@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Length extends Annotation
 {
-    const event = 'annotationLengthValidator';
+    const EVENT = 'annotationLengthValidator';
 
     public $value = true;
 

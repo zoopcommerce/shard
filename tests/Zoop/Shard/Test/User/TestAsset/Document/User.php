@@ -15,6 +15,6 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  *     @Shard\Permission\Basic(roles="admin", allow="update::roles"                                   )
  * })
  */
-class User extends RoleAwareUser {
-
+class User extends RoleAwareUser
+{
 }

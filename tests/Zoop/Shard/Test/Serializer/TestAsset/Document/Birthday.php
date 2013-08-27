@@ -9,8 +9,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 /**
  * @ODM\Document
  */
-class Birthday {
-
+class Birthday
+{
     /**
      * @ODM\Id(strategy="UUID")
      */
@@ -32,23 +32,28 @@ class Birthday {
         $this->setDate($date);
     }
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function setName($name) {
+    public function setName($name)
+    {
         $this->name = $name;
     }
 
-    public function getDate() {
+    public function getDate()
+    {
         return $this->date;
     }
 
-    public function setDate($date) {
+    public function setDate($date)
+    {
         $this->date = $date;
     }
 }

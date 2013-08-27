@@ -13,18 +13,18 @@ namespace Zoop\Shard\Validator;
  */
 class ValidatorFactory
 {
-    public static function create($def){
-
+    public static function create($def)
+    {
         $class = $def['class'];
-        if (isset($def['options'])){
+        if (isset($def['options'])) {
             $options = $def['options'];
         } else {
             $options = [];
         }
 
-        if ($class == 'Zoop\Mystique\Chain'){
+        if ($class == 'Zoop\Mystique\Chain') {
             $validators = [];
-            foreach ($options['validators'] as $subDef){
+            foreach ($options['validators'] as $subDef) {
                 $validators[] = self::create($subDef);
             }
             $options['validators'] = $validators;

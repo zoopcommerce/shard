@@ -14,8 +14,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait SoftDeletedByTrait {
-
+trait SoftDeletedByTrait
+{
     /**
      * @ODM\String
      * @ODM\Index
@@ -28,7 +28,8 @@ trait SoftDeletedByTrait {
      *
      * @return string
      */
-    public function getSoftDeletedBy(){
+    public function getSoftDeletedBy()
+    {
         return $this->softDeletedBy;
     }
 }

@@ -12,10 +12,10 @@ namespace Zoop\Shard\Serializer\Type;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class DateSerializer implements TypeSerializerInterface {
-
-    public function serialize($value) {
-
+class DateToTimestamp implements TypeSerializerInterface
+{
+    public function serialize($value)
+    {
         switch (true){
             case $value instanceof \MongoDate:
                 return $value->sec;
@@ -26,7 +26,8 @@ class DateSerializer implements TypeSerializerInterface {
         }
     }
 
-    public function unserialize($value) {
+    public function unserialize($value)
+    {
         return new \DateTime("@$value");
     }
 }

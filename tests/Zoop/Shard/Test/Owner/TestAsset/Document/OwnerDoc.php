@@ -16,8 +16,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  *     @Shard\Permission\Basic(roles="admin", allow="update::owner"                        )
  * })
  */
-class OwnerDoc {
-
+class OwnerDoc
+{
     use OwnerTrait;
 
     /**
@@ -31,15 +31,18 @@ class OwnerDoc {
      */
     protected $name;
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function setName($name) {
+    public function setName($name)
+    {
         $this->name = $name;
     }
 }

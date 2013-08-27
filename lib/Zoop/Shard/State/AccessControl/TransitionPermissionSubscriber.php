@@ -17,16 +17,17 @@ use Zoop\Shard\State\Events as Events;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber {
-
+class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber
+{
     /**
      *
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return [
-            Shard\Permission\Transition::event,
-            Events::preTransition
+            Shard\Permission\Transition::EVENT,
+            Events::PRE_TRANSITION
         ];
     }
 
@@ -44,8 +45,8 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber {
             'options' => []
         ];
 
-        if (isset($annotation->roles)){
-            if (is_array($annotation->roles)){
+        if (isset($annotation->roles)) {
+            if (is_array($annotation->roles)) {
                 $config['options']['roles'] = $annotation->roles;
             } else {
                 $config['options']['roles'] = [$annotation->roles];
@@ -54,8 +55,8 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber {
             $config['options']['roles'] = [];
         }
 
-        if (isset($annotation->allow)){
-            if (is_array($annotation->allow)){
+        if (isset($annotation->allow)) {
+            if (is_array($annotation->allow)) {
                 $config['options']['allow'] = $annotation->allow;
             } else {
                 $config['options']['allow'] = [$annotation->allow];
@@ -64,8 +65,8 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber {
             $config['options']['allow'] = [];
         }
 
-        if (isset($annotation->deny)){
-            if (is_array($annotation->deny)){
+        if (isset($annotation->deny)) {
+            if (is_array($annotation->deny)) {
                 $config['options']['deny'] = $annotation->deny;
             } else {
                 $config['options']['deny'] = [$annotation->deny];
@@ -83,7 +84,7 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber {
      */
     public function preTransition(TransitionEventArgs $eventArgs)
     {
-        if (! ($accessController = $this->getAccessController())){
+        if (! ($accessController = $this->getAccessController())) {
             //Access control is not enabled
             return;
         }
@@ -93,15 +94,17 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber {
         $eventManager = $documentManager->getEventManager();
         $action = $eventArgs->getTransition()->getAction();
 
-        if ( ! $accessController->areAllowed([$action], null, $document)->getAllowed()) {
+        if (! $accessController->areAllowed([$action], null, $document)->getAllowed()) {
             //stop transition
             $metadata = $documentManager->getClassMetadata(get_class($document));
-            $metadata->reflFields[array_keys($metadata->state)[0]]->setValue($document, $eventArgs->getTransition()->getFrom());
+            $metadata
+                ->reflFields[array_keys($metadata->state)[0]]
+                ->setValue($document, $eventArgs->getTransition()->getFrom());
 
             $eventManager = $eventArgs->getDocumentManager()->getEventManager();
-            if ($eventManager->hasListeners(Events::transitionDenied)) {
+            if ($eventManager->hasListeners(Events::TRANSITION_DENIED)) {
                 $eventManager->dispatchEvent(
-                    Events::transitionDenied,
+                    Events::TRANSITION_DENIED,
                     $eventArgs
                 );
             }

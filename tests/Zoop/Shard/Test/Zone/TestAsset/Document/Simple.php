@@ -9,7 +9,8 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Zoop\Shard\Annotation\Annotations as Shard;
 
 /** @ODM\Document */
-class Simple implements ZoneInterface {
+class Simple implements ZoneInterface
+{
 
     use ZoneTrait;
 
@@ -23,15 +24,18 @@ class Simple implements ZoneInterface {
      */
     protected $name;
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function setName($name) {
+    public function setName($name)
+    {
         $this->name = $name;
     }
 }

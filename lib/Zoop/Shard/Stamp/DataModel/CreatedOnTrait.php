@@ -15,8 +15,8 @@ use Zoop\Shard\Annotations as Shard;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait CreatedOnTrait {
-
+trait CreatedOnTrait
+{
     /**
      * @ODM\Date
      * @Shard\Stamp\CreatedOn
@@ -27,7 +27,8 @@ trait CreatedOnTrait {
      *
      * @return date
      */
-    public function getCreatedOn(){
+    public function getCreatedOn()
+    {
         return $this->createdOn;
     }
 }

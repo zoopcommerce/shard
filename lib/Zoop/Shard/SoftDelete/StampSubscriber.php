@@ -15,16 +15,17 @@ use Zoop\Shard\Stamp\AbstractStampSubscriber;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class StampSubscriber extends AbstractStampSubscriber {
-
+class StampSubscriber extends AbstractStampSubscriber
+{
     /**
      *
      * @return array
      */
-    public function getSubscribedEvents() {
+    public function getSubscribedEvents()
+    {
         return [
-            Events::postSoftDelete,
-            Events::postRestore
+            Events::POST_SOFT_DELETE,
+            Events::POST_RESTORE
         ];
     }
 
@@ -32,16 +33,17 @@ class StampSubscriber extends AbstractStampSubscriber {
      *
      * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
      */
-    public function postSoftDelete(LifecycleEventArgs $eventArgs) {
+    public function postSoftDelete(LifecycleEventArgs $eventArgs)
+    {
         $recomputeChangeSet = false;
         $document = $eventArgs->getDocument();
         $metadata = $eventArgs->getDocumentManager()->getClassMetadata(get_class($document));
 
-        if(isset($metadata->softDelete['deletedBy'])){
+        if (isset($metadata->softDelete['deletedBy'])) {
             $metadata->reflFields[$metadata->softDelete['deletedBy']]->setValue($document, $this->getUsername());
             $recomputeChangeSet = true;
         }
-        if(isset($metadata->softDelete['deletedOn'])){
+        if (isset($metadata->softDelete['deletedOn'])) {
             $metadata->reflFields[$metadata->softDelete['deletedOn']]->setValue($document, time());
             $recomputeChangeSet = true;
         }
@@ -54,16 +56,17 @@ class StampSubscriber extends AbstractStampSubscriber {
      *
      * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
      */
-    public function postRestore(LifecycleEventArgs $eventArgs) {
+    public function postRestore(LifecycleEventArgs $eventArgs)
+    {
         $recomputeChangeSet = false;
         $document = $eventArgs->getDocument();
         $metadata = $eventArgs->getDocumentManager()->getClassMetadata(get_class($document));
 
-        if(isset($metadata->softDelete['restoredBy'])){
+        if (isset($metadata->softDelete['restoredBy'])) {
             $metadata->reflFields[$metadata->softDelete['restoredBy']]->setValue($document, $this->getUsername());
             $recomputeChangeSet = true;
         }
-        if(isset($metadata->softDelete['restoredOn'])){
+        if (isset($metadata->softDelete['restoredOn'])) {
             $metadata->reflFields[$metadata->softDelete['restoredOn']]->setValue($document, time());
             $recomputeChangeSet = true;
         }

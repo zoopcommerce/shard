@@ -14,8 +14,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait RestoredOnTrait {
-
+trait RestoredOnTrait
+{
     /**
      * @ODM\Timestamp
      * @Shard\SoftDelete\RestoredOn
@@ -26,7 +26,8 @@ trait RestoredOnTrait {
      *
      * @return timestamp
      */
-    public function getRestoredOn(){
+    public function getRestoredOn()
+    {
         return $this->restoredOn;
     }
 }

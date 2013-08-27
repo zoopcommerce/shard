@@ -16,24 +16,25 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class BasicHashService implements HashServiceInterface, ServiceLocatorAwareInterface {
-
+class BasicHashService implements HashServiceInterface, ServiceLocatorAwareInterface
+{
     use ServiceLocatorAwareTrait;
 
-    public function hashValue($plaintext, $salt = null){
+    public function hashValue($plaintext, $salt = null)
+    {
         $bcrypt = new Bcrypt(['salt' => $salt]);
         return $bcrypt->create($plaintext);
 
     }
 
-    public function hashField($field, $document, $metadata){
-
-        if (isset($metadata->crypt['hash'][$field]['salt'])){
+    public function hashField($field, $document, $metadata)
+    {
+        if (isset($metadata->crypt['hash'][$field]['salt'])) {
             $saltInterface = $this->serviceLocator->get($metadata->crypt['hash'][$field]['salt']);
         } else {
             $saltInterface = $document;
         }
-        if ($saltInterface instanceof SaltInterface){
+        if ($saltInterface instanceof SaltInterface) {
             $salt = $saltInterface->getSalt();
         }
 

@@ -5,8 +5,8 @@ namespace Zoop\Shard\User\DataModel;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Zoop\Shard\Annotation\Annotations as Shard;
 
-trait UserTrait {
-
+trait UserTrait
+{
     /**
      * @ODM\Id(strategy="none")
      * @ODM\Index(unique = true, order = "asc")
@@ -17,11 +17,13 @@ trait UserTrait {
      */
     protected $username;
 
-    public function getUsername() {
+    public function getUsername()
+    {
         return $this->username;
     }
 
-    public function setUsername($username) {
+    public function setUsername($username)
+    {
         $this->username = (string) $username;
     }
 }

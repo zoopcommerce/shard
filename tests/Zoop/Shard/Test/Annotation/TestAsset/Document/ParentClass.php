@@ -12,8 +12,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  * @Shard\Serializer\Discriminator
  * @Shard\Validator(class = "ParentValidator")
  */
-class ParentClass {
-
+class ParentClass
+{
     /**
      * @ODM\Id(strategy="UUID")
      */
@@ -25,15 +25,18 @@ class ParentClass {
      */
     protected $name;
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function setName($name) {
+    public function setName($name)
+    {
         $this->name = (string) $name;
     }
 }

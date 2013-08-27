@@ -17,7 +17,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Boolean extends Annotation
 {
-    const event = 'annotationBooleanValidator';
+    const EVENT = 'annotationBooleanValidator';
 
     public $value = true;
 

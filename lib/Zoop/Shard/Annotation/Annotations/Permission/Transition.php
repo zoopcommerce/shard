@@ -16,7 +16,7 @@ namespace Zoop\Shard\Annotation\Annotations\Permission;
 final class Transition extends AbstractPermission
 {
 
-    const event = 'annotationTransitionPermission';
+    const EVENT = 'annotationTransitionPermission';
 
     public $allow;
 

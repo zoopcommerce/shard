@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Int extends Annotation
 {
-    const event = 'annotationIntValidator';
+    const EVENT = 'annotationIntValidator';
 
     public $value = true;
 

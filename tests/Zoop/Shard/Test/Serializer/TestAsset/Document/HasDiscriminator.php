@@ -13,8 +13,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  * @ODM\DiscriminatorMap({"hasDiscriminator"="Zoop\Shard\Test\Serializer\TestAsset\Document\HasDiscriminator"})
  * @Shard\Serializer\Discriminator
  */
-class HasDiscriminator {
-
+class HasDiscriminator
+{
     /**
      * @ODM\Id(strategy="UUID")
      */
@@ -25,15 +25,18 @@ class HasDiscriminator {
      */
     protected $name;
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function setName($name) {
+    public function setName($name)
+    {
         $this->name = (string) $name;
     }
 }

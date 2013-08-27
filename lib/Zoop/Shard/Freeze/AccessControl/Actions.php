@@ -12,16 +12,15 @@ namespace Zoop\Shard\Freeze\AccessControl;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Actions {
-
+class Actions
+{
     /**
      * Mark a resouce as frozen
      */
-    const freeze = 'freeze';
+    const FREEZE = 'freeze';
 
     /**
      * Unmark a resouce as frozen
      */
-    const thaw = 'thaw';
-
+    const THAW = 'thaw';
 }

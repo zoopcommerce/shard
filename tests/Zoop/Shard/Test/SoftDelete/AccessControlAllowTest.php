@@ -8,46 +8,48 @@ use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\SoftDelete\TestAsset\Document\AccessControlled;
 use Zoop\Shard\Test\TestAsset\RoleAwareUser;
 
-class AccessControlAllowTest extends BaseTest {
-
+class AccessControlAllowTest extends BaseTest
+{
     protected $calls = array();
 
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.softDelete' => true,
-                'extension.accessControl' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    'user' => function(){
-                        $user = new RoleAwareUser();
-                        $user->setUsername('toby');
-                        $user->addRole('admin');
-                        return $user;
-                    }
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.softDelete' => true,
+                    'extension.accessControl' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                        'user' => function () {
+                            $user = new RoleAwareUser();
+                            $user->setUsername('toby');
+                            $user->addRole('admin');
+                            return $user;
+                        }
+                    ]
                 ]
             ]
-        ]);
+        );
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
         $this->softDeleter = $manifest->getServiceManager()->get('softDeleter');
     }
 
-    public function testSoftDeleteAllow(){
-
+    public function testSoftDeleteAllow()
+    {
         $this->calls = array();
 
         $documentManager = $this->documentManager;
         $eventManager = $documentManager->getEventManager();
 
-        $eventManager->addEventListener(Events::softDeleteDenied, $this);
+        $eventManager->addEventListener(Events::SOFT_DELETE_DENIED, $this);
 
         $testDoc = new AccessControlled();
 
@@ -68,17 +70,17 @@ class AccessControlAllowTest extends BaseTest {
 
         $testDoc = $repository->find($id);
         $this->assertTrue($this->softDeleter->isSoftDeleted($testDoc));
-        $this->assertFalse(isset($this->calls[Events::softDeleteDenied]));
+        $this->assertFalse(isset($this->calls[Events::SOFT_DELETE_DENIED]));
     }
 
-    public function testRestoreGrant(){
-
+    public function testRestoreGrant()
+    {
         $this->calls = array();
 
         $documentManager = $this->documentManager;
         $eventManager = $documentManager->getEventManager();
 
-        $eventManager->addEventListener(Events::restoreDenied, $this);
+        $eventManager->addEventListener(Events::RESTORE_DENIED, $this);
 
         $testDoc = new AccessControlled();
         $this->softDeleter->softDelete($testDoc);
@@ -99,10 +101,11 @@ class AccessControlAllowTest extends BaseTest {
 
         $testDoc = $repository->find($id);
         $this->assertFalse($this->softDeleter->isSoftDeleted($testDoc));
-        $this->assertFalse(isset($this->calls[Events::restoreDenied]));
+        $this->assertFalse(isset($this->calls[Events::RESTORE_DENIED]));
     }
 
-    public function __call($name, $arguments){
+    public function __call($name, $arguments)
+    {
         $this->calls[$name] = $arguments;
     }
 }

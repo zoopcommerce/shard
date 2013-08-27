@@ -18,19 +18,20 @@ class Actions
     /**
      * Create a new resource
      */
-    const create = 'create';
+    const CREATE = 'create';
 
     /**
      * Access a resouce and read it's content
      */
-    const read = 'read';
+    const READ = 'read';
 
     /**
      * Make a resource disappear, never to come back again!
      */
-    const delete = 'delete';
+    const DELETE = 'delete';
 
-    public static function update($field){
+    public static function update($field)
+    {
         return 'update::' . $field;
     }
 }

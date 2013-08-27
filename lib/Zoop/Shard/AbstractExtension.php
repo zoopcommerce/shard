@@ -14,8 +14,8 @@ use Zend\Stdlib\AbstractOptions;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-abstract class AbstractExtension extends AbstractOptions {
-
+abstract class AbstractExtension extends AbstractOptions
+{
     protected $documents = [];
 
     protected $filters = [];
@@ -36,51 +36,63 @@ abstract class AbstractExtension extends AbstractOptions {
      */
     protected $dependencies = [];
 
-    public function getServiceManagerConfig() {
+    public function getServiceManagerConfig()
+    {
         return $this->serviceManagerConfig;
     }
 
-    public function setServiceManagerConfig($serviceManagerConfig) {
+    public function setServiceManagerConfig($serviceManagerConfig)
+    {
         $this->serviceManagerConfig = $serviceManagerConfig;
     }
 
-    public function getDocuments() {
+    public function getDocuments()
+    {
         return $this->documents;
     }
 
-    public function setDocuments($documents) {
+    public function setDocuments($documents)
+    {
         $this->documents = $documents;
     }
 
-    public function getFilters() {
+    public function getFilters()
+    {
         return $this->filters;
     }
 
-    public function setFilters($filters) {
+    public function setFilters($filters)
+    {
         $this->filters = $filters;
     }
 
-    public function getSubscribers() {
+    public function getSubscribers()
+    {
         return $this->subscribers;
     }
 
-    public function setSubscribers($subscribers) {
+    public function setSubscribers($subscribers)
+    {
         $this->subscribers = $subscribers;
     }
 
-    public function getCliCommands() {
+    public function getCliCommands()
+    {
         return $this->cliCommands;
     }
 
-    public function setCliCommands($cliCommands) {
+    public function setCliCommands($cliCommands)
+    {
         $this->cliCommands = $cliCommands;
     }
 
-    public function getCliHelpers() {
+    public function getCliHelpers()
+    {
         return $this->cliHelpers;
     }
 
-    public function setCliHelpers($cliHelpers) {
+    public function setCliHelpers($cliHelpers)
+    {
         $this->cliHelpers = $cliHelpers;
     }
 
@@ -88,7 +100,8 @@ abstract class AbstractExtension extends AbstractOptions {
      *
      * @return array
      */
-    public function getDependencies() {
+    public function getDependencies()
+    {
         return $this->dependencies;
     }
 
@@ -96,7 +109,8 @@ abstract class AbstractExtension extends AbstractOptions {
      *
      * @param array $dependencies
      */
-    public function setDependencies(array $dependencies) {
+    public function setDependencies(array $dependencies)
+    {
         $this->dependencies = $dependencies;
     }
 }

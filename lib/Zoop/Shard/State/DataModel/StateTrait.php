@@ -15,8 +15,8 @@ use Zoop\Shard\Annotations as Shard;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait StateTrait{
-
+trait StateTrait
+{
     /**
      * @ODM\String
      * @ODM\Index
@@ -30,14 +30,16 @@ trait StateTrait{
      *
      * @param string $state
      */
-    public function setState($state){
+    public function setState($state)
+    {
         $this->state = (string) $state;
     }
 
     /**
      * @return string
      */
-    public function getState(){
+    public function getState()
+    {
         return $this->state;
     }
 }

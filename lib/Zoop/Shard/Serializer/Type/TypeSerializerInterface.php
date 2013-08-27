@@ -12,8 +12,8 @@ namespace Zoop\Shard\Serializer\Type;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-interface TypeSerializerInterface {
-
+interface TypeSerializerInterface
+{
     public function serialize($value);
 
     public function unserialize($value);

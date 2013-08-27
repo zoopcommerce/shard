@@ -1,5 +1,10 @@
 <?php
 
+//Builds the src php files of the docs into flat html files
+//Run this script from the mystique/docs/build directory
+
+$build = 'dist'; //used to switch the code used to bootstrap havok in layer.php
+
 $base = __DIR__ . '/..';
 $src = $base . '/src';
 $dist = $base . '/dist';
@@ -27,14 +32,8 @@ foreach($files as $file){ // iterate files
     unlink($file); // delete file
 }
 
-//copy css
-$copy($src . '/css', $dist . '/css');
-
 //copy js
 $copy($src . '/js', $dist . '/js');
-
-//copy img
-$copy($src . '/img', $dist . '/img');
 
 //build each html file
 $files = glob($src . '/*.php'); // get all file names
@@ -43,6 +42,9 @@ foreach($files as $file){ // iterate files
     $name = array_pop($name);
     $name = explode('.', $name);
     array_pop($name);
+    if ($name[count($name) - 1] == 'layout'){
+        continue;
+    }
     $name[] = 'html';
     $name = implode('.', $name);
     ob_start();
@@ -51,4 +53,4 @@ foreach($files as $file){ // iterate files
     file_put_contents($dist . '/' . $name, $content);
 }
 
-echo "docs build complete\n";
+echo "build php files complete\n";

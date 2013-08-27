@@ -16,9 +16,11 @@ use Zoop\Shard\Freeze\DataModel\ThawedByTrait;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait FreezeStampTrait {
-   use FrozenOnTrait;
-   use FrozenByTrait;
-   use ThawedByTrait;
-   use ThawedOnTrait;
+trait FreezeStampTrait
+{
+    use FrozenOnTrait;
+    use FrozenByTrait;
+    use ThawedByTrait;
+    use ThawedOnTrait;
+
 }

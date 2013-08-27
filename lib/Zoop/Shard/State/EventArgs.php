@@ -16,8 +16,8 @@ use Zoop\Common\State\Transition;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class EventArgs extends BaseEventArgs {
-
+class EventArgs extends BaseEventArgs
+{
     /**
      *
      * @var Transition
@@ -57,7 +57,8 @@ class EventArgs extends BaseEventArgs {
      *
      * @return \Zoop\Common\State\Transition
      */
-    public function getTransition() {
+    public function getTransition()
+    {
         return $this->transition;
     }
 
@@ -65,7 +66,8 @@ class EventArgs extends BaseEventArgs {
      *
      * @return object
      */
-    public function getDocument() {
+    public function getDocument()
+    {
         return $this->document;
     }
 
@@ -73,7 +75,8 @@ class EventArgs extends BaseEventArgs {
      *
      * @return \Doctrine\ODM\MongoDB\DocumentManager
      */
-    public function getDocumentManager() {
+    public function getDocumentManager()
+    {
         return $this->documentManager;
     }
 }

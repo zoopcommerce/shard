@@ -26,13 +26,14 @@ class AnnotationSubscriber implements EventSubscriber
      *
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return [
-            Shard\SoftDelete::event,
-            Shard\SoftDelete\DeletedBy::event,
-            Shard\SoftDelete\DeletedOn::event,
-            Shard\SoftDelete\RestoredBy::event,
-            Shard\SoftDelete\RestoredOn::event,
+            Shard\SoftDelete::EVENT,
+            Shard\SoftDelete\DeletedBy::EVENT,
+            Shard\SoftDelete\DeletedOn::EVENT,
+            Shard\SoftDelete\RestoredBy::EVENT,
+            Shard\SoftDelete\RestoredOn::EVENT,
         ];
     }
 
@@ -50,16 +51,24 @@ class AnnotationSubscriber implements EventSubscriber
 
         //Add sythentic annotation to create extra permission that will allow
         //updates on the softDelete field when access control is enabled.
-        $permissionAnnotation = new Shard\Permission\Basic([
-            'roles' => BasicPermission::wild,
-            'allow' => Actions::update($field)
-        ]);
+        $permissionAnnotation = new Shard\Permission\Basic(
+            [
+                'roles' => BasicPermission::WILD,
+                'allow' => Actions::update($field)
+            ]
+        );
 
         // Raise annotation event
-        if ($eventManager->hasListeners($permissionAnnotation::event)) {
+        if ($eventManager->hasListeners($permissionAnnotation::EVENT)) {
             $eventManager->dispatchEvent(
-                $permissionAnnotation::event,
-                new AnnotationEventArgs($metadata, EventType::document, $permissionAnnotation, $metadata->getReflectionClass(), $eventManager)
+                $permissionAnnotation::EVENT,
+                new AnnotationEventArgs(
+                    $metadata,
+                    EventType::DOCUMENT,
+                    $permissionAnnotation,
+                    $metadata->getReflectionClass(),
+                    $eventManager
+                )
             );
         }
     }

@@ -12,8 +12,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  * @ODM\Document
  * @Shard\Serializer\ClassName
  */
-class CakeEager {
-
+class CakeEager
+{
     /**
      * @ODM\Id(strategy="UUID")
      */
@@ -36,7 +36,8 @@ class CakeEager {
         $this->ingredients = new ArrayCollection();
     }
 
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
@@ -45,19 +46,23 @@ class CakeEager {
         return $this->ingredients;
     }
 
-    public function setIngredients(array $ingredients) {
+    public function setIngredients(array $ingredients)
+    {
         $this->ingredients = $ingredients;
     }
 
-    public function addIngredient(Ingredient $ingredient) {
+    public function addIngredient(Ingredient $ingredient)
+    {
         $this->ingredients[] = $ingredient;
     }
 
-    public function getFlavour() {
+    public function getFlavour()
+    {
         return $this->flavour;
     }
 
-    public function setFlavour(FlavourEager $flavour) {
+    public function setFlavour(FlavourEager $flavour)
+    {
         $this->flavour = $flavour;
         $flavour->addCake($this);
     }

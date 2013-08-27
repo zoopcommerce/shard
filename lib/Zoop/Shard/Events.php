@@ -13,5 +13,5 @@ namespace Zoop\Shard;
  */
 final class Events
 {
-    const onBootstrap = 'onBootstrap';
+    const ON_BOOTSTRAP = 'onBootstrap';
 }

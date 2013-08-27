@@ -24,10 +24,11 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
      *
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return [
-            Events::preSoftDelete,
-            Events::preRestore
+            Events::PRE_SOFT_DELETE,
+            Events::PRE_RESTORE
         ];
     }
 
@@ -37,21 +38,21 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
      */
     public function preSoftDelete(LifecycleEventArgs $eventArgs)
     {
-        if (! ($accessController = $this->getAccessController())){
+        if (! ($accessController = $this->getAccessController())) {
             //Access control is not enabled
             return;
         }
 
         $document = $eventArgs->getDocument();
 
-        if( !$accessController->areAllowed([Actions::softDelete], null, $document)->getAllowed()) {
+        if (! $accessController->areAllowed([Actions::SOFT_DELETE], null, $document)->getAllowed()) {
             //stop SoftDelete
             $this->getSoftDeleter()->restore($document);
 
             $eventManager = $eventArgs->getDocumentManager()->getEventManager();
-            if ($eventManager->hasListeners(Events::softDeleteDenied)) {
+            if ($eventManager->hasListeners(Events::SOFT_DELETE_DENIED)) {
                 $eventManager->dispatchEvent(
-                    Events::softDeleteDenied,
+                    Events::SOFT_DELETE_DENIED,
                     $eventArgs
                 );
             }
@@ -64,29 +65,30 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
      */
     public function preRestore(LifecycleEventArgs $eventArgs)
     {
-        if (! ($accessController = $this->getAccessController())){
+        if (! ($accessController = $this->getAccessController())) {
             //Access control is not enabled
             return;
         }
 
         $document = $eventArgs->getDocument();
 
-        if ( !$accessController->areAllowed([Actions::restore], null, $document)->getAllowed()) {
+        if (! $accessController->areAllowed([Actions::RESTORE], null, $document)->getAllowed()) {
             //stop restore
             $this->getSoftDeleter()->softDelete($document);
 
             $eventManager = $eventArgs->getDocumentManager()->getEventManager();
-            if ($eventManager->hasListeners(Events::restoreDenied)) {
+            if ($eventManager->hasListeners(Events::RESTORE_DENIED)) {
                 $eventManager->dispatchEvent(
-                    Events::restoreDenied,
+                    Events::RESTORE_DENIED,
                     $eventArgs
                 );
             }
         }
     }
 
-    protected function getSoftDeleter(){
-        if (!isset($this->softDeleter)){
+    protected function getSoftDeleter()
+    {
+        if (! isset($this->softDeleter)) {
             $this->softDeleter = $this->serviceLocator->get('softDeleter');
         }
         return $this->softDeleter;

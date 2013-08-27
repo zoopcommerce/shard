@@ -7,36 +7,38 @@ use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\SoftDelete\TestAsset\Document\Stamped;
 use Zoop\Shard\Test\TestAsset\User;
 
-class StampTest extends BaseTest {
-
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.softdelete' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    'user' => function(){
-                        $user = new User();
-                        $user->setUsername('toby');
-                        return $user;
-                    }
+class StampTest extends BaseTest
+{
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.softdelete' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                        'user' => function () {
+                            $user = new User();
+                            $user->setUsername('toby');
+                            return $user;
+                        }
+                    ]
                 ]
             ]
-        ]);
+        );
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
         $this->softDeleter = $manifest->getServiceManager()->get('softDeleter');
     }
 
-    public function testStamps() {
-
+    public function testStamps()
+    {
         $documentManager = $this->documentManager;
         $testDoc = new Stamped();
         $testDoc->setName('version1');

@@ -16,7 +16,7 @@ namespace Zoop\Shard\Annotation\Annotations\Permission;
 final class Basic extends AbstractPermission
 {
 
-    const event = 'annotationBasicPermission';
+    const EVENT = 'annotationBasicPermission';
 
     public $allow;
 

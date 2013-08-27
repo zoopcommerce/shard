@@ -8,43 +8,45 @@ use Zoop\Shard\Test\AccessControl\TestAsset\Document\FieldPermissions;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\TestAsset\RoleAwareUser;
 
-class FieldPermissionsAdminTest extends BaseTest {
-
+class FieldPermissionsAdminTest extends BaseTest
+{
     protected $calls = array();
 
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.accessControl' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    'user' => function(){
-                        $user = new RoleAwareUser();
-                        $user->setUsername('toby');
-                        $user->addRole('admin');
-                        return $user;
-                    }
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.accessControl' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                        'user' => function () {
+                            $user = new RoleAwareUser();
+                            $user->setUsername('toby');
+                            $user->addRole('admin');
+                            return $user;
+                        }
+                    ]
                 ]
             ]
-       ]);
+        );
 
-       $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
     }
 
-    public function testUpdateNameAllow(){
-
+    public function testUpdateNameAllow()
+    {
         $this->calls = array();
         $documentManager = $this->documentManager;
         $eventManager = $documentManager->getEventManager();
 
-        $eventManager->addEventListener(AccessControlEvents::updateDenied, $this);
+        $eventManager->addEventListener(AccessControlEvents::UPDATE_DENIED, $this);
 
         $testDoc = new FieldPermissions();
         $testDoc->setName('my name');
@@ -60,7 +62,7 @@ class FieldPermissionsAdminTest extends BaseTest {
         $testDoc->setName('new name');
         $documentManager->flush();
 
-        $this->assertFalse(isset($this->calls[AccessControlEvents::updateDenied]));
+        $this->assertFalse(isset($this->calls[AccessControlEvents::UPDATE_DENIED]));
 
         $documentManager->clear();
         $testDoc = $repository->find($id);
@@ -68,13 +70,13 @@ class FieldPermissionsAdminTest extends BaseTest {
         $this->assertEquals('new name', $testDoc->getName());
     }
 
-    public function testUpdateDeny(){
-
+    public function testUpdateDeny()
+    {
         $this->calls = array();
         $documentManager = $this->documentManager;
         $eventManager = $documentManager->getEventManager();
 
-        $eventManager->addEventListener(AccessControlEvents::updateDenied, $this);
+        $eventManager->addEventListener(AccessControlEvents::UPDATE_DENIED, $this);
 
         $testDoc = new FieldPermissions();
         $testDoc->setAddress('my address');
@@ -90,7 +92,7 @@ class FieldPermissionsAdminTest extends BaseTest {
         $testDoc->setAddress('new address');
         $documentManager->flush();
 
-        $this->assertTrue(isset($this->calls[AccessControlEvents::updateDenied]));
+        $this->assertTrue(isset($this->calls[AccessControlEvents::UPDATE_DENIED]));
 
         $documentManager->clear();
         $testDoc = $repository->find($id);
@@ -98,7 +100,8 @@ class FieldPermissionsAdminTest extends BaseTest {
         $this->assertEquals('my address', $testDoc->getAddress());
     }
 
-    public function __call($name, $arguments){
+    public function __call($name, $arguments)
+    {
         $this->calls[$name] = $arguments;
     }
 }

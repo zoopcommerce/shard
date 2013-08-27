@@ -19,18 +19,19 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class AccessController implements ServiceLocatorAwareInterface, DocumentManagerAwareInterface {
-
+class AccessController implements ServiceLocatorAwareInterface, DocumentManagerAwareInterface
+{
     use ServiceLocatorAwareTrait;
     use DocumentManagerAwareTrait;
 
-    const owner = 'owner';
-    const creator = 'creator';
-    const updater = 'updater';
+    const OWNER = 'owner';
+    const CREATOR = 'creator';
+    const UPDATER = 'updater';
 
     protected $permissions = [];
 
-    public function enableReadFilter(){
+    public function enableReadFilter()
+    {
         $filter = $this->documentManager->getFilterCollection()->enable('readAccessControl');
         $filter->setAccessController($this);
     }
@@ -43,42 +44,43 @@ class AccessController implements ServiceLocatorAwareInterface, DocumentManagerA
      * @param type $document
      * @return \Zoop\Shard\AccessControl\IsAllowedResult
      */
-    public function areAllowed(array $actions, ClassMetadata $metadata = null, $document = null){
+    public function areAllowed(array $actions, ClassMetadata $metadata = null, $document = null)
+    {
         $result = new AllowedResult(false);
-        if (!isset($metadata)){
+        if (! isset($metadata)) {
             $metadata = $this->documentManager->getClassMetadata(get_class($document));
         }
 
-        if (!isset($metadata->permissions)){
+        if (! isset($metadata->permissions)) {
             return $result;
         }
 
-        if ( !isset($this->permissions[$metadata->name])){
+        if (! isset($this->permissions[$metadata->name])) {
             $this->permissions[$metadata->name] = [];
         }
 
         $roles = $this->getRoles();
-        if (isset($document) && $username = $this->getUsername()){
+        if (isset($document) && $username = $this->getUsername()) {
             if (isset($metadata->owner) &&
                 $metadata->reflFields[$metadata->owner]->getValue($document) == $username
-            ){
-                $roles[] = self::owner;
+            ) {
+                $roles[] = self::OWNER;
             }
             if (isset($metadata->stamp) && isset($metadata->stamp['createdBy']) &&
                 $metadata->reflFields[$metadata->stamp['createdBy']]->getValue($document) == $username
-            ){
-                $roles[] = self::creator;
+            ) {
+                $roles[] = self::CREATOR;
             }
             if (isset($metadata->stamp) && isset($metadata->stamp['updatedBy']) &&
                 $metadata->reflFields[$metadata->stamp['updatedBy']]->getValue($document) == $username
-            ){
-                $roles[] = self::updater;
+            ) {
+                $roles[] = self::UPDATER;
             }
         }
 
-        foreach($metadata->permissions as $index => $permissionMetadata){
+        foreach ($metadata->permissions as $index => $permissionMetadata) {
 
-            if ( !isset($this->permissions[$metadata->name][$index])){
+            if (! isset($this->permissions[$metadata->name][$index])) {
                 $factory = $permissionMetadata['factory'];
                 $this->permissions[$metadata->name][$index] = $factory::get($metadata, $permissionMetadata['options']);
             }
@@ -86,39 +88,39 @@ class AccessController implements ServiceLocatorAwareInterface, DocumentManagerA
             $permission = $this->permissions[$metadata->name][$index];
             $newResult = $permission->areAllowed($roles, $actions);
             $allowed = $newResult->getAllowed();
-            if ( ! isset($allowed)){
+            if (! isset($allowed)) {
                 continue;
             }
 
             $result->setAllowed($allowed);
 
             $new = $newResult->getNew();
-            if (isset($new)){
+            if (isset($new)) {
                 $result->setNew(array_merge($new, $newResult->getNew()));
             }
 
             $old = $newResult->getOld();
-            if (isset($old)){
+            if (isset($old)) {
                 $result->setOld(array_merge($old, $newResult->getOld()));
             }
         }
 
-        if (isset($document)){
-            if (count($result->getNew()) > 0){
-                foreach ($result->getNew() as $field => $value){
+        if (isset($document)) {
+            if (count($result->getNew()) > 0) {
+                foreach ($result->getNew() as $field => $value) {
                     $newValue = $metadata->reflFields[$field]->getValue($document);
-                    if (!$this->testCriteria($newValue, $value)){
+                    if (! $this->testCriteria($newValue, $value)) {
                         $result->setAllowed(false);
                         return $result;
                     }
                 }
             }
 
-            if (count($result->getOld()) > 0){
+            if (count($result->getOld()) > 0) {
                 $changeSet = $this->documentManager->getUnitOfWork()->getDocumentChangeSet($document);
-                foreach ($result->getOld() as $field => $value){
+                foreach ($result->getOld() as $field => $value) {
                     $oldValue = $changeSet[$field][0];
-                    if (!$this->testCriteria($oldValue, $value)){
+                    if (! $this->testCriteria($oldValue, $value)) {
                         $result->setAllowed(false);
                         return $result;
                     }
@@ -129,15 +131,16 @@ class AccessController implements ServiceLocatorAwareInterface, DocumentManagerA
         return $result;
     }
 
-    protected function testCriteria($documentValue, $testValue){
+    protected function testCriteria($documentValue, $testValue)
+    {
         if (($testValue instanceof \MongoRegex && !preg_match("/$testValue->regex/", $documentValue)) ||
             (is_string($testValue) && $documentValue != $testValue)
         ) {
             return false;
         }
-        if (is_array($testValue) && array_key_exists('$or', $testValue)){
-            foreach ($testValue['$or'] as $option){
-                if ($this->testCriteria($documentValue, $option)){
+        if (is_array($testValue) && array_key_exists('$or', $testValue)) {
+            foreach ($testValue['$or'] as $option) {
+                if ($this->testCriteria($documentValue, $option)) {
                     return true;
                 }
             }
@@ -146,22 +149,23 @@ class AccessController implements ServiceLocatorAwareInterface, DocumentManagerA
         return true;
     }
 
-    protected function getRoles(){
-
+    protected function getRoles()
+    {
         if ($this->serviceLocator->has('user') &&
             $user = $this->serviceLocator->get('user')
-        ){
-            if ($user instanceof RoleAwareUserInterface){
+        ) {
+            if ($user instanceof RoleAwareUserInterface) {
                 return $user->getRoles();
             }
         }
         return [];
     }
 
-    protected function getUsername(){
+    protected function getUsername()
+    {
         if ($this->serviceLocator->has('user') &&
             $user = $this->serviceLocator->get('user')
-        ){
+        ) {
             return $user->getUsername();
         }
     }

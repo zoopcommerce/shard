@@ -7,39 +7,41 @@ use Zoop\Shard\Manifest;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\Freeze\TestAsset\Document\AccessControlled;
 
-class AccessControlFreezeDenyTest extends BaseTest {
-
+class AccessControlFreezeDenyTest extends BaseTest
+{
     protected $calls = array();
 
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.freeze' => true,
-                'extension.accesscontrol' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.freeze' => true,
+                    'extension.accesscontrol' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                    ]
                 ]
             ]
-        ]);
+        );
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
         $this->freezer = $manifest->getServiceManager()->get('freezer');
     }
 
-    public function testFreezeDeny(){
-
+    public function testFreezeDeny()
+    {
         $this->calls = array();
         $documentManager = $this->documentManager;
         $eventManager = $documentManager->getEventManager();
 
-        $eventManager->addEventListener(Events::freezeDenied, $this);
+        $eventManager->addEventListener(Events::FREEZE_DENIED, $this);
 
         $testDoc = new AccessControlled();
 
@@ -60,10 +62,11 @@ class AccessControlFreezeDenyTest extends BaseTest {
 
         $testDoc = $repository->find($id);
         $this->assertFalse($this->freezer->isFrozen($testDoc));
-        $this->assertTrue(isset($this->calls[Events::freezeDenied]));
+        $this->assertTrue(isset($this->calls[Events::FREEZE_DENIED]));
     }
 
-    public function __call($name, $arguments){
+    public function __call($name, $arguments)
+    {
         $this->calls[$name] = $arguments;
     }
 }

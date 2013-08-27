@@ -26,13 +26,14 @@ class AnnotationSubscriber implements EventSubscriber
      *
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         return [
-            Shard\Freeze::event,
-            Shard\Freeze\FrozenBy::event,
-            Shard\Freeze\FrozenOn::event,
-            Shard\Freeze\ThawedBy::event,
-            Shard\Freeze\ThawedOn::event,
+            Shard\Freeze::EVENT,
+            Shard\Freeze\FrozenBy::EVENT,
+            Shard\Freeze\FrozenOn::EVENT,
+            Shard\Freeze\ThawedBy::EVENT,
+            Shard\Freeze\ThawedOn::EVENT,
         ];
     }
 
@@ -50,16 +51,24 @@ class AnnotationSubscriber implements EventSubscriber
 
         //Add sythentic annotation to create extra permission that will allow
         //updates on the freeze field when access control is enabled.
-        $permissionAnnotation = new Shard\Permission\Basic([
-            'roles' => BasicPermission::wild,
-            'allow' => Actions::update($field)
-        ]);
+        $permissionAnnotation = new Shard\Permission\Basic(
+            [
+                'roles' => BasicPermission::WILD,
+                'allow' => Actions::update($field)
+            ]
+        );
 
         // Raise annotation event
-        if ($eventManager->hasListeners($permissionAnnotation::event)) {
+        if ($eventManager->hasListeners($permissionAnnotation::EVENT)) {
             $eventManager->dispatchEvent(
-                $permissionAnnotation::event,
-                new AnnotationEventArgs($metadata, EventType::document, $permissionAnnotation, $metadata->getReflectionClass(), $eventManager)
+                $permissionAnnotation::EVENT,
+                new AnnotationEventArgs(
+                    $metadata,
+                    EventType::DOCUMENT,
+                    $permissionAnnotation,
+                    $metadata->getReflectionClass(),
+                    $eventManager
+                )
             );
         }
     }

@@ -14,8 +14,8 @@ use Zoop\Shard\AbstractExtension;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Extension extends AbstractExtension {
-
+class Extension extends AbstractExtension
+{
     protected $subscribers = [
         'subscriber.stamp.mainsubscriber',
         'subscriber.stamp.annotationsubscriber',

@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class HexColor extends Annotation
 {
-    const event = 'annotationHexColorValidator';
+    const EVENT = 'annotationHexColorValidator';
 
     public $value = true;
 

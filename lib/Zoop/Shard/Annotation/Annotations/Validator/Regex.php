@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Regex extends Annotation
 {
-    const event = 'annotationRegexValidator';
+    const EVENT = 'annotationRegexValidator';
 
     public $value = true;
 

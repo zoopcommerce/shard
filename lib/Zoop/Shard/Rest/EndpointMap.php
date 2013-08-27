@@ -15,20 +15,23 @@ class EndpointMap
 {
     protected $map = [];
 
-    public function setMap($map) {
+    public function setMap($map)
+    {
         $this->map = $map;
     }
 
-    public function hasEndpoint($name){
+    public function hasEndpoint($name)
+    {
         return array_key_exists($name, $this->map);
     }
 
-    public function getEndpoint($name){
-        if (!$this->hasEndpoint($name)){
+    public function getEndpoint($name)
+    {
+        if (! $this->hasEndpoint($name)) {
             return;
         }
         $endpoint = $this->map[$name];
-        if ( ! $endpoint instanceof Endpoint){
+        if (! $endpoint instanceof Endpoint) {
             $endpoint = new Endpoint($endpoint);
             $endpoint->setName($name);
             $this->map[$name] = $endpoint;
@@ -36,15 +39,15 @@ class EndpointMap
         return $endpoint;
     }
 
-    public function getEndpointsFromClass($class){
-
+    public function getEndpointsFromClass($class)
+    {
         $result = [];
 
-        $checkEmbeddedEndpoints = function($endpoint) use (&$result, $class, &$checkEmbeddedEndpoints){
+        $checkEmbeddedEndpoints = function ($endpoint) use (&$result, $class, &$checkEmbeddedEndpoints) {
             $embeddedLists = $endpoint->getEmbeddedLists();
-            if (count($embeddedLists) > 0){
-                foreach ($embeddedLists as $name => $embeddedEndpoint){
-                    if ($embeddedEndpoint->getClass() == $class){
+            if (count($embeddedLists) > 0) {
+                foreach ($embeddedLists as $name => $embeddedEndpoint) {
+                    if ($embeddedEndpoint->getClass() == $class) {
                         $result[] = $embeddedEndpoint;
                     }
                     $checkEmbeddedEndpoints($embeddedEndpoint);
@@ -52,9 +55,9 @@ class EndpointMap
             }
         };
 
-        foreach ($this->map as $name => $endpoint){
+        foreach ($this->map as $name => $endpoint) {
             $endpoint = $this->getEndpoint($name);
-            if ($endpoint->getClass() == $class){
+            if ($endpoint->getClass() == $class) {
                 $result[] = $endpoint;
             }
             $checkEmbeddedEndpoints($endpoint);

@@ -16,36 +16,37 @@ use Zoop\Shard\Annotation\EventType;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class AnnotationSubscriber implements EventSubscriber {
-
+class AnnotationSubscriber implements EventSubscriber
+{
     /**
      *
      * @return array
      */
-    public function getSubscribedEvents(){
+    public function getSubscribedEvents()
+    {
         $events = [
-            Shard\Validator\Alpha::event,
-            Shard\Validator\Boolean::event,
-            Shard\Validator\Chain::event,
-            Shard\Validator\CreditCard::event,
-            Shard\Validator\CreditCardExpiry::event,
-            Shard\Validator\Cvv::event,
-            Shard\Validator\Date::event,
-            Shard\Validator\Email::event,
-            Shard\Validator\Equal::event,
-            Shard\Validator\Float::event,
-            Shard\Validator\GreaterThan::event,
-            Shard\Validator\GreaterThanEqual::event,
-            Shard\Validator\HexColor::event,
-            Shard\Validator\Int::event,
-            Shard\Validator\Length::event,
-            Shard\Validator\NotRequired::event,
-            Shard\Validator\Password::event,
-            Shard\Validator\Regex::event,
-            Shard\Validator\Required::event,
-            Shard\Validator\Slug::event,
-            Shard\Validator\String::event,
-            Shard\Validator::event,
+            Shard\Validator\Alpha::EVENT,
+            Shard\Validator\Boolean::EVENT,
+            Shard\Validator\Chain::EVENT,
+            Shard\Validator\CreditCard::EVENT,
+            Shard\Validator\CreditCardExpiry::EVENT,
+            Shard\Validator\Cvv::EVENT,
+            Shard\Validator\Date::EVENT,
+            Shard\Validator\Email::EVENT,
+            Shard\Validator\Equal::EVENT,
+            Shard\Validator\Float::EVENT,
+            Shard\Validator\GreaterThan::EVENT,
+            Shard\Validator\GreaterThanEqual::EVENT,
+            Shard\Validator\HexColor::EVENT,
+            Shard\Validator\Int::EVENT,
+            Shard\Validator\Length::EVENT,
+            Shard\Validator\NotRequired::EVENT,
+            Shard\Validator\Password::EVENT,
+            Shard\Validator\Regex::EVENT,
+            Shard\Validator\Required::EVENT,
+            Shard\Validator\Slug::EVENT,
+            Shard\Validator\String::EVENT,
+            Shard\Validator::EVENT,
         ];
         return $events;
     }
@@ -82,7 +83,7 @@ class AnnotationSubscriber implements EventSubscriber {
         $reflection = $eventArgs->getReflection();
         $metadata = $eventArgs->getMetadata();
         $validators = [];
-        foreach ($annotation->value as $validatorAnnotation){
+        foreach ($annotation->value as $validatorAnnotation) {
             $validatorEventArgs = new AnnotationEventArgs(
                 $metadata,
                 $type,
@@ -91,17 +92,17 @@ class AnnotationSubscriber implements EventSubscriber {
                 $eventManager
             );
             $eventManager->dispatchEvent(
-                $validatorAnnotation::event,
+                $validatorAnnotation::EVENT,
                 $validatorEventArgs
             );
             switch ($type){
-                case EventType::document:
-                    if (isset($metadata->validator['document'])){
+                case EventType::DOCUMENT:
+                    if (isset($metadata->validator['document'])) {
                         $validators[] = $metadata->validator['document'];
                     }
                     break;
-                case EventType::field:
-                    if (isset($metadata->validator['fields'][$reflection->getName()])){
+                case EventType::FIELD:
+                    if (isset($metadata->validator['fields'][$reflection->getName()])) {
                         $validators[] = $metadata->validator['fields'][$reflection->getName()];
                     }
                     break;
@@ -109,22 +110,28 @@ class AnnotationSubscriber implements EventSubscriber {
         }
 
         switch ($type){
-            case EventType::document:
-                if (count($validators) == 0){
+            case EventType::DOCUMENT:
+                if (count($validators) == 0) {
                     $this->setDocumentValidator($eventArgs, null);
-                } else if (count($validators) == 1){
+                } elseif (count($validators) == 1) {
                     $this->setDocumentValidator($eventArgs, $validators[0]);
-                } else if (count($validators) > 1){
-                    $this->setDocumentValidator($eventArgs, ['class' => $annotation->class, 'options' => ['validators' => $validators]]);
+                } elseif (count($validators) > 1) {
+                    $this->setDocumentValidator(
+                        $eventArgs,
+                        ['class' => $annotation->class, 'options' => ['validators' => $validators]]
+                    );
                 }
                 break;
-            case EventType::field:
-                if (count($validators) == 0){
+            case EventType::FIELD:
+                if (count($validators) == 0) {
                     $this->setFieldValidator($eventArgs, null);
-                } else if (count($validators) == 1){
+                } elseif (count($validators) == 1) {
                     $this->setFieldValidator($eventArgs, $validators[0]);
-                } else if (count($validators) > 1){
-                    $this->setFieldValidator($eventArgs, ['class' => $annotation->class, 'options' => ['validators' => $validators]]);
+                } elseif (count($validators) > 1) {
+                    $this->setFieldValidator(
+                        $eventArgs,
+                        ['class' => $annotation->class, 'options' => ['validators' => $validators]]
+                    );
                 }
                 break;
         }
@@ -189,14 +196,17 @@ class AnnotationSubscriber implements EventSubscriber {
         $annotation = $eventArgs->getAnnotation();
 
         $options = [];
-        if (isset($annotation->compareValue)){
+        if (isset($annotation->compareValue)) {
             $options['compareValue'] = $annotation->compareValue;
         }
 
-        $this->setFieldValidator($eventArgs, [
-            'class' => $annotation->class,
-            'options' => $options
-        ]);
+        $this->setFieldValidator(
+            $eventArgs,
+            [
+                'class' => $annotation->class,
+                'options' => $options
+            ]
+        );
     }
 
     /**
@@ -218,14 +228,17 @@ class AnnotationSubscriber implements EventSubscriber {
         $annotation = $eventArgs->getAnnotation();
 
         $options = [];
-        if (isset($annotation->compareValue)){
+        if (isset($annotation->compareValue)) {
             $options['compareValue'] = $annotation->compareValue;
         }
 
-        $this->setFieldValidator($eventArgs, [
-            'class' => $annotation->class,
-            'options' => $options
-        ]);
+        $this->setFieldValidator(
+            $eventArgs,
+            [
+                'class' => $annotation->class,
+                'options' => $options
+            ]
+        );
     }
 
     /**
@@ -237,14 +250,17 @@ class AnnotationSubscriber implements EventSubscriber {
         $annotation = $eventArgs->getAnnotation();
 
         $options = [];
-        if (isset($annotation->compareValue)){
+        if (isset($annotation->compareValue)) {
             $options['compareValue'] = $annotation->compareValue;
         }
 
-        $this->setFieldValidator($eventArgs, [
-            'class' => $annotation->class,
-            'options' => $options
-        ]);
+        $this->setFieldValidator(
+            $eventArgs,
+            [
+                'class' => $annotation->class,
+                'options' => $options
+            ]
+        );
     }
 
     /**
@@ -276,17 +292,20 @@ class AnnotationSubscriber implements EventSubscriber {
         $annotation = $eventArgs->getAnnotation();
 
         $options = [];
-        if (isset($annotation->min)){
+        if (isset($annotation->min)) {
             $options['min'] = $annotation->min;
         }
-        if (isset($annotation->max)){
+        if (isset($annotation->max)) {
             $options['max'] = $annotation->max;
         }
 
-        $this->setFieldValidator($eventArgs, [
-            'class' => $annotation->class,
-            'options' => $options
-        ]);
+        $this->setFieldValidator(
+            $eventArgs,
+            [
+                'class' => $annotation->class,
+                'options' => $options
+            ]
+        );
     }
 
     /**
@@ -298,14 +317,17 @@ class AnnotationSubscriber implements EventSubscriber {
         $annotation = $eventArgs->getAnnotation();
 
         $options = [];
-        if (isset($annotation->compareValue)){
+        if (isset($annotation->compareValue)) {
             $options['compareValue'] = $annotation->compareValue;
         }
 
-        $this->setFieldValidator($eventArgs, [
-            'class' => $annotation->class,
-            'options' => $options
-        ]);
+        $this->setFieldValidator(
+            $eventArgs,
+            [
+                'class' => $annotation->class,
+                'options' => $options
+            ]
+        );
     }
 
     /**
@@ -317,14 +339,17 @@ class AnnotationSubscriber implements EventSubscriber {
         $annotation = $eventArgs->getAnnotation();
 
         $options = [];
-        if (isset($annotation->compareValue)){
+        if (isset($annotation->compareValue)) {
             $options['compareValue'] = $annotation->compareValue;
         }
 
-        $this->setFieldValidator($eventArgs, [
-            'class' => $annotation->class,
-            'options' => $options
-        ]);
+        $this->setFieldValidator(
+            $eventArgs,
+            [
+                'class' => $annotation->class,
+                'options' => $options
+            ]
+        );
     }
 
     /**
@@ -336,14 +361,17 @@ class AnnotationSubscriber implements EventSubscriber {
         $annotation = $eventArgs->getAnnotation();
 
         $options = [];
-        if (isset($annotation->compareValue)){
+        if (isset($annotation->compareValue)) {
             $options['compareValue'] = $annotation->compareValue;
         }
 
-        $this->setFieldValidator($eventArgs, [
-            'class' => $annotation->class,
-            'options' => $options
-        ]);
+        $this->setFieldValidator(
+            $eventArgs,
+            [
+                'class' => $annotation->class,
+                'options' => $options
+            ]
+        );
     }
 
     /**
@@ -375,14 +403,17 @@ class AnnotationSubscriber implements EventSubscriber {
         $annotation = $eventArgs->getAnnotation();
 
         $options = [];
-        if (isset($annotation->regex)){
+        if (isset($annotation->regex)) {
             $options['regex'] = $annotation->regex;
         }
 
-        $this->setFieldValidator($eventArgs, [
-            'class' => $annotation->class,
-            'options' => $options
-        ]);
+        $this->setFieldValidator(
+            $eventArgs,
+            [
+                'class' => $annotation->class,
+                'options' => $options
+            ]
+        );
     }
 
     /**
@@ -424,32 +455,40 @@ class AnnotationSubscriber implements EventSubscriber {
         $annotation = $eventArgs->getAnnotation();
 
         switch ($eventArgs->getEventType()){
-            case EventType::document:
-                $this->setDocumentValidator($eventArgs, [
-                    'class' => $annotation->class,
-                    'options' => $annotation->options
-                ]);
+            case EventType::DOCUMENT:
+                $this->setDocumentValidator(
+                    $eventArgs,
+                    [
+                        'class' => $annotation->class,
+                        'options' => $annotation->options
+                    ]
+                );
                 break;
                 break;
-            case EventType::field:
-                $this->setFieldValidator($eventArgs, [
-                    'class' => $annotation->class,
-                    'options' => $annotation->options
-                ]);
+            case EventType::FIELD:
+                $this->setFieldValidator(
+                    $eventArgs,
+                    [
+                        'class' => $annotation->class,
+                        'options' => $annotation->options
+                    ]
+                );
                 break;
         }
     }
 
-    protected function setFieldValidator($eventArgs, $definition){
-        if ($eventArgs->getAnnotation()->value && isset($definition)){
+    protected function setFieldValidator($eventArgs, $definition)
+    {
+        if ($eventArgs->getAnnotation()->value && isset($definition)) {
             $eventArgs->getMetadata()->validator['fields'][$eventArgs->getReflection()->getName()] = $definition;
         } else {
             unset($eventArgs->getMetadata()->validator['fields'][$eventArgs->getReflection()->getName()]);
         }
     }
 
-    protected function setDocumentValidator($eventArgs, $definition){
-        if ($eventArgs->getAnnotation()->value && isset($definition)){
+    protected function setDocumentValidator($eventArgs, $definition)
+    {
+        if ($eventArgs->getAnnotation()->value && isset($definition)) {
             $eventArgs->getMetadata()->validator['document'] = $definition;
         } else {
             unset($eventArgs->getMetadata()->validator['document']);

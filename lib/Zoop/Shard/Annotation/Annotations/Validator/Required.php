@@ -19,7 +19,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Required extends Annotation
 {
-    const event = 'annotationRequiredValidator';
+    const EVENT = 'annotationRequiredValidator';
 
     public $value = true;
 

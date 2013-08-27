@@ -16,8 +16,8 @@ use Zoop\Shard\Annotations as Shard;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-trait FreezeableTrait {
-
+trait FreezeableTrait
+{
     /**
      * @ODM\Boolean
      * @Shard\Freeze

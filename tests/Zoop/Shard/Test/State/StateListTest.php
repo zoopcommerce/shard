@@ -7,34 +7,36 @@ use Zoop\Shard\State\Events;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\State\TestAsset\Document\StateList;
 
-class StateListTest extends BaseTest {
-
+class StateListTest extends BaseTest
+{
     protected $calls = array();
 
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.state' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.state' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                    ]
                 ]
             ]
-        ]);
+        );
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
         $eventManager = $this->documentManager->getEventManager();
-        $eventManager->addEventListener(Events::badState, $this);
+        $eventManager->addEventListener(Events::BAD_STATE, $this);
     }
 
-    public function testCreateWithStateOnListFunction(){
-
+    public function testCreateWithStateOnListFunction()
+    {
         $this->calls = [];
         $documentManager = $this->documentManager;
 
@@ -47,11 +49,11 @@ class StateListTest extends BaseTest {
         $documentManager->flush();
 
         $this->assertNotNull($testDoc->getId());
-        $this->assertFalse(isset($this->calls[Events::badState]));
+        $this->assertFalse(isset($this->calls[Events::BAD_STATE]));
     }
 
-    public function testCreateWithStateNotOnListFunction() {
-
+    public function testCreateWithStateNotOnListFunction()
+    {
         $this->calls = [];
         $documentManager = $this->documentManager;
 
@@ -64,11 +66,11 @@ class StateListTest extends BaseTest {
         $documentManager->flush();
 
         $this->assertNull($testDoc->getId());
-        $this->assertTrue(isset($this->calls[Events::badState]));
+        $this->assertTrue(isset($this->calls[Events::BAD_STATE]));
     }
 
-    public function testUpdateWithStateOnListFunction(){
-
+    public function testUpdateWithStateOnListFunction()
+    {
         $this->calls = [];
         $documentManager = $this->documentManager;
 
@@ -80,18 +82,18 @@ class StateListTest extends BaseTest {
         $documentManager->persist($testDoc);
         $documentManager->flush();
 
-        $this->assertFalse(isset($this->calls[Events::badState]));
+        $this->assertFalse(isset($this->calls[Events::BAD_STATE]));
 
         $testDoc->setState('inactive');
 
         $documentManager->flush();
 
         $this->assertNotNull($testDoc->getId());
-        $this->assertFalse(isset($this->calls[Events::badState]));
+        $this->assertFalse(isset($this->calls[Events::BAD_STATE]));
     }
 
-    public function testUpdateWithStateNotOnListFunction() {
-
+    public function testUpdateWithStateNotOnListFunction()
+    {
         $this->calls = [];
         $documentManager = $this->documentManager;
 
@@ -103,17 +105,18 @@ class StateListTest extends BaseTest {
         $documentManager->persist($testDoc);
         $documentManager->flush();
 
-        $this->assertFalse(isset($this->calls[Events::badState]));
+        $this->assertFalse(isset($this->calls[Events::BAD_STATE]));
 
         $testDoc->setState('bad state');
 
         $documentManager->flush();
 
         $this->assertNotNull($testDoc->getId());
-        $this->assertTrue(isset($this->calls[Events::badState]));
+        $this->assertTrue(isset($this->calls[Events::BAD_STATE]));
     }
 
-    public function __call($name, $arguments){
+    public function __call($name, $arguments)
+    {
         $this->calls[$name] = $arguments;
     }
 }

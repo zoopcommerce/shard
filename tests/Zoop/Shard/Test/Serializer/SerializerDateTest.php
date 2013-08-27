@@ -6,31 +6,33 @@ use Zoop\Shard\Manifest;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\Birthday;
 
-class SerializerDateTest extends BaseTest {
-
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.serializer' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+class SerializerDateTest extends BaseTest
+{
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.serializer' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                    ]
                 ]
             ]
-        ]);
+        );
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
         $this->serializer = $manifest->getServiceManager()->get('serializer');
     }
 
-    public function testSerializerMongoDate(){
-
+    public function testSerializerMongoDate()
+    {
         $birthday = new Birthday('Miriam', new \MongoDate(strtotime('1950-01-01 Europe/Berlin')));
 
         $correct = [
@@ -43,8 +45,8 @@ class SerializerDateTest extends BaseTest {
         $this->assertEquals($correct, $array);
     }
 
-    public function testSerializerDateTime(){
-
+    public function testSerializerDateTime()
+    {
         $birthday = new Birthday('Miriam', new \DateTime('01/01/1950', new \DateTimeZone('Europe/Berlin')));
 
         $correct = [
@@ -57,8 +59,8 @@ class SerializerDateTest extends BaseTest {
         $this->assertEquals($correct, $array);
     }
 
-    public function testApplySerializeMetadataToArray(){
-
+    public function testApplySerializeMetadataToArray()
+    {
         $documentManager = $this->documentManager;
         $birthday = new Birthday('Miriam', new \DateTime('01/01/1950', new \DateTimeZone('Europe/Berlin')));
         $documentManager->persist($birthday);
@@ -88,8 +90,8 @@ class SerializerDateTest extends BaseTest {
         $this->assertEquals($correct, $array);
     }
 
-    public function testUnserializer(){
-
+    public function testUnserializer()
+    {
         $data = array(
             'name' => 'Miriam',
             'date' => '1949-12-31T23:00:00+00:00'

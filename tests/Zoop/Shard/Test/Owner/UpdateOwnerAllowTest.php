@@ -8,44 +8,46 @@ use Zoop\Shard\Test\Owner\TestAsset\Document\OwnerDoc;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\TestAsset\RoleAwareUser;
 
-class UpdateOwnerAllowTest extends BaseTest {
-
+class UpdateOwnerAllowTest extends BaseTest
+{
     protected $calls = array();
 
-    public function setUp(){
-
-        $manifest = new Manifest([
-            'documents' => [
-                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-            ],
-            'extension_configs' => [
-                'extension.accessControl' => true,
-                'extension.owner' => true
-            ],
-            'document_manager' => 'testing.documentmanager',
-            'service_manager_config' => [
-                'factories' => [
-                    'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    'user' => function(){
-                        $user = new RoleAwareUser();
-                        $user->setUsername('toby');
-                        $user->addRole('admin');
-                        return $user;
-                    }
+    public function setUp()
+    {
+        $manifest = new Manifest(
+            [
+                'documents' => [
+                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+                ],
+                'extension_configs' => [
+                    'extension.accessControl' => true,
+                    'extension.owner' => true
+                ],
+                'document_manager' => 'testing.documentmanager',
+                'service_manager_config' => [
+                    'factories' => [
+                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
+                        'user' => function () {
+                            $user = new RoleAwareUser();
+                            $user->setUsername('toby');
+                            $user->addRole('admin');
+                            return $user;
+                        }
+                    ]
                 ]
             ]
-        ]);
+        );
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
     }
 
-    public function testOwnerUpdateAllow(){
-
+    public function testOwnerUpdateAllow()
+    {
         $this->calls = array();
         $documentManager = $this->documentManager;
         $eventManager = $documentManager->getEventManager();
 
-        $eventManager->addEventListener(Events::updateDenied, $this);
+        $eventManager->addEventListener(Events::UPDATE_DENIED, $this);
 
         $testDoc = new OwnerDoc();
 
@@ -60,10 +62,11 @@ class UpdateOwnerAllowTest extends BaseTest {
         $testDoc->setOwner('bobby');
         $documentManager->flush();
 
-        $this->assertFalse(isset($this->calls[Events::updateDenied]));
+        $this->assertFalse(isset($this->calls[Events::UPDATE_DENIED]));
     }
 
-    public function __call($name, $arguments){
+    public function __call($name, $arguments)
+    {
         $this->calls[$name] = $arguments;
     }
 }

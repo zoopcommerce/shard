@@ -26,5 +26,4 @@ interface DocumentValidatorInterface
      * @throws Exception\RuntimeException If validation of $value is impossible
      */
     public function isValid($document);
-
 }

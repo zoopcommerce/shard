@@ -5,9 +5,10 @@ namespace Zoop\Shard\Test\Validator\TestAsset;
 use Zoop\Mystique\ValidatorInterface;
 use Zoop\Mystique\Result;
 
-class FieldValidator2 implements ValidatorInterface {
-
-    public function isValid($value) {
+class FieldValidator2 implements ValidatorInterface
+{
+    public function isValid($value)
+    {
         $messages = [];
 
         if ($value == 'valid' || $value == 'alsoValid') {

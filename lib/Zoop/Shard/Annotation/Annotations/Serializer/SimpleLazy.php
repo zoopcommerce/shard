@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class SimpleLazy extends Annotation
 {
-    const event = 'annotationSerializerSimpleLazy';
+    const EVENT = 'annotationSerializerSimpleLazy';
 
     public $value = true;
 }

@@ -12,15 +12,15 @@ namespace Zoop\Shard\SoftDelete\AccessControl;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Actions {
-
+class Actions
+{
     /**
      * Mark a resouce as deleted, but do not actually remove it
      */
-    const softDelete = 'softDelete';
+    const SOFT_DELETE = 'softDelete';
 
     /**
      * Unmark a resource as deleted
      */
-    const restore = 'restore';
+    const RESTORE = 'restore';
 }

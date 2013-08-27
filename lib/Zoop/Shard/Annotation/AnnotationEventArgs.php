@@ -17,8 +17,8 @@ use Doctrine\ODM\MongoDB\Mapping\ClassMetadataInfo;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class AnnotationEventArgs extends BaseEventArgs {
-
+class AnnotationEventArgs extends BaseEventArgs
+{
     protected $metadata;
 
     protected $eventType;
@@ -50,24 +50,28 @@ class AnnotationEventArgs extends BaseEventArgs {
         $this->eventManager = $eventManager;
     }
 
-    public function getMetadata() {
+    public function getMetadata()
+    {
         return $this->metadata;
     }
 
-    public function getEventType() {
+    public function getEventType()
+    {
         return $this->eventType;
     }
 
-    public function getAnnotation() {
+    public function getAnnotation()
+    {
         return $this->annotation;
     }
 
-    public function getReflection() {
+    public function getReflection()
+    {
         return $this->reflection;
     }
 
-    public function getEventManager() {
+    public function getEventManager()
+    {
         return $this->eventManager;
     }
-
 }
