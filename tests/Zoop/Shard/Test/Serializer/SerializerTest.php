@@ -7,7 +7,6 @@ use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\User;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\Group;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\Profile;
-use Zoop\Shard\Test\Serializer\TestAsset\Document\HasDiscriminator;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\ClassName;
 
 class SerializerTest extends BaseTest
@@ -97,21 +96,6 @@ class SerializerTest extends BaseTest
             $array,
             'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
         );
-
-        $this->assertEquals($correct, $array);
-    }
-
-    public function testSerializeDiscriminator()
-    {
-        $testDoc = new HasDiscriminator();
-        $testDoc->setName('superdweebie');
-
-        $correct = array(
-            'type' => 'hasDiscriminator',
-            'name' => 'superdweebie',
-        );
-
-        $array = $this->serializer->toArray($testDoc);
 
         $this->assertEquals($correct, $array);
     }

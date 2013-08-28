@@ -427,6 +427,12 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
         $documentManager = $this->documentManager;
         $metadata = $this->documentManager->getClassMetadata($className);
 
+        // Check for discrimnator and discriminator field in data
+        if (isset($metadata->discriminatorField) && isset($data[$metadata->discriminatorField['fieldName']])) {
+            $metadata = $this->documentManager
+                ->getClassMetadata($metadata->discriminatorMap[$data[$metadata->discriminatorField['fieldName']]]);
+        }
+
         // Check for reference
         if (isset($data['$ref'])) {
             $pieces = explode('/', $data['$ref']);

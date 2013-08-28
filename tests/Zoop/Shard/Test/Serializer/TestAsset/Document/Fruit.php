@@ -10,10 +10,13 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  * @ODM\Document
  * @ODM\InheritanceType("SINGLE_COLLECTION")
  * @ODM\DiscriminatorField(fieldName="type")
- * @ODM\DiscriminatorMap({"hasDiscriminator"="Zoop\Shard\Test\Serializer\TestAsset\Document\HasDiscriminator"})
+ * @ODM\DiscriminatorMap({
+ *     "apple"="Zoop\Shard\Test\Serializer\TestAsset\Document\Apple",
+ *     "orange"="Zoop\Shard\Test\Serializer\TestAsset\Document\Orange"
+ * })
  * @Shard\Serializer\Discriminator
  */
-class HasDiscriminator
+abstract class Fruit
 {
     /**
      * @ODM\Id(strategy="UUID")
@@ -21,22 +24,23 @@ class HasDiscriminator
     protected $id;
 
     /**
-     * @ODM\Field(type="string")
+     *
+     * @ODM\String
      */
-    protected $name;
+    protected $variety;
 
     public function getId()
     {
         return $this->id;
     }
 
-    public function getName()
+    public function getVariety()
     {
-        return $this->name;
+        return $this->variety;
     }
 
-    public function setName($name)
+    public function setVariety($variety)
     {
-        $this->name = (string) $name;
+        $this->variety = $variety;
     }
 }

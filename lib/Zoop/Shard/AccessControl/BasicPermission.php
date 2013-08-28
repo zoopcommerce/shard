@@ -87,7 +87,7 @@ class BasicPermission implements PermissionInterface
             $denyMatch = count(
                 array_filter(
                     $this->deny,
-                    function ($action) use ($testAction){
+                    function ($action) use ($testAction) {
                         //second check that action does not matche any deny
                         return preg_match($action, $testAction);
                     }
