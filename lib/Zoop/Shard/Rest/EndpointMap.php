@@ -6,6 +6,8 @@
  */
 namespace Zoop\Shard\Rest;
 
+use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
+
 /**
  *
  * @since   1.0
@@ -39,9 +41,11 @@ class EndpointMap
         return $endpoint;
     }
 
-    public function getEndpointsFromClass($class)
+    public function getEndpointsFromMetadata(ClassMetadata $metadata)
     {
         $result = [];
+
+        $class = $metadata->name;
 
         $checkEmbeddedEndpoints = function ($endpoint) use (&$result, $class, &$checkEmbeddedEndpoints) {
             $embeddedLists = $endpoint->getEmbeddedLists();
@@ -59,6 +63,13 @@ class EndpointMap
             $endpoint = $this->getEndpoint($name);
             if ($endpoint->getClass() == $class) {
                 $result[] = $endpoint;
+            }
+            if (isset($metadata->parentClasses)){
+                foreach ($metadata->parentClasses as $parentClass){
+                    if ($endpoint->getClass() == $parentClass) {
+                        $result[] = $endpoint;
+                    }
+                }
             }
             $checkEmbeddedEndpoints($endpoint);
         }
