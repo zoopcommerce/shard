@@ -480,21 +480,13 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                         if (! ($embeddedCollection = $metadata->reflFields[$field]->getValue($document))) {
                             $embeddedCollection = new ArrayCollection;
                         }
-                        for ($i = 0; $i < count($data[$field]); $i++) {
-                            if (count($embeddedCollection) > $i - 1) {
-                                $embeddedCollection[$i] = $this->unserialize(
-                                    $data[$field][$i],
-                                    $mapping['targetDocument'],
-                                    $mode,
-                                    $embeddedCollection[$i]
-                                );
-                            } else {
-                                $embeddedCollection[] = $this->unserialize(
-                                    $data[$field][$i],
-                                    $mapping['targetDocument'],
-                                    $mode
-                                );
-                            }
+                        foreach ($data[$field] as $index => $embeddedData){
+                            $embeddedCollection[$index] = $this->unserialize(
+                                $embeddedData,
+                                $mapping['targetDocument'],
+                                $mode,
+                                $embeddedCollection[$index]
+                            );
                         }
                         $value = $embeddedCollection;
                         break;
