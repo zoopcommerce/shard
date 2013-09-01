@@ -508,7 +508,14 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                             }
                             break;
                         case self::UNSERIALIZE_UPDATE:
-                            $value = new ArrayCollection([]);
+                            if ($embeddedCollection = $metadata->reflFields[$field]->getValue($document)) {
+                                foreach ($embeddedCollection as $key => $item){
+                                    $embeddedCollection->remove($key);
+                                }
+                                $value = $embeddedCollection;
+                            } else {
+                                $value = new ArrayCollection([]);
+                            }
                             break;
                     }
                     break;
@@ -531,44 +538,46 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                     }
                     break;
                 case isset($mapping['reference']) && $mapping['type'] == 'many':
-                    $newArray = [];
                     if (isset($data[$field])) {
-                        foreach ($data[$field] as $value) {
+                        if (! ($referenceCollection = $metadata->reflFields[$field]->getValue($document))) {
+                            $referenceCollection = new ArrayCollection;
+                        }
+                        foreach ($data[$field] as $index => $referenceData) {
 
                             //extract id for a reference, otherwise, unserialize array
                             unset($id);
-                            if (is_array($value)) {
-                                if (isset($value['$ref'])) {
-                                    $pieces = explode('/', $value['$ref']);
+                            if (is_array($referenceData)) {
+                                if (isset($referenceData['$ref'])) {
+                                    $pieces = explode('/', $referenceData['$ref']);
                                     $id = $pieces[count($pieces) - 1];
                                 } else {
-                                    $value = $this->removeClassNameAndDiscriminatorFromArray(
-                                        $value,
+                                    $referenceData = $this->removeClassNameAndDiscriminatorFromArray(
+                                        $referenceData,
                                         $this->classNameField
                                     );
                                     $identifier = $documentManager
                                         ->getClassMetadata($mapping['targetDocument'])
                                         ->identifier;
 
-                                    if (count($value) == 1 && isset($value[$identifier])) {
-                                        $id = $value[$identifier];
+                                    if (count($referenceData) == 1 && isset($referenceData[$identifier])) {
+                                        $id = $referenceData[$identifier];
                                     }
                                 }
                             } else {
-                                $id = $value;
+                                $id = $referenceData;
                             }
 
                             if (isset($id)) {
-                                $newArray[] = $documentManager->getReference($mapping['targetDocument'], $id);
+                                $referenceCollection[$index] = $documentManager->getReference($mapping['targetDocument'], $id);
                             } else {
-                                $newArray[] = $this->unserialize(
+                                $referenceCollection[$index] = $this->unserialize(
                                     $value,
                                     $mapping['targetDocument'],
                                     $mode
                                 );
                             }
                         }
-                        $value = new ArrayCollection($newArray);
+                        $value = $referenceCollection;
                         break;
                     }
                     switch ($mode) {
@@ -578,7 +587,14 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                             }
                             break;
                         case self::UNSERIALIZE_UPDATE:
-                            $value = new ArrayCollection([]);
+                            if ($referenceCollection = $metadata->reflFields[$field]->getValue($document)) {
+                                foreach ($referenceCollection as $key => $item){
+                                    $referenceCollection->remove($key);
+                                }
+                                $value = $referenceCollection;
+                            } else {
+                                $value = new ArrayCollection([]);
+                            }
                             break;
                     }
                     break;
