@@ -413,24 +413,32 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
         array $data,
         $className = null,
         $mode = self::UNSERIALIZE_PATCH,
-        $document = null
+        $document = null,
+        $discriminatorField = null,
+        $discriminatorMap = null
     ) {
 
-        if (! isset($className)) {
-            $className = $data[$this->classNameField];
-        }
-
-        if (! isset($className) || ! class_exists($className)) {
-            throw new Exception\ClassNotFoundException(sprintf('ClassName %s could not be loaded', $className));
-        }
-
         $documentManager = $this->documentManager;
-        $metadata = $this->documentManager->getClassMetadata($className);
-
-        // Check for discrimnator and discriminator field in data
-        if (isset($metadata->discriminatorField) && isset($data[$metadata->discriminatorField['fieldName']])) {
+        
+        if (isset($discriminatorField) && isset($data[$discriminatorField])) {
             $metadata = $this->documentManager
-                ->getClassMetadata($metadata->discriminatorMap[$data[$metadata->discriminatorField['fieldName']]]);
+                ->getClassMetadata($discriminatorMap[$data[$discriminatorField]]);
+        } else {
+            if (! isset($className)) {
+                $className = $data[$this->classNameField];
+            }
+
+            if (! isset($className) || ! class_exists($className)) {
+                throw new Exception\ClassNotFoundException(sprintf('ClassName %s could not be loaded', $className));
+            }
+
+            $metadata = $this->documentManager->getClassMetadata($className);
+
+            // Check for discrimnator and discriminator field in data
+            if (isset($metadata->discriminatorField) && isset($data[$metadata->discriminatorField['fieldName']])) {
+                $metadata = $this->documentManager
+                    ->getClassMetadata($metadata->discriminatorMap[$data[$metadata->discriminatorField['fieldName']]]);
+            }
         }
 
         // Check for reference
@@ -483,9 +491,11 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                         foreach ($data[$field] as $index => $embeddedData){
                             $embeddedCollection[$index] = $this->unserialize(
                                 $embeddedData,
-                                $mapping['targetDocument'],
+                                isset($mapping['targetDocument']) ? $mapping['targetDocument'] : null,
                                 $mode,
-                                $embeddedCollection[$index]
+                                $embeddedCollection[$index],
+                                isset($mapping['discriminatorField']) ? $mapping['discriminatorField'] : null,
+                                isset($mapping['discriminatorMap']) ? $mapping['discriminatorMap'] : null
                             );
                         }
                         $value = $embeddedCollection;
@@ -510,8 +520,11 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                     } elseif (is_array($data[$field])) {
                         $value = $this->unserialize(
                             $data[$field],
-                            $mapping['targetDocument'],
-                            $mode
+                            isset($mapping['targetDocument']) ? $mapping['targetDocument'] : null,
+                            $mode,
+                            null,
+                            isset($mapping['discriminatorField']) ? $mapping['discriminatorField'] : null,
+                            isset($mapping['discriminatorMap']) ? $mapping['discriminatorMap'] : null
                         );
                     } else {
                         $value = $documentManager->getReference($mapping['targetDocument'], $data[$field]);
