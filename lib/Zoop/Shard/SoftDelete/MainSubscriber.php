@@ -34,7 +34,9 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     public function getSubscribedEvents()
     {
         return [
+            // @codingStandardsIgnoreStart
             ODMEvents::onFlush
+            // @codingStandardsIgnoreEnd
         ];
     }
 

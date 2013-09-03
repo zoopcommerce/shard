@@ -26,7 +26,9 @@ class MainSubscriber extends AbstractAccessControlSubscriber
     {
         return [
             ManifestEvents::ON_BOOTSTRAP,
+            // @codingStandardsIgnoreStart
             ODMEvents::onFlush
+            // @codingStandardsIgnoreEnd
         ];
     }
 

@@ -24,7 +24,9 @@ class MainSubscriber extends AbstractStampSubscriber
     public function getSubscribedEvents()
     {
         return [
+            // @codingStandardsIgnoreStart
             ODMEvents::prePersist
+            // @codingStandardsIgnoreEnd
         ];
     }
 

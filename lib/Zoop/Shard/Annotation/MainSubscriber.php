@@ -29,7 +29,9 @@ class MainSubscriber implements EventSubscriber
     public function getSubscribedEvents()
     {
         return [
+            // @codingStandardsIgnoreStart
             ODMEvents::loadClassMetadata
+            // @codingStandardsIgnoreEnd
         ];
     }
 
