@@ -568,7 +568,7 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                             }
 
                             if (isset($id)) {
-                                if ($id !== $referenceCollection->getMongoData()[$index]['$id']) {
+                                if (method_exists($referenceCollection, 'getMongoData') && $id !== $referenceCollection->getMongoData()[$index]['$id']) {
                                     $referenceCollection[$index] =
                                         $documentManager->getReference($mapping['targetDocument'], $id);
                                 }
