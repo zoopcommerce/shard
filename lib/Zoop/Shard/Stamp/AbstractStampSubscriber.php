@@ -36,7 +36,7 @@ abstract class AbstractStampSubscriber implements EventSubscriber, ServiceLocato
 
     protected function getUsername()
     {
-        if ($this->serviceLocator->has('user')){
+        if ($this->serviceLocator->has('user')) {
             return $this->serviceLocator->get('user')->getUsername();
         } else {
             return null;

@@ -64,8 +64,8 @@ class EndpointMap
             if ($endpoint->getClass() == $class) {
                 $result[] = $endpoint;
             }
-            if (isset($metadata->parentClasses)){
-                foreach ($metadata->parentClasses as $parentClass){
+            if (isset($metadata->parentClasses)) {
+                foreach ($metadata->parentClasses as $parentClass) {
                     if ($endpoint->getClass() == $parentClass) {
                         $result[] = $endpoint;
                     }

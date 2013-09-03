@@ -419,7 +419,7 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
     ) {
 
         $documentManager = $this->documentManager;
-        
+
         if (isset($discriminatorField) && isset($data[$discriminatorField])) {
             $metadata = $this->documentManager
                 ->getClassMetadata($discriminatorMap[$data[$discriminatorField]]);
@@ -488,7 +488,7 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                         if (! ($embeddedCollection = $metadata->reflFields[$field]->getValue($document))) {
                             $embeddedCollection = new ArrayCollection;
                         }
-                        foreach ($data[$field] as $index => $embeddedData){
+                        foreach ($data[$field] as $index => $embeddedData) {
                             $embeddedCollection[$index] = $this->unserialize(
                                 $embeddedData,
                                 isset($mapping['targetDocument']) ? $mapping['targetDocument'] : null,
@@ -509,7 +509,7 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                             break;
                         case self::UNSERIALIZE_UPDATE:
                             if ($embeddedCollection = $metadata->reflFields[$field]->getValue($document)) {
-                                foreach ($embeddedCollection as $key => $item){
+                                foreach ($embeddedCollection as $key => $item) {
                                     $embeddedCollection->remove($key);
                                 }
                                 $value = $embeddedCollection;
@@ -568,12 +568,16 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                             }
 
                             if (isset($id)) {
-                                $referenceCollection[$index] = $documentManager->getReference($mapping['targetDocument'], $id);
+                                if ($id !== $referenceCollection->getMongoData()[$index]['$id']) {
+                                    $referenceCollection[$index] =
+                                        $documentManager->getReference($mapping['targetDocument'], $id);
+                                }
                             } else {
                                 $referenceCollection[$index] = $this->unserialize(
-                                    $value,
+                                    $referenceData,
                                     $mapping['targetDocument'],
-                                    $mode
+                                    $mode,
+                                    $referenceCollection[$index]
                                 );
                             }
                         }
@@ -588,7 +592,7 @@ class Serializer implements ServiceLocatorAwareInterface, DocumentManagerAwareIn
                             break;
                         case self::UNSERIALIZE_UPDATE:
                             if ($referenceCollection = $metadata->reflFields[$field]->getValue($document)) {
-                                foreach ($referenceCollection as $key => $item){
+                                foreach ($referenceCollection as $key => $item) {
                                     $referenceCollection->remove($key);
                                 }
                                 $value = $referenceCollection;
