@@ -20,7 +20,8 @@ class Extension extends AbstractExtension
     protected $subscribers = [
         'subscriber.accessControl.mainsubscriber',
         'subscriber.accessControl.annotationsubscriber',
-        'subscriber.accessControl.basicPermissionSubscriber'
+        'subscriber.accessControl.basicPermissionSubscriber',
+        'subscriber.accessControl.rolesSubscriber'
     ];
 
     protected $filters = [
@@ -35,6 +36,8 @@ class Extension extends AbstractExtension
                 'Zoop\Shard\AccessControl\AnnotationSubscriber',
             'subscriber.accessControl.basicPermissionSubscriber' =>
                 'Zoop\Shard\AccessControl\BasicPermissionSubscriber',
+            'subscriber.accessControl.rolesSubscriber' =>
+                'Zoop\Shard\AccessControl\RolesSubscriber',
             'accessController' =>
                 'Zoop\Shard\AccessControl\AccessController'
         ]
@@ -45,6 +48,7 @@ class Extension extends AbstractExtension
      * @var array
      */
     protected $dependencies = [
-        'extension.annotation' => true
+        'extension.annotation' => true,
+        'extension.odmcore'    => true,
     ];
 }

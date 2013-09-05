@@ -47,7 +47,7 @@ class ReadAccessControl extends BsonFilter
             if ($result->getAllowed()) {
                 return $result->getNew();
             } else {
-                $criteria = [];
+                $critiera = [];
                 foreach ($result->getNew() as $field => $value) {
                     if ($value instanceof \MongoRegex) {
                         $critiera[$field] = ['$not' => $value];

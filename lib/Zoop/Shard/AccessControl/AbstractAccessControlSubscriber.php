@@ -22,6 +22,8 @@ abstract class AbstractAccessControlSubscriber implements EventSubscriber, Servi
 
     protected $accessController;
 
+    protected $documentManager;
+
     protected function getAccessController()
     {
         if (! isset($this->accessController)) {
@@ -30,5 +32,16 @@ abstract class AbstractAccessControlSubscriber implements EventSubscriber, Servi
             }
         }
         return $this->accessController;
+    }
+
+    protected function getDocumentManager()
+    {
+        if (! isset($this->documentManager)) {
+            $this->documentManager = $this->serviceLocator->get('manifest')->getDocumentManager();
+            if (is_string($this->documentManager)){
+                $this->documentManager = $this->serviceLocator->get($this->documentManager);
+            }
+        }
+        return $this->documentManager;
     }
 }

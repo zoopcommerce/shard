@@ -18,13 +18,15 @@ class Extension extends AbstractExtension
 {
     protected $subscribers = [
         'subscriber.owner.mainsubscriber',
-        'subscriber.owner.annotationsubscriber'
+        'subscriber.owner.annotationsubscriber',
+        'subscriber.owner.rolessubscriber'
     ];
 
     protected $serviceManagerConfig = [
         'invokables' => [
             'subscriber.owner.mainsubscriber' => 'Zoop\Shard\Owner\MainSubscriber',
-            'subscriber.owner.annotationsubscriber' => 'Zoop\Shard\Owner\AnnotationSubscriber'
+            'subscriber.owner.annotationsubscriber' => 'Zoop\Shard\Owner\AnnotationSubscriber',
+            'subscriber.owner.rolessubscriber' => 'Zoop\Shard\Owner\RolesSubscriber'
         ]
     ];
 
