@@ -50,13 +50,10 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
             //stop freeze
             $this->getFreezer()->thaw($document);
 
-            $eventManager = $eventArgs->getDocumentManager()->getEventManager();
-            if ($eventManager->hasListeners(Events::FREEZE_DENIED)) {
-                $eventManager->dispatchEvent(
-                    Events::FREEZE_DENIED,
-                    new AccessControlEventArgs($document, Actions::FREEZE)
-                );
-            }
+            $eventArgs->getDocumentManager()->getEventManager()->dispatchEvent(
+                Events::FREEZE_DENIED,
+                new AccessControlEventArgs($document, Actions::FREEZE)
+            );
         }
     }
 
@@ -78,13 +75,10 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
             //stop thaw
             $this->getFreezer()->freeze($document);
 
-            $eventManager = $eventArgs->getDocumentManager()->getEventManager();
-            if ($eventManager->hasListeners(Events::THAW_DENIED)) {
-                $eventManager->dispatchEvent(
-                    Events::THAW_DENIED,
-                    new AccessControlEventArgs($document, Actions::THAW)
-                );
-            }
+            $eventArgs->getDocumentManager()->getEventManager()->dispatchEvent(
+                Events::THAW_DENIED,
+                new AccessControlEventArgs($document, Actions::THAW)
+            );
         }
     }
 

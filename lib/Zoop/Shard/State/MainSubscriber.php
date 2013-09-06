@@ -57,12 +57,10 @@ class MainSubscriber implements EventSubscriber
             ) {
                 $unitOfWork->detach($document);
                 $eventManager = $documentManager->getEventManager();
-                if ($eventManager->hasListeners(Events::BAD_STATE)) {
-                    $eventManager->dispatchEvent(
-                        Events::BAD_STATE,
-                        $eventArgs
-                    );
-                }
+                $eventManager->dispatchEvent(
+                    Events::BAD_STATE,
+                    $eventArgs
+                );
             }
         }
 
@@ -87,23 +85,19 @@ class MainSubscriber implements EventSubscriber
             //stop state change if the new state is not on the defined state list
             if (count($metadata->state[$field]) > 0 && ! in_array($toState, $metadata->state[$field])) {
                 $metadata->reflFields[$field]->setValue($document, $fromState);
-                if ($eventManager->hasListeners(Events::BAD_STATE)) {
-                    $eventManager->dispatchEvent(
-                        Events::BAD_STATE,
-                        $eventArgs
-                    );
-                }
+                $eventManager->dispatchEvent(
+                    Events::BAD_STATE,
+                    $eventArgs
+                );
                 $unitOfWork->recomputeSingleDocumentChangeSet($metadata, $document);
                 continue;
             }
 
             // Raise preTransition
-            if ($eventManager->hasListeners(Events::PRE_TRANSITION)) {
-                $eventManager->dispatchEvent(
-                    Events::PRE_TRANSITION,
-                    new TransitionEventArgs(new Transition($fromState, $toState), $document, $documentManager)
-                );
-            }
+            $eventManager->dispatchEvent(
+                Events::PRE_TRANSITION,
+                new TransitionEventArgs(new Transition($fromState, $toState), $document, $documentManager)
+            );
 
             if ($document->getState() == $fromState) {
                 //State change has been rolled back
@@ -112,23 +106,19 @@ class MainSubscriber implements EventSubscriber
             }
 
             // Raise onTransition
-            if ($eventManager->hasListeners(Events::ON_TRANSITION)) {
-                $eventManager->dispatchEvent(
-                    Events::ON_TRANSITION,
-                    new TransitionEventArgs(new Transition($fromState, $toState), $document, $documentManager)
-                );
-            }
+            $eventManager->dispatchEvent(
+                Events::ON_TRANSITION,
+                new TransitionEventArgs(new Transition($fromState, $toState), $document, $documentManager)
+            );
 
             // Force change set update
             $unitOfWork->recomputeSingleDocumentChangeSet($metadata, $document);
 
             // Raise postTransition - this is when workflow vars should be updated
-            if ($eventManager->hasListeners(Events::POST_TRANSITION)) {
-                $eventManager->dispatchEvent(
-                    Events::POST_TRANSITION,
-                    new TransitionEventArgs(new Transition($fromState, $toState), $document, $documentManager)
-                );
-            }
+            $eventManager->dispatchEvent(
+                Events::POST_TRANSITION,
+                new TransitionEventArgs(new Transition($fromState, $toState), $document, $documentManager)
+            );
         }
     }
 }

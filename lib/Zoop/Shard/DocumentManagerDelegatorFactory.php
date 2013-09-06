@@ -30,10 +30,7 @@ class DocumentManagerDelegatorFactory implements DelegatorFactoryInterface
             return $this->documentManagers[$name];
         } else {
             $this->documentManagers[$name] = call_user_func($callback);
-            $eventManager = $this->documentManagers[$name]->getEventManager();
-            if ($eventManager->hasListeners(Events::ON_BOOTSTRAP)) {
-                $eventManager->dispatchEvent(Events::ON_BOOTSTRAP, new BootstrapEventArgs);
-            }
+            $this->documentManagers[$name]->getEventManager()->dispatchEvent(Events::ON_BOOTSTRAP, new BootstrapEventArgs);
         }
 
         return $this->documentManagers[$name];

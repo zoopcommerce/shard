@@ -68,12 +68,10 @@ class MainSubscriber extends AbstractAccessControlSubscriber
         }
         $unitOfWork->detach($document);
 
-        if ($eventManager->hasListeners(AccessControlEvents::CREATE_DENIED)) {
-            $eventManager->dispatchEvent(
-                AccessControlEvents::CREATE_DENIED,
-                new EventArgs($document, Actions::CREATE)
-            );
-        }
+        $eventManager->dispatchEvent(
+            AccessControlEvents::CREATE_DENIED,
+            new EventArgs($document, Actions::CREATE)
+        );
     }
 
     public function update(UpdateEventArgs $eventArgs)
@@ -113,12 +111,10 @@ class MainSubscriber extends AbstractAccessControlSubscriber
         //stop updates
         $unitOfWork->clearDocumentChangeSet(spl_object_hash($document));
 
-        if ($eventManager->hasListeners(AccessControlEvents::UPDATE_DENIED)) {
-            $eventManager->dispatchEvent(
-                AccessControlEvents::UPDATE_DENIED,
-                new EventArgs($document, 'update')
-            );
-        }
+        $eventManager->dispatchEvent(
+            AccessControlEvents::UPDATE_DENIED,
+            new EventArgs($document, 'update')
+        );
     }
 
     public function delete(DeleteEventArgs $eventArgs)
@@ -137,11 +133,9 @@ class MainSubscriber extends AbstractAccessControlSubscriber
 
         $documentManager->persist($document);
 
-        if ($eventManager->hasListeners(AccessControlEvents::DELETE_DENIED)) {
-            $eventManager->dispatchEvent(
-                AccessControlEvents::DELETE_DENIED,
-                new EventArgs($document, Actions::DELETE)
-            );
-        }
+        $eventManager->dispatchEvent(
+            AccessControlEvents::DELETE_DENIED,
+            new EventArgs($document, Actions::DELETE)
+        );
     }
 }

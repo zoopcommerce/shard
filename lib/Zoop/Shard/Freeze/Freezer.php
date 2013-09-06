@@ -16,24 +16,23 @@ use Zoop\Shard\DocumentManagerAwareTrait;
  */
 class Freezer implements DocumentManagerAwareInterface
 {
-
     use DocumentManagerAwareTrait;
 
     public function isFrozen($document)
     {
         $metadata = $this->documentManager->getClassMetadata(get_class($document));
-        return $metadata->reflFields[$metadata->freeze['flag']]->getValue($document);
+        return $metadata->getFieldValue($document, $metadata->freeze['flag']);
     }
 
     public function freeze($document)
     {
         $metadata = $this->documentManager->getClassMetadata(get_class($document));
-        $metadata->reflFields[$metadata->freeze['flag']]->setValue($document, true);
+        $metadata->setFieldValue($document, $metadata->freeze['flag'], true);
     }
 
     public function thaw($document)
     {
         $metadata = $this->documentManager->getClassMetadata(get_class($document));
-        $metadata->reflFields[$metadata->freeze['flag']]->setValue($document, false);
+        $metadata->setFieldValue($document, $metadata->freeze['flag'], false);
     }
 }

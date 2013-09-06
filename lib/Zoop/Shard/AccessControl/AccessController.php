@@ -146,15 +146,12 @@ class AccessController implements ServiceLocatorAwareInterface, DocumentManagerA
     {
         $eventManager = $this->documentManager->getEventManager();
 
-        if ($eventManager->hasListeners(Events::GET_ROLES)) {
-            $event = new GetRolesEventArgs($metadata, $document, $this->getUser());
-            $eventManager->dispatchEvent(
-                Events::GET_ROLES,
-                $event
-            );
-            return $event->getRoles();
-        }
-        return [];
+        $event = new GetRolesEventArgs($metadata, $document, $this->getUser());
+        $eventManager->dispatchEvent(
+            Events::GET_ROLES,
+            $event
+        );
+        return $event->getRoles();
     }
 
     protected function getUser()

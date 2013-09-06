@@ -63,12 +63,10 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                 $eventManager = $documentManager->getEventManager();
 
                 // Raise INVALID_UPDATE
-                if ($eventManager->hasListeners(Events::INVALID_UPDATE)) {
-                    $eventManager->dispatchEvent(
-                        Events::INVALID_UPDATE,
-                        new EventArgs($document, $documentManager, $result)
-                    );
-                }
+                $eventManager->dispatchEvent(
+                    Events::INVALID_UPDATE,
+                    new EventArgs($document, $documentManager, $result)
+                );
             }
         }
 
@@ -84,12 +82,10 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                 $eventManager = $documentManager->getEventManager();
 
                 // Raise invalidCreate
-                if ($eventManager->hasListeners(Events::INVALID_CREATE)) {
-                    $eventManager->dispatchEvent(
-                        Events::INVALID_CREATE,
-                        new EventArgs($document, $documentManager, $result)
-                    );
-                }
+                $eventManager->dispatchEvent(
+                    Events::INVALID_CREATE,
+                    new EventArgs($document, $documentManager, $result)
+                );
             }
         }
     }

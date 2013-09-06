@@ -102,12 +102,10 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber
                 ->setValue($document, $eventArgs->getTransition()->getFrom());
 
             $eventManager = $eventArgs->getDocumentManager()->getEventManager();
-            if ($eventManager->hasListeners(Events::TRANSITION_DENIED)) {
-                $eventManager->dispatchEvent(
-                    Events::TRANSITION_DENIED,
-                    $eventArgs
-                );
-            }
+            $eventManager->dispatchEvent(
+                Events::TRANSITION_DENIED,
+                $eventArgs
+            );
         }
     }
 }

@@ -66,12 +66,10 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                     $unitOfWork->clearDocumentChangeSet(spl_object_hash($document));
 
                     // Raise softDeletedUpdateDenied
-                    if ($eventManager->hasListeners(SoftDeleteEvents::SOFT_DELETED_UPDATE_DENIED)) {
-                        $eventManager->dispatchEvent(
-                            SoftDeleteEvents::SOFT_DELETED_UPDATE_DENIED,
-                            new LifecycleEventArgs($document, $documentManager)
-                        );
-                    }
+                    $eventManager->dispatchEvent(
+                        SoftDeleteEvents::SOFT_DELETED_UPDATE_DENIED,
+                        new LifecycleEventArgs($document, $documentManager)
+                    );
                     continue;
                 } else {
                     continue;
@@ -82,21 +80,17 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                 // Trigger soft delete events
 
                 // Raise preSoftDelete
-                if ($eventManager->hasListeners(SoftDeleteEvents::PRE_SOFT_DELETE)) {
-                    $eventManager->dispatchEvent(
-                        SoftDeleteEvents::PRE_SOFT_DELETE,
-                        new LifecycleEventArgs($document, $documentManager)
-                    );
-                }
+                $eventManager->dispatchEvent(
+                    SoftDeleteEvents::PRE_SOFT_DELETE,
+                    new LifecycleEventArgs($document, $documentManager)
+                );
 
                 if ($softDeleter->isSoftDeleted($document)) {
                     // Raise postSoftDelete
-                    if ($eventManager->hasListeners(SoftDeleteEvents::POST_SOFT_DELETE)) {
-                        $eventManager->dispatchEvent(
-                            SoftDeleteEvents::POST_SOFT_DELETE,
-                            new LifecycleEventArgs($document, $documentManager)
-                        );
-                    }
+                    $eventManager->dispatchEvent(
+                        SoftDeleteEvents::POST_SOFT_DELETE,
+                        new LifecycleEventArgs($document, $documentManager)
+                    );
                 } else {
                     // Soft delete has been rolled back
                     $metadata = $documentManager->getClassMetadata(get_class($document));
@@ -107,21 +101,17 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                 // Trigger restore events
 
                 // Raise preRestore
-                if ($eventManager->hasListeners(SoftDeleteEvents::PRE_RESTORE)) {
-                    $eventManager->dispatchEvent(
-                        SoftDeleteEvents::PRE_RESTORE,
-                        new LifecycleEventArgs($document, $documentManager)
-                    );
-                }
+                $eventManager->dispatchEvent(
+                    SoftDeleteEvents::PRE_RESTORE,
+                    new LifecycleEventArgs($document, $documentManager)
+                );
 
                 if (! $softDeleter->isSoftDeleted($document)) {
                     // Raise postRestore
-                    if ($eventManager->hasListeners(SoftDeleteEvents::POST_RESTORE)) {
-                        $eventManager->dispatchEvent(
-                            SoftDeleteEvents::POST_RESTORE,
-                            new LifecycleEventArgs($document, $documentManager)
-                        );
-                    }
+                    $eventManager->dispatchEvent(
+                        SoftDeleteEvents::POST_RESTORE,
+                        new LifecycleEventArgs($document, $documentManager)
+                    );
                 } else {
                     // Restore has been rolled back
                     $metadata = $documentManager->getClassMetadata(get_class($document));

@@ -16,10 +16,6 @@ use Zoop\Shard\AbstractExtension;
  */
 class Extension extends AbstractExtension
 {
-    protected $dependencies = [
-        'extension.annotation' => true
-    ];
-
     protected $subscribers = [
         'subscriber.freeze.mainsubscriber',
         'subscriber.freeze.stampsubscriber',
@@ -39,5 +35,10 @@ class Extension extends AbstractExtension
             'subscriber.freeze.annotationsubscriber' => 'Zoop\Shard\Freeze\AnnotationSubscriber',
             'subscriber.freeze.freezesubscriber' => 'Zoop\Shard\Freeze\AccessControl\FreezeSubscriber'
         ]
+    ];
+
+    protected $dependencies = [
+        'extension.annotation' => true,
+        'extension.odmcore'    => true,
     ];
 }

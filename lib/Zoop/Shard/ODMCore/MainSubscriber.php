@@ -41,31 +41,25 @@ class MainSubscriber implements EventSubscriber
         $eventManager = $documentManager->getEventManager();
 
         foreach ($unitOfWork->getScheduledDocumentInsertions() as $document) {
-            if ($eventManager->hasListeners(Events::CREATE)) {
-                $eventManager->dispatchEvent(
-                    Events::CREATE,
-                    new CreateEventArgs($document)
-                );
-            }
+            $eventManager->dispatchEvent(
+                Events::CREATE,
+                new CreateEventArgs($document)
+            );
         }
 
         foreach ($unitOfWork->getScheduledDocumentUpdates() as $document) {
-            if ($eventManager->hasListeners(Events::UPDATE)) {
-                $eventManager->dispatchEvent(
-                    Events::UPDATE,
-                    new UpdateEventArgs($document)
-                );
-            }
+            $eventManager->dispatchEvent(
+                Events::UPDATE,
+                new UpdateEventArgs($document)
+            );
         }
 
         //Check delete permsisions
         foreach ($unitOfWork->getScheduledDocumentDeletions() as $document) {
-            if ($eventManager->hasListeners(Events::DELETE)) {
-                $eventManager->dispatchEvent(
-                    Events::DELETE,
-                    new DeleteEventArgs($document)
-                );
-            }
+            $eventManager->dispatchEvent(
+                Events::DELETE,
+                new DeleteEventArgs($document)
+            );
         }
     }
 }

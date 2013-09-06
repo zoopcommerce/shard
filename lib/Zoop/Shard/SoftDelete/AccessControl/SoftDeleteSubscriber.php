@@ -49,13 +49,10 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
             //stop SoftDelete
             $this->getSoftDeleter()->restore($document);
 
-            $eventManager = $eventArgs->getDocumentManager()->getEventManager();
-            if ($eventManager->hasListeners(Events::SOFT_DELETE_DENIED)) {
-                $eventManager->dispatchEvent(
-                    Events::SOFT_DELETE_DENIED,
-                    $eventArgs
-                );
-            }
+            $eventArgs->getDocumentManager()->getEventManager()->dispatchEvent(
+                Events::SOFT_DELETE_DENIED,
+                $eventArgs
+            );
         }
     }
 
@@ -76,13 +73,10 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
             //stop restore
             $this->getSoftDeleter()->softDelete($document);
 
-            $eventManager = $eventArgs->getDocumentManager()->getEventManager();
-            if ($eventManager->hasListeners(Events::RESTORE_DENIED)) {
-                $eventManager->dispatchEvent(
-                    Events::RESTORE_DENIED,
-                    $eventArgs
-                );
-            }
+            $eventArgs->getDocumentManager()->getEventManager()->dispatchEvent(
+                Events::RESTORE_DENIED,
+                $eventArgs
+            );
         }
     }
 

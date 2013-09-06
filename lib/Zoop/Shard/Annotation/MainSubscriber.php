@@ -63,12 +63,10 @@ class MainSubscriber implements EventSubscriber
         $this->buildMetadata($metadata, $metadata, $eventManager);
 
         // Raise post build metadata event
-        if ($eventManager->hasListeners(Events::POST_BUILD_METADATA)) {
-            $eventManager->dispatchEvent(
-                Events::POST_BUILD_METADATA,
-                $eventArgs
-            );
-        }
+        $eventManager->dispatchEvent(
+            Events::POST_BUILD_METADATA,
+            $eventArgs
+        );
     }
 
     protected function buildMetadata(ClassMetadata $source, ClassMetadata $target, $eventManager)
@@ -88,18 +86,16 @@ class MainSubscriber implements EventSubscriber
             if (defined(get_class($annotation) . '::EVENT')) {
 
                 // Raise annotation event
-                if ($eventManager->hasListeners($annotation::EVENT)) {
-                    $eventManager->dispatchEvent(
-                        $annotation::EVENT,
-                        new AnnotationEventArgs(
-                            $target,
-                            EventType::DOCUMENT,
-                            $annotation,
-                            $targetReflClass,
-                            $eventManager
-                        )
-                    );
-                }
+                $eventManager->dispatchEvent(
+                    $annotation::EVENT,
+                    new AnnotationEventArgs(
+                        $target,
+                        EventType::DOCUMENT,
+                        $annotation,
+                        $targetReflClass,
+                        $eventManager
+                    )
+                );
             }
         }
     }
@@ -114,12 +110,10 @@ class MainSubscriber implements EventSubscriber
                 if (defined(get_class($annotation) . '::EVENT')) {
 
                     // Raise annotation event
-                    if ($eventManager->hasListeners($annotation::EVENT)) {
-                        $eventManager->dispatchEvent(
-                            $annotation::EVENT,
-                            new AnnotationEventArgs($target, EventType::FIELD, $annotation, $reflField, $eventManager)
-                        );
-                    }
+                    $eventManager->dispatchEvent(
+                        $annotation::EVENT,
+                        new AnnotationEventArgs($target, EventType::FIELD, $annotation, $reflField, $eventManager)
+                    );
                 }
             }
         }
@@ -136,12 +130,10 @@ class MainSubscriber implements EventSubscriber
                 if (defined(get_class($annotation) . '::EVENT')) {
 
                     // Raise annotation event
-                    if ($eventManager->hasListeners($annotation::EVENT)) {
-                        $eventManager->dispatchEvent(
-                            $annotation::EVENT,
-                            new AnnotationEventArgs($target, EventType::METHOD, $annotation, $reflMethod, $eventManager)
-                        );
-                    }
+                    $eventManager->dispatchEvent(
+                        $annotation::EVENT,
+                        new AnnotationEventArgs($target, EventType::METHOD, $annotation, $reflMethod, $eventManager)
+                    );
                 }
             }
         }
