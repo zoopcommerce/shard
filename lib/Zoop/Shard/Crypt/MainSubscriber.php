@@ -7,15 +7,13 @@
 namespace Zoop\Shard\Crypt;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
-use Doctrine\ODM\MongoDB\Events as ODMEvents;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Crypt\BlockCipher\BlockCipherServiceInterface;
 use Zoop\Shard\Crypt\Hash\HashServiceInterface;
 use Zoop\Shard\GetDocumentManagerTrait;
 use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
-use Zoop\Shard\ODMCore\UpdateEventArgs;
+use Zoop\Shard\ODMCore\CoreEventArgs;
 
 /**
  * Listener hashes fields marked with CryptHash annotation
@@ -38,12 +36,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
      */
     public function getSubscribedEvents()
     {
-        return [
-            // @codingStandardsIgnoreStart
-            ODMEvents::prePersist,
-            // @codingStandardsIgnoreEnd
-            ODMCoreEvents::UPDATE,
-        ];
+        return [ODMCoreEvents::CRYPT];
     }
 
     public function getHashHelper()
@@ -62,38 +55,14 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         return $this->blockCipherHelper;
     }
 
-    public function update(UpdateEventArgs $eventArgs)
+    public function crypt(CoreEventArgs $eventArgs)
     {
         $documentManager = $this->getDocumentManager();
         $document = $eventArgs->getDocument();
         $metadata = $documentManager->getClassMetadata(get_class($document));
 
-        $requireRecompute = false;
-        if ($this->hashFields($metadata, $document)){
-            $requireRecompute = true;
-        }
-        if ($this->blockCipherFields($metadata, $document)){
-            $requireRecompute = true;
-        }
-
-        if ($requireRecompute) {
-            $documentManager->getUnitOfWork()->recomputeSingleDocumentChangeSet($metadata, $document);
-        }
-    }
-
-    /**
-     *
-     * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
-     */
-    public function prePersist(LifecycleEventArgs $eventArgs)
-    {
-        $document = $eventArgs->getDocument();
-        $documentManager = $eventArgs->getDocumentManager();
-        $metadata = $documentManager->getClassMetadata(get_class($document));
-
-        $this->getHashHelper()->hashDocument($document, $metadata);
-        $this->getBlockCipherHelper()->encryptDocument($document, $metadata);
-
+        $this->hashFields($metadata, $document);
+        $this->blockCipherFields($metadata, $document);
     }
 
     protected function hashFields($metadata, $document)
@@ -114,7 +83,12 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                     throw new \Zoop\Shard\Exception\InvalidArgumentException();
                 }
                 $service->hashField($field, $document, $metadata);
-                return true;
+                $this->getDocumentManager()->getUnitOfWork()->propertyChanged(
+                    $document,
+                    $field,
+                    $changeSet[$field][0],
+                    $metadata->getFieldValue($document, $field)
+                );
             }
         }
     }
@@ -137,7 +111,12 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                     throw new \Zoop\Shard\Exception\InvalidArgumentException();
                 }
                 $service->encryptField($field, $document, $metadata);
-                return true;
+                $this->getDocumentManager()->getUnitOfWork()->propertyChanged(
+                    $document,
+                    $field,
+                    $changeSet[$field][0],
+                    $metadata->getFieldValue($document, $field)
+                );
             }
         }
     }
@@ -147,9 +126,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         list($old, $new) = $changeSet[$field];
 
         // Check for change
-        if (($old == null || $old == $new) ||
-            (! isset($new) || $new == '')
-        ) {
+        if ($old == $new || (! isset($new) || $new == '')) {
             return false;
         }
 

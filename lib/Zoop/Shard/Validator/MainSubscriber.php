@@ -7,10 +7,11 @@
 namespace Zoop\Shard\Validator;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\ODM\MongoDB\Event\OnFlushEventArgs;
-use Doctrine\ODM\MongoDB\Events as ODMEvents;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zoop\Shard\GetDocumentManagerTrait;
+use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
+use Zoop\Shard\ODMCore\CoreEventArgs;
 
 /**
  *
@@ -20,6 +21,7 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
 class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 {
     use ServiceLocatorAwareTrait;
+    use GetDocumentManagerTrait;
 
     /**
      *
@@ -33,60 +35,34 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
      */
     public function getSubscribedEvents()
     {
-        $events = [
-            // @codingStandardsIgnoreStart
-            ODMEvents::onFlush
-            // @codingStandardsIgnoreEnd
-        ];
+        $events = [ODMCoreEvents::VALIDATE];
         return $events;
     }
 
-    /**
-     *
-     * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
-     */
-    public function onFlush(OnFlushEventArgs $eventArgs)
+    public function validate(CoreEventArgs $eventArgs)
     {
-        $documentManager = $eventArgs->getDocumentManager();
+        $document = $eventArgs->getDocument();
+        $documentManager = $this->getDocumentManager();
         $unitOfWork = $documentManager->getUnitOfWork();
         $documentValidator = $this->getDocumentValidator();
 
-        foreach ($unitOfWork->getScheduledDocumentUpdates() as $document) {
-            $metadata = $documentManager->getClassMetadata(get_class($document));
+        $metadata = $documentManager->getClassMetadata(get_class($document));
 
-            $result = $documentValidator->isValid($document, $metadata);
-            if (! $result->getValue()) {
+        $result = $documentValidator->isValid($document, $metadata);
+        if (! $result->getValue()) {
 
-                // Updates to invalid documents are not allowed. Roll them back
-                $unitOfWork->detach($document);
+            // Updates to invalid documents are not allowed. Roll them back
+            $unitOfWork->detach($document);
 
-                $eventManager = $documentManager->getEventManager();
+            $eventManager = $documentManager->getEventManager();
 
-                // Raise INVALID_UPDATE
-                $eventManager->dispatchEvent(
-                    Events::INVALID_UPDATE,
-                    new EventArgs($document, $documentManager, $result)
-                );
-            }
-        }
+            // Raise INVALID_OBJECT
+            $eventManager->dispatchEvent(
+                Events::INVALID_OBJECT,
+                new EventArgs($document, $result)
+            );
 
-        foreach ($unitOfWork->getScheduledDocumentInsertions() as $document) {
-            $metadata = $documentManager->getClassMetadata(get_class($document));
-
-            $result = $documentValidator->isValid($document, $metadata);
-            if (! $result->getValue()) {
-
-                //stop creation
-                $unitOfWork->detach($document);
-
-                $eventManager = $documentManager->getEventManager();
-
-                // Raise invalidCreate
-                $eventManager->dispatchEvent(
-                    Events::INVALID_CREATE,
-                    new EventArgs($document, $documentManager, $result)
-                );
-            }
+            $eventArgs->setShortCircut(true);
         }
     }
 

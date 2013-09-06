@@ -9,9 +9,7 @@ namespace Zoop\Shard\AccessControl;
 use Zoop\Shard\AccessControl\Events as AccessControlEvents;
 use Zoop\Shard\Events as ManifestEvents;
 use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
-use Zoop\Shard\ODMCore\CreateEventArgs;
-use Zoop\Shard\ODMCore\DeleteEventArgs;
-use Zoop\Shard\ODMCore\UpdateEventArgs;
+use Zoop\Shard\ODMCore\CoreEventArgs;
 
 /**
  *
@@ -39,7 +37,7 @@ class MainSubscriber extends AbstractAccessControlSubscriber
         $this->getAccessController()->enableReadFilter();
     }
 
-    public function create(CreateEventArgs $eventArgs)
+    public function create(CoreEventArgs $eventArgs)
     {
         $document = $eventArgs->getDocument();
 
@@ -74,7 +72,7 @@ class MainSubscriber extends AbstractAccessControlSubscriber
         );
     }
 
-    public function update(UpdateEventArgs $eventArgs)
+    public function update(CoreEventArgs $eventArgs)
     {
         //Check update permissions
         $document = $eventArgs->getDocument();
@@ -117,7 +115,7 @@ class MainSubscriber extends AbstractAccessControlSubscriber
         );
     }
 
-    public function delete(DeleteEventArgs $eventArgs)
+    public function delete(CoreEventArgs $eventArgs)
     {
         //Check delete permsisions
         $document = $eventArgs->getDocument();

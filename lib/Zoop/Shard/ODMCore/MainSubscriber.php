@@ -41,25 +41,33 @@ class MainSubscriber implements EventSubscriber
         $eventManager = $documentManager->getEventManager();
 
         foreach ($unitOfWork->getScheduledDocumentInsertions() as $document) {
-            $eventManager->dispatchEvent(
-                Events::CREATE,
-                new CreateEventArgs($document)
-            );
+            $createEventArgs = new CoreEventArgs($document, CoreEventArgs::CREATE);
+            $eventManager->dispatchEvent(Events::CREATE, $createEventArgs);
+            if ($createEventArgs->getShortCircut()) {
+                continue;
+            }
+            $eventManager->dispatchEvent(Events::VALIDATE, $createEventArgs);
+            if ($createEventArgs->getShortCircut()) {
+                continue;
+            }
+            $eventManager->dispatchEvent(Events::CRYPT, $createEventArgs);
         }
 
         foreach ($unitOfWork->getScheduledDocumentUpdates() as $document) {
-            $eventManager->dispatchEvent(
-                Events::UPDATE,
-                new UpdateEventArgs($document)
-            );
+            $updateEventArgs = new CoreEventArgs($document, CoreEventArgs::UPDATE);
+            $eventManager->dispatchEvent(Events::UPDATE, $updateEventArgs);
+            if ($updateEventArgs->getShortCircut()) {
+                continue;
+            }
+            $eventManager->dispatchEvent(Events::VALIDATE, $updateEventArgs);
+            if ($updateEventArgs->getShortCircut()) {
+                continue;
+            }
+            $eventManager->dispatchEvent(Events::CRYPT, $updateEventArgs);
         }
 
-        //Check delete permsisions
         foreach ($unitOfWork->getScheduledDocumentDeletions() as $document) {
-            $eventManager->dispatchEvent(
-                Events::DELETE,
-                new DeleteEventArgs($document)
-            );
+            $eventManager->dispatchEvent(Events::DELETE, new CoreEventArgs($document, CoreEventArgs::DELETE));
         }
     }
 }

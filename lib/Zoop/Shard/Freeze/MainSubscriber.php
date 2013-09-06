@@ -13,8 +13,7 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\AccessControl\EventArgs as AccessControlEventArgs;
 use Zoop\Shard\GetDocumentManagerTrait;
 use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
-use Zoop\Shard\ODMCore\DeleteEventArgs;
-use Zoop\Shard\ODMCore\UpdateEventArgs;
+use Zoop\Shard\ODMCore\CoreEventArgs;
 
 /**
  * Emits freeze events
@@ -41,7 +40,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         ];
     }
 
-    public function update(UpdateEventArgs $eventArgs)
+    public function update(CoreEventArgs $eventArgs)
     {
         $document = $eventArgs->getDocument();
         $documentManager = $this->getDocumentManager();
@@ -116,7 +115,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         }
     }
 
-    public function delete(DeleteEventArgs $eventArgs)
+    public function delete(CoreEventArgs $eventArgs)
     {
         $document = $eventArgs->getDocument();
         $documentManager = $this->getDocumentManager();

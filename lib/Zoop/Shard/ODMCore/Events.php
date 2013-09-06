@@ -28,4 +28,14 @@ final class Events
      * Triggered by onFlush document delete
      */
     const DELETE = 'delete';
+
+    /**
+     * Triggered by onFlush
+     */
+    const VALIDATE = 'validate';
+
+    /**
+     * Triggered by onFlush
+     */
+    const CRYPT = 'crypt';
 }

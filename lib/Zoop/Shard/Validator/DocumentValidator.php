@@ -73,7 +73,7 @@ class DocumentValidator implements DocumentValidatorInterface, DocumentManagerAw
         // Document level validators
         if (isset($metadata->validator['document'])) {
             $validator = ValidatorFactory::create($metadata->validator['document']);
-            $validatorResult = $validator->isValid($value);
+            $validatorResult = $validator->isValid($document);
 
             $result->addClassResult($validatorResult);
             foreach ($validatorResult->getMessages() as $message) {
