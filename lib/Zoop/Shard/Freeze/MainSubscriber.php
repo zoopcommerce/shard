@@ -65,6 +65,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                     Events::FROZEN_UPDATE_DENIED,
                     new AccessControlEventArgs($document, 'update')
                 );
+                $eventArgs->setShortCircut(true);
                 return;
             } else {
                 return;
@@ -137,6 +138,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             Events::FROZEN_DELETE_DENIED,
             new AccessControlEventArgs($document, 'delete')
         );
+        $eventArgs->setShortCircut(true);
     }
 
     protected function getFreezer()

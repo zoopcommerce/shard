@@ -70,6 +70,7 @@ class MainSubscriber extends AbstractAccessControlSubscriber
             AccessControlEvents::CREATE_DENIED,
             new EventArgs($document, Actions::CREATE)
         );
+        $eventArgs->setShortCircut(true);
     }
 
     public function update(CoreEventArgs $eventArgs)
@@ -113,6 +114,7 @@ class MainSubscriber extends AbstractAccessControlSubscriber
             AccessControlEvents::UPDATE_DENIED,
             new EventArgs($document, 'update')
         );
+        $eventArgs->setShortCircut(true);
     }
 
     public function delete(CoreEventArgs $eventArgs)
@@ -135,5 +137,6 @@ class MainSubscriber extends AbstractAccessControlSubscriber
             AccessControlEvents::DELETE_DENIED,
             new EventArgs($document, Actions::DELETE)
         );
+        $eventArgs->setShortCircut(true);
     }
 }
