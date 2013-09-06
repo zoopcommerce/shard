@@ -18,7 +18,7 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 class ChildB extends ParentClass
 {
     /**
-     * @Shard\Serializer\Ignore("none")
+     * @Shard\Serializer\Ignore(false)
      */
     protected $name;
 }

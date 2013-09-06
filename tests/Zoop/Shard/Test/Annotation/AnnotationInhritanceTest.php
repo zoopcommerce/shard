@@ -46,7 +46,7 @@ class AnnotationInheritaceTest extends BaseTest
         $this->assertTrue($metadata->serializer['className']);
         $this->assertTrue($metadata->serializer['discriminator']);
         $this->assertEquals(['class' => 'ParentValidator', 'options' => []], $metadata->validator['document']);
-        $this->assertEquals('ignore_always', $metadata->serializer['fields']['name']['ignore']);
+        $this->assertEquals(true, $metadata->serializer['fields']['name']['serializeIgnore']);
     }
 
     public function testAnnotationInheritanceOverride()
@@ -58,6 +58,6 @@ class AnnotationInheritaceTest extends BaseTest
         $this->assertFalse($metadata->serializer['className']);
         $this->assertFalse($metadata->serializer['discriminator']);
         $this->assertEquals(['class' => 'ChildBValidator', 'options' => []], $metadata->validator['document']);
-        $this->assertEquals('none', $metadata->serializer['fields']['name']['ignore']);
+        $this->assertEquals(false, $metadata->serializer['fields']['name']['serializeIgnore']);
     }
 }

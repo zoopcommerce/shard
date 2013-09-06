@@ -24,6 +24,7 @@ class User
     /**
      * @ODM\Field(type="string")
      * @Shard\Serializer\Ignore
+     * @Shard\Unserializer\Ignore
      */
     protected $password;
 

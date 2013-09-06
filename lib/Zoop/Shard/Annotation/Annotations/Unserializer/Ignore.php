@@ -4,12 +4,12 @@
  * @package    Zoop
  * @license    MIT
  */
-namespace Zoop\Shard\Annotation\Annotations\Serializer;
+namespace Zoop\Shard\Annotation\Annotations\Unserializer;
 
 use Doctrine\Common\Annotations\Annotation;
 
 /**
- * Mark a field to be skipped during serialization.
+ * Mark a field to be skipped during unserialization.
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
@@ -18,7 +18,7 @@ use Doctrine\Common\Annotations\Annotation;
  */
 final class Ignore extends Annotation
 {
-    const EVENT = 'annotationSerializerIgnore';
+    const EVENT = 'annotationUnserializerIgnore';
 
     public $value = true;
 }

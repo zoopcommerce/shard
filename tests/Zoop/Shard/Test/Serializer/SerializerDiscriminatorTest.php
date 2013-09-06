@@ -29,6 +29,7 @@ class SerializerDiscriminatorTest extends BaseTest
         );
 
         $this->serializer = $manifest->getServiceManager()->get('serializer');
+        $this->unserializer = $manifest->getServiceManager()->get('unserializer');
     }
 
     public function testSerializeDiscriminator()
@@ -66,7 +67,7 @@ class SerializerDiscriminatorTest extends BaseTest
             'color' => 'red'
         );
 
-        $testDoc = $this->serializer->fromArray($data, 'Zoop\Shard\Test\Serializer\TestAsset\Document\Fruit');
+        $testDoc = $this->unserializer->fromArray($data, 'Zoop\Shard\Test\Serializer\TestAsset\Document\Fruit');
 
         $this->assertTrue($testDoc instanceof Apple);
         $this->assertEquals('red', $testDoc->getColor());

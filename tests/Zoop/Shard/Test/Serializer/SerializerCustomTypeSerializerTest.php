@@ -36,7 +36,7 @@ class SerializerCustomTypeSerializerTest extends BaseTest
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
         $this->serializer = $manifest->getServiceManager()->get('serializer');
-
+        $this->unserializer = $manifest->getServiceManager()->get('unserializer');
     }
 
     public function testSerializer()
@@ -65,7 +65,7 @@ class SerializerCustomTypeSerializerTest extends BaseTest
             'name' => 'Cherry'
         );
 
-        $flavour = $this->serializer->fromArray(
+        $flavour = $this->unserializer->fromArray(
             $data,
             'Zoop\Shard\Test\Serializer\TestAsset\Document\Flavour'
         );

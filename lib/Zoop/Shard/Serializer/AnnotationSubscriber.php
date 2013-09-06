@@ -33,6 +33,7 @@ class AnnotationSubscriber implements EventSubscriber
             Shard\Serializer\RefLazy::EVENT,
             Shard\Serializer\ReferenceSerializer::EVENT,
             Shard\Serializer\SimpleLazy::EVENT,
+            Shard\Unserializer\Ignore::EVENT,
         ];
     }
 
@@ -81,7 +82,20 @@ class AnnotationSubscriber implements EventSubscriber
         $metadata = $eventArgs->getMetadata();
         $annotation = $eventArgs->getAnnotation();
         $this->createMetadata($metadata);
-        $metadata->serializer['fields'][$eventArgs->getReflection()->getName()]['ignore'] =
+        $metadata->serializer['fields'][$eventArgs->getReflection()->getName()]['serializeIgnore'] =
+            $annotation->value;
+    }
+
+    /**
+     *
+     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
+     */
+    public function annotationUnserializerIgnore(AnnotationEventArgs $eventArgs)
+    {
+        $metadata = $eventArgs->getMetadata();
+        $annotation = $eventArgs->getAnnotation();
+        $this->createMetadata($metadata);
+        $metadata->serializer['fields'][$eventArgs->getReflection()->getName()]['unserializeIgnore'] =
             $annotation->value;
     }
 

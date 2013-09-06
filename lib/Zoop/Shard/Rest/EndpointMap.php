@@ -47,14 +47,14 @@ class EndpointMap
 
         $class = $metadata->name;
 
-        $checkEmbeddedEndpoints = function ($endpoint) use (&$result, $class, &$checkEmbeddedEndpoints) {
+        $getEmbeddedEndpoints = function ($endpoint) use (&$result, $class, &$getEmbeddedEndpoints) {
             $embeddedLists = $endpoint->getEmbeddedLists();
             if (count($embeddedLists) > 0) {
-                foreach ($embeddedLists as $name => $embeddedEndpoint) {
+                foreach ($embeddedLists as $embeddedEndpoint) {
                     if ($embeddedEndpoint->getClass() == $class) {
                         $result[] = $embeddedEndpoint;
                     }
-                    $checkEmbeddedEndpoints($embeddedEndpoint);
+                    $getEmbeddedEndpoints($embeddedEndpoint);
                 }
             }
         };
@@ -71,7 +71,7 @@ class EndpointMap
                     }
                 }
             }
-            $checkEmbeddedEndpoints($endpoint);
+            $getEmbeddedEndpoints($endpoint);
         }
 
         return $result;

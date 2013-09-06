@@ -31,6 +31,7 @@ class SerializerTest extends BaseTest
         );
 
         $this->serializer = $manifest->getServiceManager()->get('serializer');
+        $this->unserializer = $manifest->getServiceManager()->get('unserializer');
     }
 
     public function testSerializer()
@@ -132,7 +133,7 @@ class SerializerTest extends BaseTest
             ),
         );
 
-        $user = $this->serializer->fromArray(
+        $user = $this->unserializer->fromArray(
             $data,
             'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
         );
@@ -156,7 +157,7 @@ class SerializerTest extends BaseTest
             'name' => 'superdweebie',
         );
 
-        $testDoc = $this->serializer->fromArray($data);
+        $testDoc = $this->unserializer->fromArray($data);
 
         $this->assertTrue($testDoc instanceof ClassName);
         $this->assertEquals('superdweebie', $testDoc->getName());

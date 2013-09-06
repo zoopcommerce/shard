@@ -29,6 +29,7 @@ class SerializerDateTest extends BaseTest
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
         $this->serializer = $manifest->getServiceManager()->get('serializer');
+        $this->unserializer = $manifest->getServiceManager()->get('unserializer');
     }
 
     public function testSerializerMongoDate()
@@ -97,7 +98,7 @@ class SerializerDateTest extends BaseTest
             'date' => '1949-12-31T23:00:00+00:00'
         );
 
-        $birthday = $this->serializer->fromArray(
+        $birthday = $this->unserializer->fromArray(
             $data,
             'Zoop\Shard\Test\Serializer\TestAsset\Document\Birthday'
         );

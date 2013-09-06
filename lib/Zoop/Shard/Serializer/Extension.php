@@ -30,7 +30,8 @@ class Extension extends AbstractExtension
             'serializer.type.dateToTimestamp'  => 'Zoop\Shard\Serializer\Type\DateToTimestamp'
         ],
         'factories' => [
-            'serializer' => 'Zoop\Shard\Serializer\SerializerFactory',
+            'serializer'   => 'Zoop\Shard\Serializer\SerializerFactory',
+            'unserializer' => 'Zoop\Shard\Serializer\UnserializerFactory',
         ]
     ];
 
