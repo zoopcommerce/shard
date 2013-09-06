@@ -73,6 +73,13 @@ class MainSubscriber implements EventSubscriber
 
     protected function buildMetadata(ClassMetadata $source, ClassMetadata $target, $eventManager)
     {
+        $this->processDocumentAnnotations($source, $target, $eventManager);
+        $this->processFieldAnnotations($source, $target, $eventManager);
+        $this->processMethodAnnotations($source, $target, $eventManager);
+    }
+
+    protected function processDocumentAnnotations(ClassMetadata $source, ClassMetadata $target, $eventManager)
+    {
         $sourceReflClass = $source->getReflectionClass();
         $targetReflClass = $target->getReflectionClass();
 
@@ -95,6 +102,11 @@ class MainSubscriber implements EventSubscriber
                 }
             }
         }
+    }
+
+    protected function processFieldAnnotations(ClassMetadata $source, ClassMetadata $target, $eventManager)
+    {
+        $sourceReflClass = $source->getReflectionClass();
 
         //Field annotations
         foreach ($sourceReflClass->getProperties() as $reflField) {
@@ -111,6 +123,11 @@ class MainSubscriber implements EventSubscriber
                 }
             }
         }
+    }
+
+    protected function processMethodAnnotations(ClassMetadata $source, ClassMetadata $target, $eventManager)
+    {
+        $sourceReflClass = $source->getReflectionClass();
 
         //Method annotations
         foreach ($sourceReflClass->getMethods() as $reflMethod) {

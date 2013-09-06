@@ -21,6 +21,8 @@ class ClassMetadata extends DoctrineClassMetadata
      * Determines which fields get serialized.
      *
      * @return array The names of all the fields that should be serialized.
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     public function __sleep()
     {

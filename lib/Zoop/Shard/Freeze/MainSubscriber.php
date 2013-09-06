@@ -68,7 +68,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                     if ($eventManager->hasListeners(Events::FROZEN_UPDATE_DENIED)) {
                         $eventManager->dispatchEvent(
                             Events::FROZEN_UPDATE_DENIED,
-                            new AccessControlEventArgs($document, $documentManager, 'update')
+                            new AccessControlEventArgs($document, 'update')
                         );
                     }
                     continue;
@@ -145,7 +145,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             if ($eventManager->hasListeners(Events::FROZEN_DELETE_DENIED)) {
                 $eventManager->dispatchEvent(
                     Events::FROZEN_DELETE_DENIED,
-                    new AccessControlEventArgs($document, $documentManager, 'delete')
+                    new AccessControlEventArgs($document, 'delete')
                 );
             }
         }

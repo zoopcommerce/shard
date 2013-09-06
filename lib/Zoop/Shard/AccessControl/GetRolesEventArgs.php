@@ -7,7 +7,7 @@
 namespace Zoop\Shard\AccessControl;
 
 use Doctrine\Common\EventArgs as BaseEventArgs;
-use Doctrine\ODM\MongoDB\Mapping\ClassMetadataInfo;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Zoop\Common\User\UserInterface;
 
 /**
@@ -27,7 +27,7 @@ class GetRolesEventArgs extends BaseEventArgs
     protected $roles;
 
     public function __construct(
-        ClassMetadataInfo $metadata,
+        ClassMetadata $metadata,
         $document,
         UserInterface $user = null,
         array $roles = []
@@ -42,24 +42,12 @@ class GetRolesEventArgs extends BaseEventArgs
         return $this->metadata;
     }
 
-    public function setMetadata($metadata) {
-        $this->metadata = $metadata;
-    }
-
     public function getDocument() {
         return $this->document;
     }
 
-    public function setDocument($document) {
-        $this->document = $document;
-    }
-
     public function getUser() {
         return $this->user;
-    }
-
-    public function setUser($user) {
-        $this->user = $user;
     }
 
     public function getRoles() {

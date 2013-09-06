@@ -8,12 +8,14 @@ namespace Zoop\Shard\Crypt;
 
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
-use Doctrine\ODM\MongoDB\Event\OnFlushEventArgs;
 use Doctrine\ODM\MongoDB\Events as ODMEvents;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Crypt\BlockCipher\BlockCipherServiceInterface;
 use Zoop\Shard\Crypt\Hash\HashServiceInterface;
+use Zoop\Shard\GetDocumentManagerTrait;
+use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
+use Zoop\Shard\ODMCore\UpdateEventArgs;
 
 /**
  * Listener hashes fields marked with CryptHash annotation
@@ -25,6 +27,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 {
 
     use ServiceLocatorAwareTrait;
+    use GetDocumentManagerTrait;
 
     protected $hashHelper;
 
@@ -38,8 +41,8 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         return [
             // @codingStandardsIgnoreStart
             ODMEvents::prePersist,
-            ODMEvents::onFlush
             // @codingStandardsIgnoreEnd
+            ODMCoreEvents::UPDATE,
         ];
     }
 
@@ -59,58 +62,22 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         return $this->blockCipherHelper;
     }
 
-    /**
-     *
-     * @param OnFlushEventArgs $eventArgs
-     */
-    public function onFlush(OnFlushEventArgs $eventArgs)
+    public function update(UpdateEventArgs $eventArgs)
     {
-        $documentManager = $eventArgs->getDocumentManager();
-        $unitOfWork = $documentManager->getUnitOfWork();
+        $documentManager = $this->getDocumentManager();
+        $document = $eventArgs->getDocument();
+        $metadata = $documentManager->getClassMetadata(get_class($document));
 
-        foreach ($unitOfWork->getScheduledDocumentUpdates() as $document) {
-            $changeSet = $unitOfWork->getDocumentChangeSet($document);
-            $metadata = $documentManager->getClassMetadata(get_class($document));
-            foreach ($changeSet as $field => $change) {
-                $old = $change[0];
-                $new = $change[1];
+        $requireRecompute = false;
+        if ($this->hashFields($metadata, $document)){
+            $requireRecompute = true;
+        }
+        if ($this->blockCipherFields($metadata, $document)){
+            $requireRecompute = true;
+        }
 
-                // Check for change
-                if ($old == null || $old == $new) {
-                    continue;
-                }
-
-                if (! isset($new) || $new == '') {
-                    continue;
-                }
-
-                $requireRecompute = false;
-
-                if (isset($metadata->crypt['hash']) &&
-                   isset($metadata->crypt['hash'][$field])
-                ) {
-                    $service = $this->serviceLocator->get($metadata->crypt['hash'][$field]['service']);
-                    if (! $service instanceof HashServiceInterface) {
-                        throw new \Zoop\Shard\Exception\InvalidArgumentException();
-                    }
-                    $service->hashField($field, $document, $metadata);
-                    $requireRecompute = true;
-
-                } elseif (isset($metadata->crypt['blockCipher']) &&
-                   isset($metadata->crypt['blockCipher'][$field])
-                ) {
-                    $service = $this->serviceLocator->get($metadata->crypt['blockCipher'][$field]['service']);
-                    if (! $service instanceof BlockCipherServiceInterface) {
-                        throw new \Zoop\Shard\Exception\InvalidArgumentException();
-                    }
-                    $service->encryptField($field, $document, $metadata);
-                    $requireRecompute = true;
-                }
-
-                if ($requireRecompute) {
-                    $unitOfWork->recomputeSingleDocumentChangeSet($metadata, $document);
-                }
-            }
+        if ($requireRecompute) {
+            $documentManager->getUnitOfWork()->recomputeSingleDocumentChangeSet($metadata, $document);
         }
     }
 
@@ -127,5 +94,65 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         $this->getHashHelper()->hashDocument($document, $metadata);
         $this->getBlockCipherHelper()->encryptDocument($document, $metadata);
 
+    }
+
+    protected function hashFields($metadata, $document)
+    {
+        if (! isset($metadata->crypt['hash'])){
+            return;
+        }
+
+        foreach ($metadata->crypt['hash'] as $field => $setting){
+
+            $changeSet = $this->getDocumentManager()
+                ->getUnitOfWork()
+                ->getDocumentChangeSet($document);
+
+            if ($this->hasChanged($field, $changeSet)) {
+                $service = $this->serviceLocator->get($setting['service']);
+                if (! $service instanceof HashServiceInterface) {
+                    throw new \Zoop\Shard\Exception\InvalidArgumentException();
+                }
+                $service->hashField($field, $document, $metadata);
+                return true;
+            }
+        }
+    }
+
+    protected function blockCipherFields($metadata, $document)
+    {
+        if (! isset($metadata->crypt['blockCipher'])){
+            return;
+        }
+
+        foreach ($metadata->crypt['blockCipher'] as $field => $setting){
+
+            $changeSet = $this->getDocumentManager()
+                ->getUnitOfWork()
+                ->getDocumentChangeSet($document);
+
+            if ($this->hasChanged($field, $changeSet)) {
+                $service = $this->serviceLocator->get($setting['service']);
+                if (! $service instanceof BlockCipherServiceInterface) {
+                    throw new \Zoop\Shard\Exception\InvalidArgumentException();
+                }
+                $service->encryptField($field, $document, $metadata);
+                return true;
+            }
+        }
+    }
+
+    protected function hasChanged($field, $changeSet){
+
+        list($old, $new) = $changeSet[$field];
+
+        // Check for change
+        if (($old == null || $old == $new) ||
+            (! isset($new) || $new == '')
+        ) {
+            return false;
+        }
+
+        return true;
     }
 }

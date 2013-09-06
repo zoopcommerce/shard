@@ -7,7 +7,6 @@
 namespace Zoop\Shard\AccessControl;
 
 use Doctrine\Common\EventArgs as BaseEventArgs;
-use Doctrine\ODM\MongoDB\DocumentManager;
 
 /**
  * Arguments for access control events
@@ -26,12 +25,6 @@ class EventArgs extends BaseEventArgs
 
     /**
      *
-     * @var \Doctrine\ODM\MongoDB\DocumentManager
-     */
-    protected $documentManager;
-
-    /**
-     *
      * @var array
      */
     protected $action;
@@ -39,16 +32,13 @@ class EventArgs extends BaseEventArgs
     /**
      *
      * @param object $document
-     * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
      * @param array $messages
      */
     public function __construct(
         $document,
-        DocumentManager $documentManager,
         $action
     ) {
         $this->document = $document;
-        $this->documentManager = $documentManager;
         $this->action = (string) $action;
     }
 
@@ -61,22 +51,8 @@ class EventArgs extends BaseEventArgs
         return $this->document;
     }
 
-    /**
-     *
-     * @return \Doctrine\ODM\MongoDB\DocumentManager
-     */
-    public function getDocumentManager()
-    {
-        return $this->documentManager;
-    }
-
     public function getAction()
     {
         return $this->action;
-    }
-
-    public function setAction($action)
-    {
-        $this->action = (string) $action;
     }
 }

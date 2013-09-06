@@ -20,6 +20,9 @@ class DocumentManagerDelegatorFactory implements DelegatorFactoryInterface
 
     protected $documentManagers = [];
 
+    /**
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function createDelegatorWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName, $callback)
     {
 

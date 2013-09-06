@@ -46,7 +46,7 @@ class RolesSubscriber implements EventSubscriber
         if (isset($document) &&
             isset($metadata->owner) &&
             isset($username) &&
-            $metadata->reflFields[$metadata->owner]->getValue($document) == $username
+            $metadata->getFieldValue($document, $metadata->owner) == $username
         ) {
             $eventArgs->addRole(self::OWNER);
         }
