@@ -16,12 +16,12 @@ final class Events
 {
 
     /**
-     * Fires before freeze happens
+     * Fires before freeze is persisted
      */
     const PRE_FREEZE = 'preFreeze';
 
     /**
-     * Fires after freeze happens
+     * Fires after freeze is persisted
      */
     const POST_FREEZE = 'postFreeze';
 

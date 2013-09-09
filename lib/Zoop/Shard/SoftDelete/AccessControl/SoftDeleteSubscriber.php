@@ -44,10 +44,11 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
         }
 
         $document = $eventArgs->getDocument();
+        $metadata = $eventArgs->getMetadata();
 
-        if (! $accessController->areAllowed([Actions::SOFT_DELETE], null, $document)->getAllowed()) {
+        if (! $accessController->areAllowed([Actions::SOFT_DELETE], $metadata, $document)->getAllowed()) {
             //stop SoftDelete
-            $this->getSoftDeleter()->restore($document, $eventArgs->getMetadata());
+            $this->getSoftDeleter()->restore($document, $metadata);
 
             $eventArgs->setReject(true);
 
@@ -70,10 +71,11 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
         }
 
         $document = $eventArgs->getDocument();
+        $metadata = $eventArgs->getMetadata();
 
-        if (! $accessController->areAllowed([Actions::RESTORE], null, $document)->getAllowed()) {
+        if (! $accessController->areAllowed([Actions::RESTORE], $metadata, $document)->getAllowed()) {
             //stop restore
-            $this->getSoftDeleter()->softDelete($document, $eventArgs->getMetadata());
+            $this->getSoftDeleter()->softDelete($document, $metadata);
 
             $eventArgs->setReject(true);
 

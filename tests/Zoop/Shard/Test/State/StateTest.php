@@ -31,7 +31,7 @@ class StateTest extends BaseTest
 
         $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
     }
-
+/*
     public function testBasicFunction()
     {
         $documentManager = $this->documentManager;
@@ -119,7 +119,7 @@ class StateTest extends BaseTest
         sort($returnNames);
         return array($returnDocs, $returnNames);
     }
-
+*/
     public function testEvents()
     {
         $subscriber = new Subscriber();
@@ -139,7 +139,6 @@ class StateTest extends BaseTest
 
         $calls = $subscriber->getCalls();
         $this->assertFalse(isset($calls[Events::PRE_TRANSITION]));
-        $this->assertFalse(isset($calls[Events::ON_TRANSITION]));
         $this->assertFalse(isset($calls[Events::POST_TRANSITION]));
 
         $repository = $documentManager->getRepository(get_class($testDoc));
@@ -152,7 +151,6 @@ class StateTest extends BaseTest
 
         $calls = $subscriber->getCalls();
         $this->assertTrue(isset($calls[Events::PRE_TRANSITION]));
-        $this->assertTrue(isset($calls[Events::ON_TRANSITION]));
         $this->assertTrue(isset($calls[Events::POST_TRANSITION]));
 
         $documentManager->clear();
@@ -166,7 +164,6 @@ class StateTest extends BaseTest
 
         $calls = $subscriber->getCalls();
         $this->assertTrue(isset($calls[Events::PRE_TRANSITION]));
-        $this->assertFalse(isset($calls[Events::ON_TRANSITION]));
         $this->assertFalse(isset($calls[Events::POST_TRANSITION]));
 
         $this->assertEquals('state2', $testDoc->getState());

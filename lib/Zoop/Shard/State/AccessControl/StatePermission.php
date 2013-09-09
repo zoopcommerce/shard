@@ -114,7 +114,7 @@ class StatePermission implements PermissionInterface
 
             if ($denyMatch) {
                 //one or more actions are explicitly denied
-                return new AllowedResult(false, null, [$this->stateField => $this->mongoRegex($this->states)]);
+                return new AllowedResult(false, [], [$this->stateField => $this->mongoRegex($this->states)]);
             }
             if ($allowMatch) {
                 $allowMatches++;
@@ -122,7 +122,7 @@ class StatePermission implements PermissionInterface
         }
         if ($allowMatches == count($testActions)) {
             //all actions are explicitly allowed
-            return new AllowedResult(true, null, [$this->stateField => $this->mongoRegex($this->states)]);
+            return new AllowedResult(true, [], [$this->stateField => $this->mongoRegex($this->states)]);
         }
 
         //Permission is neither explicitly allowed or denied.

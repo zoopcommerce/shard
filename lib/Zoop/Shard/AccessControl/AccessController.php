@@ -39,12 +39,9 @@ class AccessController implements ServiceLocatorAwareInterface, DocumentManagerA
      * @param type $document
      * @return \Zoop\Shard\AccessControl\IsAllowedResult
      */
-    public function areAllowed(array $actions, ClassMetadata $metadata = null, $document = null)
+    public function areAllowed(array $actions, ClassMetadata $metadata, $document = null)
     {
         $result = new AllowedResult(false);
-        if (! isset($metadata)) {
-            $metadata = $this->documentManager->getClassMetadata(get_class($document));
-        }
 
         if (! isset($metadata->permissions)) {
             return $result;
@@ -62,15 +59,8 @@ class AccessController implements ServiceLocatorAwareInterface, DocumentManagerA
 
             $result->setAllowed($allowed);
 
-            $new = $newResult->getNew();
-            if (isset($new)) {
-                $result->setNew(array_merge($new, $newResult->getNew()));
-            }
-
-            $old = $newResult->getOld();
-            if (isset($old)) {
-                $result->setOld(array_merge($old, $newResult->getOld()));
-            }
+            $result->setNew(array_merge($result->getNew(), $newResult->getNew()));
+            $result->setOld(array_merge($result->getOld(), $newResult->getOld()));
         }
 
         if (isset($document)) {

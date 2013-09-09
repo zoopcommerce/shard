@@ -38,4 +38,9 @@ final class Events
      * Triggered by onFlush
      */
     const CRYPT = 'crypt';
+
+    /**
+     * Triggered by classmetadata __sleep
+     */
+    const METADATA_SLEEP = 'metadataSleep';
 }

@@ -14,6 +14,7 @@ use Zoop\Shard\Crypt\Hash\HashServiceInterface;
 use Zoop\Shard\GetDocumentManagerTrait;
 use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
 use Zoop\Shard\ODMCore\CoreEventArgs;
+use Zoop\Shard\ODMCore\MetadataSleepEventArgs;
 
 /**
  * Listener hashes fields marked with CryptHash annotation
@@ -36,7 +37,10 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
      */
     public function getSubscribedEvents()
     {
-        return [ODMCoreEvents::CRYPT];
+        return [
+            ODMCoreEvents::CRYPT,
+            ODMCoreEvents::METADATA_SLEEP,
+        ];
     }
 
     public function getHashHelper()
@@ -131,5 +135,9 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         }
 
         return true;
+    }
+
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs){
+        $eventArgs->addSerialized('crypt');
     }
 }

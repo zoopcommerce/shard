@@ -23,5 +23,4 @@ trait FreezeableTrait
      * @Shard\Freeze
      */
     protected $frozen = false;
-
 }

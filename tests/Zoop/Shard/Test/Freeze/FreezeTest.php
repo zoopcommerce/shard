@@ -208,8 +208,8 @@ class FreezeTest extends BaseTest implements EventSubscriber
 
         $this->assertFalse($this->freezer->isFrozen($testDoc, $metadata));
 
-        $this->freezer->freeze($testDoc, $metadata);
         $subscriber->reset();
+        $this->freezer->freeze($testDoc, $metadata);
 
         $documentManager->flush();
 
@@ -241,8 +241,8 @@ class FreezeTest extends BaseTest implements EventSubscriber
         $documentManager->clear();
         $testDoc = $repository->find($id);
 
-        $this->freezer->thaw($testDoc, $metadata);
         $subscriber->reset();
+        $this->freezer->thaw($testDoc, $metadata);
 
         $documentManager->flush();
 
@@ -257,9 +257,10 @@ class FreezeTest extends BaseTest implements EventSubscriber
 
         $this->assertFalse($this->freezer->isFrozen($testDoc, $metadata));
 
-        $this->freezer->freeze($testDoc, $metadata);
         $subscriber->reset();
         $subscriber->setRollbackFreeze(true);
+
+        $this->freezer->freeze($testDoc, $metadata);
 
         $documentManager->flush();
 
@@ -273,8 +274,10 @@ class FreezeTest extends BaseTest implements EventSubscriber
         $testDoc = $repository->find($id);
 
         $this->assertFalse($this->freezer->isFrozen($testDoc, $metadata));
-        $this->freezer->freeze($testDoc, $metadata);
+
         $subscriber->reset();
+        $this->freezer->freeze($testDoc, $metadata);
+
         $documentManager->flush();
 
         $testDoc = null;
@@ -282,9 +285,9 @@ class FreezeTest extends BaseTest implements EventSubscriber
 
         $this->assertTrue($this->freezer->isFrozen($testDoc, $metadata));
 
-        $this->freezer->thaw($testDoc, $metadata);
         $subscriber->reset();
         $subscriber->setRollbackThaw(true);
+        $this->freezer->thaw($testDoc, $metadata);
 
         $documentManager->flush();
 
@@ -323,7 +326,7 @@ class FreezeTest extends BaseTest implements EventSubscriber
     {
         $this->calls[Events::PRE_FREEZE] = $eventArgs;
         if ($this->rollbackFreeze) {
-            $this->freezer->thaw($eventArgs->getDocument(), $eventArgs->getMetadata());
+            $eventArgs->setReject(true);
         }
     }
 
@@ -331,7 +334,7 @@ class FreezeTest extends BaseTest implements EventSubscriber
     {
         $this->calls[Events::PRE_THAW] = $eventArgs;
         if ($this->rollbackThaw) {
-            $this->freezer->freeze($eventArgs->getDocument(), $eventArgs->getMetadata());
+            $eventArgs->setReject(true);
         }
     }
 

@@ -30,11 +30,13 @@ class Extension extends AbstractExtension
 
     protected $serviceManagerConfig = [
         'invokables' => [
-            'softDeleter' => 'Zoop\Shard\SoftDelete\SoftDeleter',
             'subscriber.softdelete.mainsubscriber' => 'Zoop\Shard\SoftDelete\MainSubscriber',
             'subscriber.softdelete.stampsubscriber' => 'Zoop\Shard\SoftDelete\StampSubscriber',
             'subscriber.softdelete.annotationsubscriber' => 'Zoop\Shard\SoftDelete\AnnotationSubscriber',
             'subscriber.softdelete.softdeletesubscriber' => 'Zoop\Shard\SoftDelete\AccessControl\SoftDeleteSubscriber'
+        ],
+        'factories' => [
+            'softDeleter' => 'Zoop\Shard\SoftDelete\SoftDeleterFactory',
         ]
     ];
 

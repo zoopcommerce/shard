@@ -4,7 +4,7 @@
  * @package    Zoop
  * @license    MIT
  */
-namespace Zoop\Shard;
+namespace Zoop\Shard\ODMCore;
 
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadataFactory as DoctrineClassMetadataFactory;
 

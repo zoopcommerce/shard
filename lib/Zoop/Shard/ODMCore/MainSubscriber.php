@@ -39,76 +39,97 @@ class MainSubscriber implements EventSubscriber
     {
         $documentManager = $eventArgs->getDocumentManager();
         $unitOfWork = $documentManager->getUnitOfWork();
-        $eventManager = $documentManager->getEventManager();
 
         foreach ($unitOfWork->getScheduledDocumentInsertions() as $document) {
-            $createEventArgs = new CreateEventArgs(
-                $document,
-                $documentManager->getClassMetadata(get_class($document)),
-                $eventManager
-            );
-            $eventManager->dispatchEvent(Events::CREATE, $createEventArgs);
-            if ($createEventArgs->getReject()) {
-                $this->rejectCreate($document, $documentManager);
-                continue;
-            }
-            $eventManager->dispatchEvent(Events::VALIDATE, $createEventArgs);
-            if ($createEventArgs->getReject()) {
-                $this->rejectCreate($document, $documentManager);
-                continue;
-            }
-            $eventManager->dispatchEvent(Events::CRYPT, $createEventArgs);
-            if ($createEventArgs->getReject()) {
-                $this->rejectCreate($document, $documentManager);
-            }
+            $this->create($document, $documentManager);
         }
 
         foreach ($unitOfWork->getScheduledDocumentUpdates() as $document) {
-            $changeSet = $unitOfWork->getDocumentChangeSet($document);
-            if (count($changeSet) == 0) {
-                continue;
-            }
-            $updateEventArgs = new UpdateEventArgs(
-                $document,
-                $documentManager->getClassMetadata(get_class($document)),
-                $changeSet,
-                $eventManager
-            );
-            $eventManager->dispatchEvent(Events::UPDATE, $updateEventArgs);
-            if ($updateEventArgs->getReject()) {
-                $this->rejectUpdate($document, $changeSet, $documentManager);
-                continue;
-            }
-            if ($updateEventArgs->getRecompute()) {
-                $this->recomputeUpdate($document, $documentManager);
-            }
-            $eventManager->dispatchEvent(Events::VALIDATE, $updateEventArgs);
-            if ($updateEventArgs->getReject()) {
-                $this->rejectUpdate($document, $changeSet, $documentManager);
-                continue;
-            }
-            if ($updateEventArgs->getRecompute()) {
-                $this->recomputeUpdate($document, $documentManager);
-            }
-            $eventManager->dispatchEvent(Events::CRYPT, $updateEventArgs);
-            if ($updateEventArgs->getReject()) {
-                $this->rejectUpdate($document, $changeSet, $documentManager);
-            }
-            if ($updateEventArgs->getRecompute()) {
-                $this->recomputeUpdate($document, $documentManager);
-            }
+            $this->update($document, $documentManager);
         }
 
         foreach ($unitOfWork->getScheduledDocumentDeletions() as $document) {
-            $deleteEventArgs = new DeleteEventArgs(
-                $document,
-                $documentManager->getClassMetadata(get_class($document)),
-                $eventManager
-            );
-            $eventManager->dispatchEvent(Events::DELETE, $deleteEventArgs);
-            if ($deleteEventArgs->getReject()) {
-                $this->rejectDelete($document, $documentManager);
-            }
+            $this->delete($document, $documentManager);
+        }
+    }
+
+    protected function create($document, $documentManager)
+    {
+        $eventManager = $documentManager->getEventManager();
+
+        $createEventArgs = new CreateEventArgs(
+            $document,
+            $documentManager->getClassMetadata(get_class($document)),
+            $eventManager
+        );
+        $eventManager->dispatchEvent(Events::CREATE, $createEventArgs);
+        if ($createEventArgs->getReject()) {
+            $this->rejectCreate($document, $documentManager);
+            return;
+        }
+        $eventManager->dispatchEvent(Events::VALIDATE, $createEventArgs);
+        if ($createEventArgs->getReject()) {
+            $this->rejectCreate($document, $documentManager);
+            return;
+        }
+        $eventManager->dispatchEvent(Events::CRYPT, $createEventArgs);
+        if ($createEventArgs->getReject()) {
+            $this->rejectCreate($document, $documentManager);
+        }
+    }
+
+    protected function update($document, $documentManager)
+    {
+        $unitOfWork = $documentManager->getUnitOfWork();
+        $eventManager = $documentManager->getEventManager();
+
+        $changeSet = $unitOfWork->getDocumentChangeSet($document);
+        if (count($changeSet) == 0) {
+            return;
+        }
+        $updateEventArgs = new UpdateEventArgs(
+            $document,
+            $documentManager->getClassMetadata(get_class($document)),
+            $changeSet,
+            $eventManager
+        );
+        $eventManager->dispatchEvent(Events::UPDATE, $updateEventArgs);
+        if ($updateEventArgs->getReject()) {
+            $this->rejectUpdate($document, $changeSet, $documentManager);
+            return;
+        }
+        if ($updateEventArgs->getRecompute()) {
+            $this->recomputeUpdate($document, $documentManager);
+        }
+        $eventManager->dispatchEvent(Events::VALIDATE, $updateEventArgs);
+        if ($updateEventArgs->getReject()) {
+            $this->rejectUpdate($document, $changeSet, $documentManager);
+            return;
+        }
+        if ($updateEventArgs->getRecompute()) {
+            $this->recomputeUpdate($document, $documentManager);
+        }
+        $eventManager->dispatchEvent(Events::CRYPT, $updateEventArgs);
+        if ($updateEventArgs->getReject()) {
+            $this->rejectUpdate($document, $changeSet, $documentManager);
+        }
+        if ($updateEventArgs->getRecompute()) {
+            $this->recomputeUpdate($document, $documentManager);
+        }
+    }
+
+    protected function delete($document, $documentManager)
+    {
+        $eventManager = $documentManager->getEventManager();
+
+        $deleteEventArgs = new DeleteEventArgs(
+            $document,
+            $documentManager->getClassMetadata(get_class($document)),
+            $eventManager
+        );
+        $eventManager->dispatchEvent(Events::DELETE, $deleteEventArgs);
+        if ($deleteEventArgs->getReject()) {
+            $this->rejectDelete($document, $documentManager);
         }
     }
 

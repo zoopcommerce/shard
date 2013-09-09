@@ -45,10 +45,11 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
         }
 
         $document = $eventArgs->getDocument();
+        $metadata = $eventArgs->getMetadata();
 
-        if (! $accessController->areAllowed([Actions::FREEZE], null, $document)->getAllowed()) {
+        if (! $accessController->areAllowed([Actions::FREEZE], $metadata, $document)->getAllowed()) {
             //stop freeze
-            $this->getFreezer()->thaw($document, $eventArgs->getMetadata());
+            $this->getFreezer()->thaw($document, $metadata);
 
             $eventArgs->setReject(true);
 
@@ -72,10 +73,11 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
         }
 
         $document = $eventArgs->getDocument();
+        $metadata = $eventArgs->getMetadata();
 
-        if (! $accessController->areAllowed([Actions::THAW], null, $document)->getAllowed()) {
+        if (! $accessController->areAllowed([Actions::THAW], $metadata, $document)->getAllowed()) {
             //stop thaw
-            $this->getFreezer()->freeze($document, $eventArgs->getMetadata());
+            $this->getFreezer()->freeze($document, $metadata);
 
             $eventArgs->setReject(true);
 

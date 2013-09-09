@@ -11,6 +11,7 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
 use Zoop\Shard\ODMCore\CoreEventArgs;
+use Zoop\Shard\ODMCore\MetadataSleepEventArgs;
 
 /**
  *
@@ -33,7 +34,10 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
      */
     public function getSubscribedEvents()
     {
-        $events = [ODMCoreEvents::VALIDATE];
+        $events = [
+            ODMCoreEvents::VALIDATE,
+            ODMCoreEvents::METADATA_SLEEP,
+        ];
         return $events;
     }
 
@@ -53,6 +57,10 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 
             $eventArgs->setReject(true);
         }
+    }
+
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs){
+        $eventArgs->addSerialized('validator');
     }
 
     /**

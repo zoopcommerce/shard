@@ -201,8 +201,8 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
 
         $this->assertFalse($this->softDeleter->isSoftDeleted($testDoc, $metadata));
 
-        $this->softDeleter->softDelete($testDoc, $metadata);
         $subscriber->reset();
+        $this->softDeleter->softDelete($testDoc, $metadata);
 
         $documentManager->flush();
 
@@ -224,8 +224,8 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
         $calls = $subscriber->getCalls();
         $this->assertTrue(isset($calls[Events::SOFT_DELETED_UPDATE_DENIED]));
 
-        $this->softDeleter->restore($testDoc, $metadata);
         $subscriber->reset();
+        $this->softDeleter->restore($testDoc, $metadata);
 
         $documentManager->flush();
 
@@ -240,9 +240,9 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
 
         $this->assertFalse($this->softDeleter->isSoftDeleted($testDoc, $metadata));
 
-        $this->softDeleter->softDelete($testDoc, $metadata);
         $subscriber->reset();
         $subscriber->setRollbackDelete(true);
+        $this->softDeleter->softDelete($testDoc, $metadata);
 
         $documentManager->flush();
 
@@ -256,8 +256,9 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
         $testDoc = $repository->find($id);
 
         $this->assertFalse($this->softDeleter->isSoftDeleted($testDoc, $metadata));
-        $this->softDeleter->softDelete($testDoc, $metadata);
+
         $subscriber->reset();
+        $this->softDeleter->softDelete($testDoc, $metadata);
         $documentManager->flush();
 
         $testDoc = null;
@@ -265,10 +266,10 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
 
         $this->assertTrue($this->softDeleter->isSoftDeleted($testDoc, $metadata));
 
-        $this->softDeleter->restore($testDoc, $metadata);
         $subscriber->reset();
         $subscriber->setRollbackRestore(true);
-
+        $this->softDeleter->restore($testDoc, $metadata);
+        
         $documentManager->flush();
 
         $calls = $subscriber->getCalls();
@@ -305,7 +306,7 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
     {
         $this->calls[Events::PRE_SOFT_DELETE] = $eventArgs;
         if ($this->rollbackDelete) {
-            $this->softDeleter->restore($eventArgs->getDocument(), $eventArgs->getMetadata());
+            $eventArgs->setReject(true);
         }
     }
 
@@ -313,7 +314,7 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
     {
         $this->calls[Events::PRE_RESTORE] = $eventArgs;
         if ($this->rollbackRestore) {
-            $this->softDeleter->softDelete($eventArgs->getDocument(), $eventArgs->getMetadata());
+            $eventArgs->setReject(true);
         }
     }
 

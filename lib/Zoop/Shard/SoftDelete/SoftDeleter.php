@@ -6,6 +6,7 @@
  */
 namespace Zoop\Shard\SoftDelete;
 
+use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 
 /**
@@ -15,6 +16,12 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
  */
 class SoftDeleter
 {
+    protected $eventManager;
+
+    public function __construct(EventManager $eventManager) {
+        $this->eventManager = $eventManager;
+    }
+
     public function getSoftDeleteField(ClassMetadata $metadata)
     {
         if (isset($metadata->softDelete) && isset($metadata->softDelete['flag'])) {
@@ -29,11 +36,46 @@ class SoftDeleter
 
     public function softDelete($document, ClassMetadata $metadata)
     {
-        $metadata->reflFields[$metadata->softDelete['flag']]->setValue($document, true);
+        if (!($field = $this->getSoftDeleteField($metadata)) || $this->isSoftDeleted($document, $metadata)) {
+            //nothing to do
+            return;
+        }
+
+        $eventManager = $this->eventManager;
+
+        // Raise preSoftDelete
+        $softDeleteEventArgs = new SoftDeleteEventArgs($document, $metadata, $eventManager);
+        $eventManager->dispatchEvent(Events::PRE_SOFT_DELETE, $softDeleteEventArgs);
+        if ($softDeleteEventArgs->getReject()){
+            return;
+        }
+
+        //do the soft delete
+        $metadata->setFieldValue($document, $field, true);
+
+        //raise postSoftDelete
+        $eventManager->dispatchEvent(Events::POST_SOFT_DELETE, $softDeleteEventArgs);
     }
 
     public function restore($document, ClassMetadata $metadata)
     {
-        $metadata->reflFields[$metadata->softDelete['flag']]->setValue($document, false);
+        if (!($field = $this->getSoftDeleteField($metadata)) || !$this->isSoftDeleted($document, $metadata)) {
+            //nothing to do
+            return;
+        }
+
+        $eventManager = $this->eventManager;
+
+        // Raise preRestore
+        $softDeleteEventArgs = new SoftDeleteEventArgs($document, $metadata, $eventManager);
+        $eventManager->dispatchEvent(Events::PRE_RESTORE, $softDeleteEventArgs);
+        if ($softDeleteEventArgs->getReject()){
+            return;
+        }
+
+        $metadata->setFieldValue($document, $field, false);
+
+        //raise postRestore
+        $eventManager->dispatchEvent(Events::POST_RESTORE, $softDeleteEventArgs);
     }
 }

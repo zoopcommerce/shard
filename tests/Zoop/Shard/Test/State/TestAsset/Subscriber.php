@@ -3,7 +3,7 @@
 namespace Zoop\Shard\Test\State\TestAsset;
 
 use Doctrine\Common\EventSubscriber;
-use Zoop\Shard\State\EventArgs as StateEventArgs;
+use Zoop\Shard\State\TransitionEventArgs;
 use Zoop\Shard\State\Events as StateEvents;
 
 class Subscriber implements EventSubscriber
@@ -16,7 +16,6 @@ class Subscriber implements EventSubscriber
     {
         return array(
             StateEvents::PRE_TRANSITION,
-            StateEvents::ON_TRANSITION,
             StateEvents::POST_TRANSITION
         );
     }
@@ -27,11 +26,11 @@ class Subscriber implements EventSubscriber
         $this->rollbackTransition = false;
     }
 
-    public function preTransition(StateEventArgs $eventArgs)
+    public function preTransition(TransitionEventArgs $eventArgs)
     {
         $this->calls['preTransition'] = $eventArgs;
         if ($this->rollbackTransition) {
-            $eventArgs->getDocument()->setState($eventArgs->getTransition()->getFrom());
+            $eventArgs->setReject(true);
         }
     }
 

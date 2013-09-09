@@ -12,6 +12,7 @@ use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
 use Zoop\Shard\ODMCore\CreateEventArgs;
 use Zoop\Shard\ODMCore\DeleteEventArgs;
 use Zoop\Shard\ODMCore\UpdateEventArgs;
+use Zoop\Shard\ODMCore\MetadataSleepEventArgs;
 
 /**
  *
@@ -31,6 +32,7 @@ class MainSubscriber extends AbstractAccessControlSubscriber
             ODMCoreEvents::CREATE,
             ODMCoreEvents::DELETE,
             ODMCoreEvents::UPDATE,
+            ODMCoreEvents::METADATA_SLEEP,
         ];
     }
 
@@ -49,29 +51,9 @@ class MainSubscriber extends AbstractAccessControlSubscriber
         $document = $eventArgs->getDocument();
 
         //Check create permissions
-        if ($this->getAccessController()->areAllowed([Actions::CREATE], null, $document)->getAllowed()) {
+        if ($this->getAccessController()->areAllowed([Actions::CREATE], $eventArgs->getMetadata(), $document)->getAllowed()) {
             return;
         }
-
-//        $documentManager = $this->getDocumentManager();
-//        $unitOfWork = $documentManager->getUnitOfWork();
-//        $eventManager = $documentManager->getEventManager();
-//
-//        //stop creation
-//        $metadata = $documentManager->getClassMetadata(get_class($document));
-//
-//        if ($metadata->isEmbeddedDocument) {
-//            list($mapping, $parent) = $unitOfWork->getParentAssociation($document);
-//            $parentMetadata = $documentManager->getClassMetadata(get_class($parent));
-//            if ($mapping['type'] == 'many') {
-//                $collection = $parentMetadata->reflFields[$mapping['fieldName']]->getValue($parent);
-//                $collection->removeElement($document);
-//                $unitOfWork->recomputeSingleDocumentChangeSet($parentMetadata, $parent);
-//            } else {
-//                $parentMetadata->reflFields[$mapping['fieldName']]->setValue($document, null);
-//            }
-//        }
-//        $unitOfWork->detach($document);
 
         $eventArgs->setReject(true);
 
@@ -85,37 +67,15 @@ class MainSubscriber extends AbstractAccessControlSubscriber
     {
         //Check update permissions
         $document = $eventArgs->getDocument();
-//        $documentManager = $this->getDocumentManager();
-//        $unitOfWork = $documentManager->getUnitOfWork();
         $actions = [];
 
-        //Assemble all the actions that require permission
-//        $changeSet = $unitOfWork->getDocumentChangeSet($document);
-
-//        if (count($changeSet) == 0) {
-//            return;
-//        }
-
-        foreach ($eventArgs->getChangeSet() as $field => $change) {
+        foreach (array_keys($eventArgs->getChangeSet()) as $field) {
             $actions[] = Actions::update($field);
         }
 
-        if ($this->getAccessController()->areAllowed($actions, null, $document)->getAllowed()) {
+        if ($this->getAccessController()->areAllowed($actions, $eventArgs->getMetadata(), $document)->getAllowed()) {
             return;
         }
-
-//        $metadata = $documentManager->getClassMetadata(get_class($document));
-//
-//        //roll back changes
-//        if (!isset($changeSet)) {
-//            $changeSet = $unitOfWork->getDocumentChangeSet($document);
-//        }
-//        foreach ($changeSet as $field => $change) {
-//            $metadata->reflFields[$field]->setValue($document, $change[0]);
-//        }
-//
-//        //stop updates
-//        $unitOfWork->clearDocumentChangeSet(spl_object_hash($document));
 
         $eventArgs->setReject(true);
 
@@ -130,7 +90,7 @@ class MainSubscriber extends AbstractAccessControlSubscriber
         //Check delete permsisions
         $document = $eventArgs->getDocument();
 
-        if ($this->getAccessController()->areAllowed([Actions::DELETE], null, $document)->getAllowed()) {
+        if ($this->getAccessController()->areAllowed([Actions::DELETE], $eventArgs->getMetadata(), $document)->getAllowed()) {
             return;
         }
 
@@ -140,5 +100,10 @@ class MainSubscriber extends AbstractAccessControlSubscriber
             AccessControlEvents::DELETE_DENIED,
             new EventArgs($document, Actions::DELETE)
         );
+    }
+
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs){
+        $eventArgs->addSerialized('accessConrol');
+        $eventArgs->addSerialized('permissions');
     }
 }

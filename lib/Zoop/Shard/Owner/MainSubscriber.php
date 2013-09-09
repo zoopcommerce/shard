@@ -9,6 +9,8 @@ namespace Zoop\Shard\Owner;
 use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
 use Doctrine\ODM\MongoDB\Events as ODMEvents;
 use Zoop\Shard\Stamp\AbstractStampSubscriber;
+use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
+use Zoop\Shard\ODMCore\MetadataSleepEventArgs;
 
 /**
  *
@@ -25,8 +27,9 @@ class MainSubscriber extends AbstractStampSubscriber
     {
         return [
             // @codingStandardsIgnoreStart
-            ODMEvents::prePersist
+            ODMEvents::prePersist,
             // @codingStandardsIgnoreEnd
+            ODMCoreEvents::METADATA_SLEEP,
         ];
     }
 
@@ -46,5 +49,9 @@ class MainSubscriber extends AbstractStampSubscriber
                 $reflField->setValue($document, $this->getUsername());
             }
         }
+    }
+
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs){
+        $eventArgs->addSerialized('owner');
     }
 }

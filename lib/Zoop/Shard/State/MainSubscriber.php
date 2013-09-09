@@ -7,10 +7,11 @@
 namespace Zoop\Shard\State;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\ODM\MongoDB\Event\OnFlushEventArgs;
-use Doctrine\ODM\MongoDB\Events as ODMEvents;
 use Zoop\Common\State\Transition;
-use Zoop\Shard\State\EventArgs as TransitionEventArgs;
+use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
+use Zoop\Shard\ODMCore\UpdateEventArgs;
+use Zoop\Shard\ODMCore\CreateEventArgs;
+use Zoop\Shard\ODMCore\MetadataSleepEventArgs;
 
 /**
  * Emits soft delete events
@@ -27,98 +28,86 @@ class MainSubscriber implements EventSubscriber
      */
     public function getSubscribedEvents()
     {
-        return array(
-            // @codingStandardsIgnoreStart
-            ODMEvents::onFlush
-            // @codingStandardsIgnoreEnd
-        );
+        return [
+            ODMCoreEvents::CREATE,
+            ODMCoreEvents::UPDATE,
+            ODMCoreEvents::METADATA_SLEEP,
+        ];
     }
 
-    /**
-     *
-     * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
-     */
-    public function onFlush(OnFlushEventArgs $eventArgs)
+    public function update(UpdateEventArgs $eventArgs)
     {
-        $documentManager = $eventArgs->getDocumentManager();
-        $unitOfWork = $documentManager->getUnitOfWork();
-
-        foreach ($unitOfWork->getScheduledDocumentInsertions() as $document) {
-
-            $metadata = $documentManager->getClassMetadata(get_class($document));
-            if (! isset($metadata->state)) {
-                continue;
-            }
-
-            $field = array_keys($metadata->state)[0];
-
-            if (count($metadata->state[$field]) > 0 &&
-                ! in_array($metadata->reflFields[$field]->getValue($document), $metadata->state[$field])
-            ) {
-                $unitOfWork->detach($document);
-                $eventManager = $documentManager->getEventManager();
-                $eventManager->dispatchEvent(
-                    Events::BAD_STATE,
-                    $eventArgs
-                );
-            }
+        if ($eventArgs->getReject()) {
+            return;
         }
 
-        foreach ($unitOfWork->getScheduledDocumentUpdates() as $document) {
+        $metadata = $eventArgs->getMetadata();
+        if (! isset($metadata->state)) {
+            return;
+        }
 
-            $metadata = $documentManager->getClassMetadata(get_class($document));
-            if (! isset($metadata->state)) {
-                continue;
-            }
+        $document = $eventArgs->getDocument();
+        $eventManager = $eventArgs->getEventManager();
+        $changeSet = $eventArgs->getChangeSet();
+        $field = array_keys($metadata->state)[0];
 
-            $eventManager = $documentManager->getEventManager();
-            $changeSet = $unitOfWork->getDocumentChangeSet($document);
-            $field = array_keys($metadata->state)[0];
+        $fromState = $changeSet[$field][0];
+        $toState = $changeSet[$field][1];
 
-            if (!isset($changeSet[$field])) {
-                continue;
-            }
+        //stop state change if the new state is not on the defined state list
+        if (count($metadata->state[$field]) > 0 && ! in_array($toState, $metadata->state[$field])) {
+            $metadata->setFieldValue($document, $field, $fromState);
+            $eventArgs->setReject(true);
+            $eventManager->dispatchEvent(Events::BAD_STATE, $eventArgs);
+            return;
+        }
 
-            $fromState = $changeSet[$field][0];
-            $toState = $changeSet[$field][1];
+        // Raise preTransition
+        $transitionEventArgs = new TransitionEventArgs($document, $metadata, new Transition($fromState, $toState), $eventManager);
+        $eventManager->dispatchEvent(Events::PRE_TRANSITION, $transitionEventArgs);
 
-            //stop state change if the new state is not on the defined state list
-            if (count($metadata->state[$field]) > 0 && ! in_array($toState, $metadata->state[$field])) {
-                $metadata->reflFields[$field]->setValue($document, $fromState);
-                $eventManager->dispatchEvent(
-                    Events::BAD_STATE,
-                    $eventArgs
-                );
-                $unitOfWork->recomputeSingleDocumentChangeSet($metadata, $document);
-                continue;
-            }
+        if ($transitionEventArgs->getReject()) {
+            $eventArgs->setReject(true);
+            return;
+        }
 
-            // Raise preTransition
-            $eventManager->dispatchEvent(
-                Events::PRE_TRANSITION,
-                new TransitionEventArgs(new Transition($fromState, $toState), $document, $documentManager)
-            );
+        // Raise postTransition - this is when workflow vars should be updated
+        $eventManager->dispatchEvent(Events::POST_TRANSITION, $transitionEventArgs);
+        if ($transitionEventArgs->getReject()) {
+            $eventArgs->setReject(true);
+            return;
+        }
+        if ($transitionEventArgs->getRecompute()) {
+            $eventArgs->setRecompute(true);
+        }
+    }
 
-            if ($document->getState() == $fromState) {
-                //State change has been rolled back
-                $unitOfWork->recomputeSingleDocumentChangeSet($metadata, $document);
-                continue;
-            }
+    public function create(CreateEventArgs $eventArgs)
+    {
+        if ($eventArgs->getReject()) {
+            return;
+        }
 
-            // Raise onTransition
-            $eventManager->dispatchEvent(
-                Events::ON_TRANSITION,
-                new TransitionEventArgs(new Transition($fromState, $toState), $document, $documentManager)
-            );
+        $metadata = $eventArgs->getMetadata();
+        if (! isset($metadata->state)) {
+            return;
+        }
 
-            // Force change set update
-            $unitOfWork->recomputeSingleDocumentChangeSet($metadata, $document);
+        $field = array_keys($metadata->state)[0];
+        $document = $eventArgs->getDocument();
 
-            // Raise postTransition - this is when workflow vars should be updated
-            $eventManager->dispatchEvent(
-                Events::POST_TRANSITION,
-                new TransitionEventArgs(new Transition($fromState, $toState), $document, $documentManager)
+        if (count($metadata->state[$field]) > 0 &&
+            ! in_array($metadata->getFieldValue($document, $field), $metadata->state[$field])
+        ) {
+            $eventArgs->setReject(true);
+            $eventArgs->getEventManager()->dispatchEvent(
+                Events::BAD_STATE,
+                $eventArgs
             );
         }
+    }
+
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs){
+        $eventArgs->addSerialized('state');
     }
 }

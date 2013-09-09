@@ -25,6 +25,9 @@ class Extension extends AbstractExtension
         'invokables' => [
             'subscriber.odmcore.mainsubscriber' =>
                 'Zoop\Shard\ODMCore\MainSubscriber'
+        ],
+        'factories' => [
+            'eventmanager' => 'Zoop\Shard\ODMCore\EventManagerFactory'
         ]
     ];
 }

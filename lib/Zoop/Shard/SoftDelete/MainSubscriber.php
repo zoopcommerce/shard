@@ -12,6 +12,7 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\AccessControl\EventArgs as AccessControlEventArgs;
 use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
 use Zoop\Shard\ODMCore\UpdateEventArgs;
+use Zoop\Shard\ODMCore\MetadataSleepEventArgs;
 
 /**
  * Emits soft delete events
@@ -32,7 +33,10 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
      */
     public function getSubscribedEvents()
     {
-        return [ODMCoreEvents::UPDATE];
+        return [
+            ODMCoreEvents::UPDATE,
+            ODMCoreEvents::METADATA_SLEEP,
+        ];
     }
 
     public function update(UpdateEventArgs $eventArgs)
@@ -41,71 +45,32 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         $softDeleter = $this->getSoftDeleter();
         $metadata = $eventArgs->getMetadata();
 
-        if (! ($field = $softDeleter->getSoftDeleteField($metadata))) {
+        if (! ($field = $softDeleter->getSoftDeleteField($metadata)) || !$softDeleter->isSoftDeleted($document, $metadata)) {
             return;
         }
 
         $changeSet = $eventArgs->getChangeSet();
-        $eventManager = $eventArgs->getEventManager();
-
-        if (!isset($changeSet[$field])) {
-            if ($softDeleter->isSoftDeleted($document, $metadata)) {
-                // Updates to softDeleted documents are not allowed. Roll them back
-                $eventArgs->setReject(true);
-
-                // Raise softDeletedUpdateDenied
-                $eventManager->dispatchEvent(
-                    Events::SOFT_DELETED_UPDATE_DENIED,
-                    new AccessControlEventArgs($document, 'softDelete')
-                );
-                return;
-            } else {
-                return;
+        $count = 0;
+        array_walk($metadata->softDelete,
+            function ($item) use ($changeSet, &$count) {
+                if (array_key_exists($item, $changeSet)) {
+                    ++$count;
+                }
             }
+        );
+
+        if (count($changeSet) == $count){
+            return;
         }
 
-        if ($changeSet[$field][1]) {
-            // Trigger soft delete events
+        // Updates to softDeleted documents are not allowed. Roll them back
+        $eventArgs->setReject(true);
 
-            // Raise preSoftDelete
-            $softDeleteEventArgs = new SoftDeleteEventArgs($document, $eventArgs->getMetadata(), $eventManager);
-            $eventManager->dispatchEvent(Events::PRE_SOFT_DELETE, $softDeleteEventArgs);
-            if ($softDeleteEventArgs->getReject()){
-                $eventArgs->setReject(true);
-                return;
-            }
-
-            if ($softDeleter->isSoftDeleted($document, $metadata)) {
-                // Raise postSoftDelete
-                $eventManager->dispatchEvent(Events::POST_SOFT_DELETE, $softDeleteEventArgs);
-                $eventArgs->setRecompute($softDeleteEventArgs->getRecompute());
-            } else {
-                // Soft delete has been rolled back
-                unset($changeSet[$field]);
-                $eventArgs->setRecompute(true);
-            }
-
-        } else {
-            // Trigger restore events
-
-            // Raise preRestore
-            $softDeleteEventArgs = new SoftDeleteEventArgs($document, $metadata, $eventManager);
-            $eventManager->dispatchEvent(Events::PRE_RESTORE, $softDeleteEventArgs);
-            if ($softDeleteEventArgs->getReject()){
-                $eventArgs->setReject(true);
-                return;
-            }
-
-            if (! $softDeleter->isSoftDeleted($document, $metadata)) {
-                // Raise postRestore
-                $eventManager->dispatchEvent(Events::POST_RESTORE, $softDeleteEventArgs);
-                $eventArgs->setRecompute($softDeleteEventArgs->getRecompute());
-            } else {
-                // Restore has been rolled back
-                unset($changeSet[$field]);
-                $eventArgs->setRecompute(true);
-            }
-        }
+        // Raise frozenUpdateDenied
+        $eventArgs->getEventManager()->dispatchEvent(
+            Events::SOFT_DELETED_UPDATE_DENIED,
+            new AccessControlEventArgs($document, 'softDelete')
+        );
     }
 
     protected function getSoftDeleter()
@@ -114,5 +79,9 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             $this->softDeleter = $this->serviceLocator->get('softDeleter');
         }
         return $this->softDeleter;
+    }
+
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs){
+        $eventArgs->addSerialized('softDelete');
     }
 }

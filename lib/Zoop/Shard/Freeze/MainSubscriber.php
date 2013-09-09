@@ -13,6 +13,7 @@ use Zoop\Shard\AccessControl\EventArgs as AccessControlEventArgs;
 use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
 use Zoop\Shard\ODMCore\UpdateEventArgs;
 use Zoop\Shard\ODMCore\DeleteEventArgs;
+use Zoop\Shard\ODMCore\MetadataSleepEventArgs;
 
 /**
  * Emits freeze events
@@ -35,80 +36,47 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         return [
             ODMCoreEvents::DELETE,
             ODMCoreEvents::UPDATE,
+            ODMCoreEvents::METADATA_SLEEP,
         ];
     }
 
+    /**
+     *
+     * @param \Zoop\Shard\ODMCore\UpdateEventArgs $eventArgs
+     * @return type
+     */
     public function update(UpdateEventArgs $eventArgs)
     {
         $document = $eventArgs->getDocument();
         $freezer = $this->getFreezer();
         $metadata = $eventArgs->getMetadata();
 
-        if (! ($field = $freezer->getFreezeField($metadata))) {
+        if (! ($field = $freezer->getFreezeField($metadata)) || !$freezer->isFrozen($document, $metadata)) {
             return;
         }
 
         $changeSet = $eventArgs->getChangeSet();
-        $eventManager = $eventArgs->getEventManager();
-
-        if (! isset($changeSet[$field])) {
-            if ($freezer->isFrozen($document, $metadata)) {
-                // Updates to frozen documents are not allowed. Roll them back
-                $eventArgs->setReject(true);
-
-                // Raise frozenUpdateDenied
-                $eventManager->dispatchEvent(
-                    Events::FROZEN_UPDATE_DENIED,
-                    new AccessControlEventArgs($document, 'update')
-                );
-                return;
-            } else {
-                return;
+        $count = 0;
+        array_walk($metadata->freeze,
+            function ($item) use ($changeSet, &$count) {
+                if (array_key_exists($item, $changeSet)) {
+                    ++$count;
+                }
             }
+        );
+
+        if (count($changeSet) == $count){
+            return;
         }
 
-        if ($changeSet[$field][1]) {
-            // Trigger freeze events
+        // Updates to frozen documents are not allowed. Roll them back
+        $eventArgs->setReject(true);
 
-            // Raise preFreeze
-            $freezerEventArgs = new FreezerEventArgs($document, $eventArgs->getMetadata(), $eventManager);
-            $eventManager->dispatchEvent(Events::PRE_FREEZE, $freezerEventArgs);
-            if ($freezerEventArgs->getReject()){
-                $eventArgs->setReject(true);
-                return;
-            }
-
-            if ($freezer->isFrozen($document, $metadata)) {
-                // Raise postFreeze
-                $eventManager->dispatchEvent(Events::POST_FREEZE, $freezerEventArgs);
-                $eventArgs->setRecompute($freezerEventArgs->getRecompute());
-            } else {
-                // Freeze has been rolled back
-                unset($changeSet[$field]);
-                $eventArgs->setRecompute(true);
-            }
-
-        } else {
-            // Trigger thaw events
-
-            // Raise preThaw
-            $freezerEventArgs = new FreezerEventArgs($document, $metadata, $eventManager);
-            $eventManager->dispatchEvent(Events::PRE_THAW, $freezerEventArgs);
-            if ($freezerEventArgs->getReject()){
-                $eventArgs->setReject(true);
-                return;
-            }
-
-            if (! $freezer->isFrozen($document, $metadata)) {
-                // Raise postThaw
-                $eventManager->dispatchEvent(Events::POST_THAW, $freezerEventArgs);
-                $eventArgs->setRecompute($freezerEventArgs->getRecompute());
-            } else {
-                // Thaw has been rolled back
-                unset($changeSet[$field]);
-                $eventArgs->setRecompute(true);
-            }
-        }
+        // Raise frozenUpdateDenied
+        $eventArgs->getEventManager()->dispatchEvent(
+            Events::FROZEN_UPDATE_DENIED,
+            new AccessControlEventArgs($document, 'update')
+        );
     }
 
     public function delete(DeleteEventArgs $eventArgs)
@@ -117,7 +85,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         $metadata = $eventArgs->getMetadata();
         $freezer = $this->getFreezer();
 
-        if ( !($field = $freezer->getFreezeField($metadata)) || ! $freezer->isFrozen($document, $metadata)) {
+        if (! $freezer->getFreezeField($metadata) || ! $freezer->isFrozen($document, $metadata)) {
             return;
         }
 
@@ -137,5 +105,9 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             $this->freezer = $this->serviceLocator->get('freezer');
         }
         return $this->freezer;
+    }
+
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs){
+        $eventArgs->addSerialized('freeze');
     }
 }

@@ -20,11 +20,6 @@ final class Events
     const PRE_TRANSITION = 'preTransition';
 
     /**
-     * Called during state change. Can be used to update the workflow vars
-     */
-    const ON_TRANSITION = 'onTransition';
-
-    /**
      * Called after state change complete
      */
     const POST_TRANSITION = 'postTransition';

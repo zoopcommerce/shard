@@ -18,12 +18,14 @@ class Extension extends AbstractExtension
 {
 
     protected $subscribers = [
-        'subscriber.zone.annotationsubscriber'
+        'subscriber.zone.annotationsubscriber',
+        'subscriber.zone.mainsubscriber'
     ];
 
     protected $serviceManagerConfig = [
         'invokables' => [
-            'subscriber.zone.annotationsubscriber' => 'Zoop\Shard\Zone\AnnotationSubscriber'
+            'subscriber.zone.annotationsubscriber' => 'Zoop\Shard\Zone\AnnotationSubscriber',
+            'subscriber.zone.mainsubscriber'       => 'Zoop\Shard\Zone\MainSubscriber'
         ]
     ];
 
