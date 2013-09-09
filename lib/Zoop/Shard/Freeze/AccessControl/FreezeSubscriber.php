@@ -6,10 +6,10 @@
  */
 namespace Zoop\Shard\Freeze\AccessControl;
 
-use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
 use Zoop\Shard\AccessControl\AbstractAccessControlSubscriber;
 use Zoop\Shard\AccessControl\EventArgs as AccessControlEventArgs;
 use Zoop\Shard\Freeze\Events;
+use Zoop\Shard\Freeze\FreezerEventArgs;
 
 /**
  *
@@ -37,7 +37,7 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
      *
      * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
      */
-    public function preFreeze(LifecycleEventArgs $eventArgs)
+    public function preFreeze(FreezerEventArgs $eventArgs)
     {
         if (! ($accessController = $this->getAccessController())) {
             //Access control is not enabled
@@ -48,9 +48,11 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
 
         if (! $accessController->areAllowed([Actions::FREEZE], null, $document)->getAllowed()) {
             //stop freeze
-            $this->getFreezer()->thaw($document);
+            $this->getFreezer()->thaw($document, $eventArgs->getMetadata());
 
-            $eventArgs->getDocumentManager()->getEventManager()->dispatchEvent(
+            $eventArgs->setReject(true);
+
+            $eventArgs->getEventManager()->dispatchEvent(
                 Events::FREEZE_DENIED,
                 new AccessControlEventArgs($document, Actions::FREEZE)
             );
@@ -61,7 +63,7 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
      *
      * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
      */
-    public function preThaw(LifecycleEventArgs $eventArgs)
+    public function preThaw(FreezerEventArgs $eventArgs)
     {
 
         if (! ($accessController = $this->getAccessController())) {
@@ -73,9 +75,11 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
 
         if (! $accessController->areAllowed([Actions::THAW], null, $document)->getAllowed()) {
             //stop thaw
-            $this->getFreezer()->freeze($document);
+            $this->getFreezer()->freeze($document, $eventArgs->getMetadata());
 
-            $eventArgs->getDocumentManager()->getEventManager()->dispatchEvent(
+            $eventArgs->setReject(true);
+
+            $eventArgs->getEventManager()->dispatchEvent(
                 Events::THAW_DENIED,
                 new AccessControlEventArgs($document, Actions::THAW)
             );

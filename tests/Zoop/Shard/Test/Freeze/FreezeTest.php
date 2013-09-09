@@ -3,12 +3,12 @@
 namespace Zoop\Shard\Test\Freeze;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
 use Zoop\Shard\Freeze\Events;
 use Zoop\Shard\Manifest;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\Freeze\TestAsset\Document\Simple;
 use Zoop\Shard\Test\TestAsset\User;
+use Zoop\Shard\Freeze\FreezerEventArgs;
 
 class FreezeTest extends BaseTest implements EventSubscriber
 {
@@ -44,6 +44,7 @@ class FreezeTest extends BaseTest implements EventSubscriber
     {
         $documentManager = $this->documentManager;
         $testDoc = new Simple();
+        $metadata = $documentManager->getClassMetadata(get_class($testDoc));
 
         $testDoc->setName('version 1');
 
@@ -56,16 +57,16 @@ class FreezeTest extends BaseTest implements EventSubscriber
         $testDoc = null;
         $testDoc = $repository->find($id);
 
-        $this->assertFalse($this->freezer->isFrozen($testDoc));
+        $this->assertFalse($this->freezer->isFrozen($testDoc, $metadata));
 
-        $this->freezer->freeze($testDoc);
+        $this->freezer->freeze($testDoc, $metadata);
 
         $documentManager->flush();
         $documentManager->clear();
         $testDoc = null;
         $testDoc = $repository->find($id);
 
-        $this->assertTrue($this->freezer->isFrozen($testDoc));
+        $this->assertTrue($this->freezer->isFrozen($testDoc, $metadata));
 
         $testDoc->setName('version 2');
 
@@ -84,14 +85,14 @@ class FreezeTest extends BaseTest implements EventSubscriber
 
         $this->assertEquals('version 1', $testDoc->getName());
 
-        $this->freezer->thaw($testDoc);
+        $this->freezer->thaw($testDoc, $metadata);
 
         $documentManager->flush();
         $documentManager->clear();
         $testDoc = null;
         $testDoc = $repository->find($id);
 
-        $this->assertFalse($this->freezer->isFrozen($testDoc));
+        $this->assertFalse($this->freezer->isFrozen($testDoc, $metadata));
     }
 
     public function testFilter()
@@ -105,6 +106,8 @@ class FreezeTest extends BaseTest implements EventSubscriber
         $testDocB = new Simple();
         $testDocB->setName('lucy');
 
+        $metadata = $documentManager->getClassMetadata(get_class($testDocA));
+
         $documentManager->persist($testDocA);
         $documentManager->persist($testDocB);
         $documentManager->flush();
@@ -115,9 +118,9 @@ class FreezeTest extends BaseTest implements EventSubscriber
         $this->assertEquals(array('lucy', 'miriam'), $docNames);
 
         if ($testDocs[0]->getName() == 'lucy') {
-            $this->freezer->freeze($testDocs[0]);
+            $this->freezer->freeze($testDocs[0], $metadata);
         } else {
-            $this->freezer->freeze($testDocs[1]);
+            $this->freezer->freeze($testDocs[1], $metadata);
         }
 
         $documentManager->flush();
@@ -148,9 +151,9 @@ class FreezeTest extends BaseTest implements EventSubscriber
         $this->assertEquals(array('lucy', 'miriam'), $docNames);
 
         if ($testDocs[0]->getName() == 'lucy') {
-            $this->freezer->thaw($testDocs[0]);
+            $this->freezer->thaw($testDocs[0], $metadata);
         } else {
-            $this->freezer->thaw($testDocs[1]);
+            $this->freezer->thaw($testDocs[1], $metadata);
         }
 
         $documentManager->getFilterCollection()->enable('freeze');
@@ -185,6 +188,7 @@ class FreezeTest extends BaseTest implements EventSubscriber
         $eventManager->addEventSubscriber($subscriber);
 
         $testDoc = new Simple();
+        $metadata = $documentManager->getClassMetadata(get_class($testDoc));
 
         $testDoc->setName('version 1');
 
@@ -202,9 +206,9 @@ class FreezeTest extends BaseTest implements EventSubscriber
         $repository = $documentManager->getRepository(get_class($testDoc));
         $testDoc = $repository->find($id);
 
-        $this->assertFalse($this->freezer->isFrozen($testDoc));
+        $this->assertFalse($this->freezer->isFrozen($testDoc, $metadata));
 
-        $this->freezer->freeze($testDoc);
+        $this->freezer->freeze($testDoc, $metadata);
         $subscriber->reset();
 
         $documentManager->flush();
@@ -218,7 +222,7 @@ class FreezeTest extends BaseTest implements EventSubscriber
         $testDoc = null;
         $testDoc = $repository->find($id);
 
-        $this->assertTrue($this->freezer->isFrozen($testDoc));
+        $this->assertTrue($this->freezer->isFrozen($testDoc, $metadata));
 
         $testDoc->setName('version 2');
         $subscriber->reset();
@@ -237,7 +241,7 @@ class FreezeTest extends BaseTest implements EventSubscriber
         $documentManager->clear();
         $testDoc = $repository->find($id);
 
-        $this->freezer->thaw($testDoc);
+        $this->freezer->thaw($testDoc, $metadata);
         $subscriber->reset();
 
         $documentManager->flush();
@@ -251,9 +255,9 @@ class FreezeTest extends BaseTest implements EventSubscriber
         $testDoc = null;
         $testDoc = $repository->find($id);
 
-        $this->assertFalse($this->freezer->isFrozen($testDoc));
+        $this->assertFalse($this->freezer->isFrozen($testDoc, $metadata));
 
-        $this->freezer->freeze($testDoc);
+        $this->freezer->freeze($testDoc, $metadata);
         $subscriber->reset();
         $subscriber->setRollbackFreeze(true);
 
@@ -268,17 +272,17 @@ class FreezeTest extends BaseTest implements EventSubscriber
         $testDoc = null;
         $testDoc = $repository->find($id);
 
-        $this->assertFalse($this->freezer->isFrozen($testDoc));
-        $this->freezer->freeze($testDoc);
+        $this->assertFalse($this->freezer->isFrozen($testDoc, $metadata));
+        $this->freezer->freeze($testDoc, $metadata);
         $subscriber->reset();
         $documentManager->flush();
 
         $testDoc = null;
         $testDoc = $repository->find($id);
 
-        $this->assertTrue($this->freezer->isFrozen($testDoc));
+        $this->assertTrue($this->freezer->isFrozen($testDoc, $metadata));
 
-        $this->freezer->thaw($testDoc);
+        $this->freezer->thaw($testDoc, $metadata);
         $subscriber->reset();
         $subscriber->setRollbackThaw(true);
 
@@ -315,19 +319,19 @@ class FreezeTest extends BaseTest implements EventSubscriber
         $this->rollbackThaw = false;
     }
 
-    public function preFreeze(LifecycleEventArgs $eventArgs)
+    public function preFreeze(FreezerEventArgs $eventArgs)
     {
         $this->calls[Events::PRE_FREEZE] = $eventArgs;
         if ($this->rollbackFreeze) {
-            $this->freezer->thaw($eventArgs->getDocument());
+            $this->freezer->thaw($eventArgs->getDocument(), $eventArgs->getMetadata());
         }
     }
 
-    public function preThaw(LifecycleEventArgs $eventArgs)
+    public function preThaw(FreezerEventArgs $eventArgs)
     {
         $this->calls[Events::PRE_THAW] = $eventArgs;
         if ($this->rollbackThaw) {
-            $this->freezer->freeze($eventArgs->getDocument());
+            $this->freezer->freeze($eventArgs->getDocument(), $eventArgs->getMetadata());
         }
     }
 

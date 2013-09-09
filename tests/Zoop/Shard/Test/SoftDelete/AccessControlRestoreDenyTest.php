@@ -51,7 +51,10 @@ class AccessControlRestoreDenyTest extends BaseTest
         $eventManager->addEventListener(Events::RESTORE_DENIED, $this);
 
         $testDoc = new AccessControlled();
-        $this->softDeleter->softDelete($testDoc);
+
+        $metadata = $documentManager->getClassMetadata(get_class($testDoc));
+
+        $this->softDeleter->softDelete($testDoc, $metadata);
         $testDoc->setName('version 1');
 
         $documentManager->persist($testDoc);
@@ -62,13 +65,13 @@ class AccessControlRestoreDenyTest extends BaseTest
         $repository = $documentManager->getRepository(get_class($testDoc));
         $testDoc = $repository->find($id);
 
-        $this->softDeleter->restore($testDoc);
+        $this->softDeleter->restore($testDoc, $metadata);
 
         $documentManager->flush();
         $documentManager->clear();
 
         $testDoc = $repository->find($id);
-        $this->assertTrue($this->softDeleter->isSoftDeleted($testDoc));
+        $this->assertTrue($this->softDeleter->isSoftDeleted($testDoc, $metadata));
         $this->assertTrue(isset($this->calls[Events::RESTORE_DENIED]));
     }
 

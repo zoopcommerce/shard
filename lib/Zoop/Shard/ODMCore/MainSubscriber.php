@@ -17,6 +17,7 @@ use Doctrine\ODM\MongoDB\Events as ODMEvents;
  */
 class MainSubscriber implements EventSubscriber
 {
+
     /**
      *
      * @return array
@@ -41,33 +42,122 @@ class MainSubscriber implements EventSubscriber
         $eventManager = $documentManager->getEventManager();
 
         foreach ($unitOfWork->getScheduledDocumentInsertions() as $document) {
-            $createEventArgs = new CoreEventArgs($document, CoreEventArgs::CREATE);
+            $createEventArgs = new CreateEventArgs(
+                $document,
+                $documentManager->getClassMetadata(get_class($document)),
+                $eventManager
+            );
             $eventManager->dispatchEvent(Events::CREATE, $createEventArgs);
-            if ($createEventArgs->getShortCircut()) {
+            if ($createEventArgs->getReject()) {
+                $this->rejectCreate($document, $documentManager);
                 continue;
             }
             $eventManager->dispatchEvent(Events::VALIDATE, $createEventArgs);
-            if ($createEventArgs->getShortCircut()) {
+            if ($createEventArgs->getReject()) {
+                $this->rejectCreate($document, $documentManager);
                 continue;
             }
             $eventManager->dispatchEvent(Events::CRYPT, $createEventArgs);
+            if ($createEventArgs->getReject()) {
+                $this->rejectCreate($document, $documentManager);
+            }
         }
 
         foreach ($unitOfWork->getScheduledDocumentUpdates() as $document) {
-            $updateEventArgs = new CoreEventArgs($document, CoreEventArgs::UPDATE);
-            $eventManager->dispatchEvent(Events::UPDATE, $updateEventArgs);
-            if ($updateEventArgs->getShortCircut()) {
+            $changeSet = $unitOfWork->getDocumentChangeSet($document);
+            if (count($changeSet) == 0) {
                 continue;
+            }
+            $updateEventArgs = new UpdateEventArgs(
+                $document,
+                $documentManager->getClassMetadata(get_class($document)),
+                $changeSet,
+                $eventManager
+            );
+            $eventManager->dispatchEvent(Events::UPDATE, $updateEventArgs);
+            if ($updateEventArgs->getReject()) {
+                $this->rejectUpdate($document, $changeSet, $documentManager);
+                continue;
+            }
+            if ($updateEventArgs->getRecompute()) {
+                $this->recomputeUpdate($document, $documentManager);
             }
             $eventManager->dispatchEvent(Events::VALIDATE, $updateEventArgs);
-            if ($updateEventArgs->getShortCircut()) {
+            if ($updateEventArgs->getReject()) {
+                $this->rejectUpdate($document, $changeSet, $documentManager);
                 continue;
             }
+            if ($updateEventArgs->getRecompute()) {
+                $this->recomputeUpdate($document, $documentManager);
+            }
             $eventManager->dispatchEvent(Events::CRYPT, $updateEventArgs);
+            if ($updateEventArgs->getReject()) {
+                $this->rejectUpdate($document, $changeSet, $documentManager);
+            }
+            if ($updateEventArgs->getRecompute()) {
+                $this->recomputeUpdate($document, $documentManager);
+            }
         }
 
         foreach ($unitOfWork->getScheduledDocumentDeletions() as $document) {
-            $eventManager->dispatchEvent(Events::DELETE, new CoreEventArgs($document, CoreEventArgs::DELETE));
+            $deleteEventArgs = new DeleteEventArgs(
+                $document,
+                $documentManager->getClassMetadata(get_class($document)),
+                $eventManager
+            );
+            $eventManager->dispatchEvent(Events::DELETE, $deleteEventArgs);
+            if ($deleteEventArgs->getReject()) {
+                $this->rejectDelete($document, $documentManager);
+            }
         }
+    }
+
+    protected function rejectCreate($document, $documentManager)
+    {
+        //stop creation
+
+        $unitOfWork = $documentManager->getUnitOfWork();
+        $metadata = $documentManager->getClassMetadata(get_class($document));
+
+        if ($metadata->isEmbeddedDocument) {
+            list($mapping, $parent) = $unitOfWork->getParentAssociation($document);
+            $parentMetadata = $documentManager->getClassMetadata(get_class($parent));
+            if ($mapping['type'] == 'many') {
+                $collection = $parentMetadata->reflFields[$mapping['fieldName']]->getValue($parent);
+                $collection->removeElement($document);
+                $unitOfWork->recomputeSingleDocumentChangeSet($parentMetadata, $parent);
+            } else {
+                $parentMetadata->reflFields[$mapping['fieldName']]->setValue($document, null);
+            }
+        }
+        $unitOfWork->detach($document);
+    }
+
+    protected function rejectUpdate($document, $changeSet, $documentManager)
+    {
+        $unitOfWork = $documentManager->getUnitOfWork();
+        $metadata = $documentManager->getClassMetadata(get_class($document));
+
+        //roll back changes
+        foreach ($changeSet as $field => $change) {
+            $metadata->setFieldValue($document, $field, $change[0]);
+        }
+
+        //stop updates
+        $unitOfWork->clearDocumentChangeSet(spl_object_hash($document));
+    }
+
+    protected function rejectDelete($document, $documentManager)
+    {
+        //stop delete
+        $documentManager->persist($document);
+    }
+
+    protected function recomputeUpdate($document, $documentManager)
+    {
+        $documentManager->getUnitOfWork()->recomputeSingleDocumentChangeSet(
+            $documentManager->getClassMetadata(get_class($document)),
+            $document
+        );
     }
 }

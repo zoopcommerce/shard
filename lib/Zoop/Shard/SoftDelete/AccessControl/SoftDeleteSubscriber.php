@@ -6,9 +6,9 @@
  */
 namespace Zoop\Shard\SoftDelete\AccessControl;
 
-use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
 use Zoop\Shard\AccessControl\AbstractAccessControlSubscriber;
 use Zoop\Shard\SoftDelete\Events;
+use Zoop\Shard\SoftDelete\SoftDeleteEventArgs;
 
 /**
  *
@@ -36,7 +36,7 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
      *
      * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
      */
-    public function preSoftDelete(LifecycleEventArgs $eventArgs)
+    public function preSoftDelete(SoftDeleteEventArgs $eventArgs)
     {
         if (! ($accessController = $this->getAccessController())) {
             //Access control is not enabled
@@ -47,9 +47,11 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
 
         if (! $accessController->areAllowed([Actions::SOFT_DELETE], null, $document)->getAllowed()) {
             //stop SoftDelete
-            $this->getSoftDeleter()->restore($document);
+            $this->getSoftDeleter()->restore($document, $eventArgs->getMetadata());
 
-            $eventArgs->getDocumentManager()->getEventManager()->dispatchEvent(
+            $eventArgs->setReject(true);
+
+            $eventArgs->getEventManager()->dispatchEvent(
                 Events::SOFT_DELETE_DENIED,
                 $eventArgs
             );
@@ -60,7 +62,7 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
      *
      * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
      */
-    public function preRestore(LifecycleEventArgs $eventArgs)
+    public function preRestore(SoftDeleteEventArgs $eventArgs)
     {
         if (! ($accessController = $this->getAccessController())) {
             //Access control is not enabled
@@ -71,9 +73,11 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
 
         if (! $accessController->areAllowed([Actions::RESTORE], null, $document)->getAllowed()) {
             //stop restore
-            $this->getSoftDeleter()->softDelete($document);
+            $this->getSoftDeleter()->softDelete($document, $eventArgs->getMetadata());
 
-            $eventArgs->getDocumentManager()->getEventManager()->dispatchEvent(
+            $eventArgs->setReject(true);
+
+            $eventArgs->getEventManager()->dispatchEvent(
                 Events::RESTORE_DENIED,
                 $eventArgs
             );

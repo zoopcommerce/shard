@@ -6,8 +6,8 @@
  */
 namespace Zoop\Shard\SoftDelete;
 
-use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
-use Zoop\Shard\Stamp\AbstractStampSubscriber;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Adds create and update stamps during persist
@@ -15,8 +15,10 @@ use Zoop\Shard\Stamp\AbstractStampSubscriber;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class StampSubscriber extends AbstractStampSubscriber
+class StampSubscriber implements ServiceLocatorAwareInterface
 {
+    use ServiceLocatorAwareTrait;
+
     /**
      *
      * @return array
@@ -33,22 +35,18 @@ class StampSubscriber extends AbstractStampSubscriber
      *
      * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
      */
-    public function postSoftDelete(LifecycleEventArgs $eventArgs)
+    public function postSoftDelete(SoftDeleteEventArgs $eventArgs)
     {
-        $recomputeChangeSet = false;
         $document = $eventArgs->getDocument();
-        $metadata = $eventArgs->getDocumentManager()->getClassMetadata(get_class($document));
+        $metadata = $eventArgs->getMetadata();
 
         if (isset($metadata->softDelete['deletedBy'])) {
-            $metadata->reflFields[$metadata->softDelete['deletedBy']]->setValue($document, $this->getUsername());
-            $recomputeChangeSet = true;
+            $metadata->setFieldValue($document, $metadata->softDelete['deletedBy'], $this->getUsername());
+            $eventArgs->setRecompute(true);
         }
         if (isset($metadata->softDelete['deletedOn'])) {
-            $metadata->reflFields[$metadata->softDelete['deletedOn']]->setValue($document, time());
-            $recomputeChangeSet = true;
-        }
-        if ($recomputeChangeSet) {
-            $this->recomputeChangeset($eventArgs);
+            $metadata->setFieldValue($document, $metadata->softDelete['deletedOn'], time());
+            $eventArgs->setRecompute(true);
         }
     }
 
@@ -56,22 +54,27 @@ class StampSubscriber extends AbstractStampSubscriber
      *
      * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
      */
-    public function postRestore(LifecycleEventArgs $eventArgs)
+    public function postRestore(SoftDeleteEventArgs $eventArgs)
     {
-        $recomputeChangeSet = false;
         $document = $eventArgs->getDocument();
-        $metadata = $eventArgs->getDocumentManager()->getClassMetadata(get_class($document));
+        $metadata = $eventArgs->getMetadata();
 
         if (isset($metadata->softDelete['restoredBy'])) {
-            $metadata->reflFields[$metadata->softDelete['restoredBy']]->setValue($document, $this->getUsername());
-            $recomputeChangeSet = true;
+            $metadata->setFieldValue($document, $metadata->softDelete['restoredBy'], $this->getUsername());
+            $eventArgs->setRecompute(true);
         }
         if (isset($metadata->softDelete['restoredOn'])) {
-            $metadata->reflFields[$metadata->softDelete['restoredOn']]->setValue($document, time());
-            $recomputeChangeSet = true;
+            $metadata->setFieldValue($document, $metadata->softDelete['restoredOn'], time());
+            $eventArgs->setRecompute(true);
         }
-        if ($recomputeChangeSet) {
-            $this->recomputeChangeset($eventArgs);
+    }
+
+    protected function getUsername()
+    {
+        if ($this->serviceLocator->has('user')) {
+            return $this->serviceLocator->get('user')->getUsername();
+        } else {
+            return null;
         }
     }
 }

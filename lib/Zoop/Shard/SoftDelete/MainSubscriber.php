@@ -7,15 +7,11 @@
 namespace Zoop\Shard\SoftDelete;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
-use Doctrine\ODM\MongoDB\Event\OnFlushEventArgs;
-use Doctrine\ODM\MongoDB\Events as ODMEvents;
-use Zoop\Shard\SoftDelete\Events as SoftDeleteEvents;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
-use Zoop\Shard\GetDocumentManagerTrait;
+use Zoop\Shard\AccessControl\EventArgs as AccessControlEventArgs;
 use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
-use Zoop\Shard\ODMCore\CoreEventArgs;
+use Zoop\Shard\ODMCore\UpdateEventArgs;
 
 /**
  * Emits soft delete events
@@ -27,7 +23,6 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 {
 
     use ServiceLocatorAwareTrait;
-    use GetDocumentManagerTrait;
 
     protected $softDeleter;
 
@@ -40,32 +35,29 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         return [ODMCoreEvents::UPDATE];
     }
 
-    public function update(CoreEventArgs $eventArgs)
+    public function update(UpdateEventArgs $eventArgs)
     {
         $document = $eventArgs->getDocument();
-        $documentManager = $this->getDocumentManager();
-        $unitOfWork = $documentManager->getUnitOfWork();
         $softDeleter = $this->getSoftDeleter();
+        $metadata = $eventArgs->getMetadata();
 
-        $metadata = $documentManager->getClassMetadata(get_class($document));
-        if (! isset($metadata->softDelete) || ! ($field = $metadata->softDelete['flag'])) {
+        if (! ($field = $softDeleter->getSoftDeleteField($metadata))) {
             return;
         }
 
-        $eventManager = $documentManager->getEventManager();
-        $changeSet = $unitOfWork->getDocumentChangeSet($document);
+        $changeSet = $eventArgs->getChangeSet();
+        $eventManager = $eventArgs->getEventManager();
 
         if (!isset($changeSet[$field])) {
-            if ($softDeleter->isSoftDeleted($document)) {
+            if ($softDeleter->isSoftDeleted($document, $metadata)) {
                 // Updates to softDeleted documents are not allowed. Roll them back
-                $unitOfWork->clearDocumentChangeSet(spl_object_hash($document));
+                $eventArgs->setReject(true);
 
                 // Raise softDeletedUpdateDenied
                 $eventManager->dispatchEvent(
-                    SoftDeleteEvents::SOFT_DELETED_UPDATE_DENIED,
-                    new LifecycleEventArgs($document, $documentManager)
+                    Events::SOFT_DELETED_UPDATE_DENIED,
+                    new AccessControlEventArgs($document, 'softDelete')
                 );
-                $eventArgs->setShortCircut(true);
                 return;
             } else {
                 return;
@@ -76,42 +68,42 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             // Trigger soft delete events
 
             // Raise preSoftDelete
-            $eventManager->dispatchEvent(
-                SoftDeleteEvents::PRE_SOFT_DELETE,
-                new LifecycleEventArgs($document, $documentManager)
-            );
+            $softDeleteEventArgs = new SoftDeleteEventArgs($document, $eventArgs->getMetadata(), $eventManager);
+            $eventManager->dispatchEvent(Events::PRE_SOFT_DELETE, $softDeleteEventArgs);
+            if ($softDeleteEventArgs->getReject()){
+                $eventArgs->setReject(true);
+                return;
+            }
 
-            if ($softDeleter->isSoftDeleted($document)) {
+            if ($softDeleter->isSoftDeleted($document, $metadata)) {
                 // Raise postSoftDelete
-                $eventManager->dispatchEvent(
-                    SoftDeleteEvents::POST_SOFT_DELETE,
-                    new LifecycleEventArgs($document, $documentManager)
-                );
+                $eventManager->dispatchEvent(Events::POST_SOFT_DELETE, $softDeleteEventArgs);
+                $eventArgs->setRecompute($softDeleteEventArgs->getRecompute());
             } else {
                 // Soft delete has been rolled back
-                $metadata = $documentManager->getClassMetadata(get_class($document));
-                $unitOfWork->recomputeSingleDocumentChangeSet($metadata, $document);
+                unset($changeSet[$field]);
+                $eventArgs->setRecompute(true);
             }
 
         } else {
             // Trigger restore events
 
             // Raise preRestore
-            $eventManager->dispatchEvent(
-                SoftDeleteEvents::PRE_RESTORE,
-                new LifecycleEventArgs($document, $documentManager)
-            );
+            $softDeleteEventArgs = new SoftDeleteEventArgs($document, $metadata, $eventManager);
+            $eventManager->dispatchEvent(Events::PRE_RESTORE, $softDeleteEventArgs);
+            if ($softDeleteEventArgs->getReject()){
+                $eventArgs->setReject(true);
+                return;
+            }
 
-            if (! $softDeleter->isSoftDeleted($document)) {
+            if (! $softDeleter->isSoftDeleted($document, $metadata)) {
                 // Raise postRestore
-                $eventManager->dispatchEvent(
-                    SoftDeleteEvents::POST_RESTORE,
-                    new LifecycleEventArgs($document, $documentManager)
-                );
+                $eventManager->dispatchEvent(Events::POST_RESTORE, $softDeleteEventArgs);
+                $eventArgs->setRecompute($softDeleteEventArgs->getRecompute());
             } else {
                 // Restore has been rolled back
-                $metadata = $documentManager->getClassMetadata(get_class($document));
-                $unitOfWork->recomputeSingleDocumentChangeSet($metadata, $document);
+                unset($changeSet[$field]);
+                $eventArgs->setRecompute(true);
             }
         }
     }

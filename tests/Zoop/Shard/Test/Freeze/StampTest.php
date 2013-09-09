@@ -43,6 +43,8 @@ class StampTest extends BaseTest
         $testDoc = new Stamped();
         $testDoc->setName('version1');
 
+        $metadata = $documentManager->getClassMetadata(get_class($testDoc));
+
         $documentManager->persist($testDoc);
         $documentManager->flush();
         $id = $testDoc->getId();
@@ -57,7 +59,7 @@ class StampTest extends BaseTest
         $this->assertNull($testDoc->getThawedBy());
         $this->assertNull($testDoc->getThawedOn());
 
-        $this->freezer->freeze($testDoc);
+        $this->freezer->freeze($testDoc, $metadata);
 
         $documentManager->flush();
         $documentManager->clear();
@@ -70,7 +72,7 @@ class StampTest extends BaseTest
         $this->assertNull($testDoc->getThawedBy());
         $this->assertNull($testDoc->getThawedOn());
 
-        $this->freezer->thaw($testDoc);
+        $this->freezer->thaw($testDoc, $metadata);
 
         $documentManager->flush();
         $documentManager->clear();

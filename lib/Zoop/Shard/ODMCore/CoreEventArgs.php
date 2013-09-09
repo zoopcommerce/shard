@@ -13,36 +13,33 @@ use Doctrine\Common\EventArgs as BaseEventArgs;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class CoreEventArgs extends BaseEventArgs
+abstract class CoreEventArgs extends BaseEventArgs
 {
-    const CREATE = 'create';
-    const DELETE = 'delete';
-    const UPDATE = 'update';
-
     protected $document;
 
-    protected $action;
+    protected $metadata;
 
-    protected $shortCircut = false;
+    protected $eventManager;
 
-    public function __construct($document, $action) {
-        $this->document = $document;
-        $this->action = $action;
-    }
+    protected $reject = false;
 
     public function getDocument() {
         return $this->document;
     }
 
-    public function getAction() {
-        return $this->action;
+    public function getMetadata() {
+        return $this->metadata;
     }
 
-    public function getShortCircut() {
-        return $this->shortCircut;
+    public function getEventManager() {
+        return $this->eventManager;
     }
 
-    public function setShortCircut($shortCircut) {
-        $this->shortCircut = $shortCircut;
+    public function getReject() {
+        return $this->reject;
+    }
+
+    public function setReject($reject) {
+        $this->reject = (boolean) $reject;
     }
 }

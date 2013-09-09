@@ -52,6 +52,7 @@ class AccessControlAllowTest extends BaseTest
         $eventManager->addEventListener(Events::SOFT_DELETE_DENIED, $this);
 
         $testDoc = new AccessControlled();
+        $metadata = $documentManager->getClassMetadata(get_class($testDoc));
 
         $testDoc->setName('version 1');
 
@@ -63,13 +64,13 @@ class AccessControlAllowTest extends BaseTest
         $repository = $documentManager->getRepository(get_class($testDoc));
         $testDoc = $repository->find($id);
 
-        $this->softDeleter->softDelete($testDoc);
+        $this->softDeleter->softDelete($testDoc, $metadata);
 
         $documentManager->flush();
         $documentManager->clear();
 
         $testDoc = $repository->find($id);
-        $this->assertTrue($this->softDeleter->isSoftDeleted($testDoc));
+        $this->assertTrue($this->softDeleter->isSoftDeleted($testDoc, $metadata));
         $this->assertFalse(isset($this->calls[Events::SOFT_DELETE_DENIED]));
     }
 
@@ -83,7 +84,9 @@ class AccessControlAllowTest extends BaseTest
         $eventManager->addEventListener(Events::RESTORE_DENIED, $this);
 
         $testDoc = new AccessControlled();
-        $this->softDeleter->softDelete($testDoc);
+        $metadata = $documentManager->getClassMetadata(get_class($testDoc));
+
+        $this->softDeleter->softDelete($testDoc, $metadata);
         $testDoc->setName('version 1');
 
         $documentManager->persist($testDoc);
@@ -94,13 +97,13 @@ class AccessControlAllowTest extends BaseTest
         $repository = $documentManager->getRepository(get_class($testDoc));
         $testDoc = $repository->find($id);
 
-        $this->softDeleter->restore($testDoc);
+        $this->softDeleter->restore($testDoc, $metadata);
 
         $documentManager->flush();
         $documentManager->clear();
 
         $testDoc = $repository->find($id);
-        $this->assertFalse($this->softDeleter->isSoftDeleted($testDoc));
+        $this->assertFalse($this->softDeleter->isSoftDeleted($testDoc, $metadata));
         $this->assertFalse(isset($this->calls[Events::RESTORE_DENIED]));
     }
 

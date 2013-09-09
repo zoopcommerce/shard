@@ -6,34 +6,34 @@
  */
 namespace Zoop\Shard\SoftDelete;
 
-use Zoop\Shard\DocumentManagerAwareInterface;
-use Zoop\Shard\DocumentManagerAwareTrait;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class SoftDeleter implements DocumentManagerAwareInterface
+class SoftDeleter
 {
-
-    use DocumentManagerAwareTrait;
-
-    public function isSoftDeleted($document)
+    public function getSoftDeleteField(ClassMetadata $metadata)
     {
-        $metadata = $this->documentManager->getClassMetadata(get_class($document));
+        if (isset($metadata->softDelete) && isset($metadata->softDelete['flag'])) {
+            return $metadata->softDelete['flag'];
+        }
+    }
+
+    public function isSoftDeleted($document, ClassMetadata $metadata)
+    {
         return $metadata->reflFields[$metadata->softDelete['flag']]->getValue($document);
     }
 
-    public function softDelete($document)
+    public function softDelete($document, ClassMetadata $metadata)
     {
-        $metadata = $this->documentManager->getClassMetadata(get_class($document));
         $metadata->reflFields[$metadata->softDelete['flag']]->setValue($document, true);
     }
 
-    public function restore($document)
+    public function restore($document, ClassMetadata $metadata)
     {
-        $metadata = $this->documentManager->getClassMetadata(get_class($document));
         $metadata->reflFields[$metadata->softDelete['flag']]->setValue($document, false);
     }
 }

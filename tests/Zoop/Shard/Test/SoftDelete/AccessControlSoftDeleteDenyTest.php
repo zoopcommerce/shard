@@ -44,7 +44,8 @@ class AccessControlSoftDeleteDenyTest extends BaseTest
         $eventManager->addEventListener(Events::SOFT_DELETE_DENIED, $this);
 
         $testDoc = new AccessControlled();
-
+        $metadata = $documentManager->getClassMetadata(get_class($testDoc));
+        
         $testDoc->setName('version 1');
 
         $documentManager->persist($testDoc);
@@ -55,13 +56,13 @@ class AccessControlSoftDeleteDenyTest extends BaseTest
         $repository = $documentManager->getRepository(get_class($testDoc));
         $testDoc = $repository->find($id);
 
-        $this->softDeleter->softDelete($testDoc);
+        $this->softDeleter->softDelete($testDoc, $metadata);
 
         $documentManager->flush();
         $documentManager->clear();
 
         $testDoc = $repository->find($id);
-        $this->assertFalse($this->softDeleter->isSoftDeleted($testDoc));
+        $this->assertFalse($this->softDeleter->isSoftDeleted($testDoc, $metadata));
         $this->assertTrue(isset($this->calls[Events::SOFT_DELETE_DENIED]));
     }
 

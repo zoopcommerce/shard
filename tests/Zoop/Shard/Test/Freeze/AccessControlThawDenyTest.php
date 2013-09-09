@@ -51,7 +51,9 @@ class AccessControlThawDenyTest extends BaseTest
         $eventManager->addEventListener(Events::THAW_DENIED, $this);
 
         $testDoc = new AccessControlled();
-        $this->freezer->freeze($testDoc);
+        $metadata = $documentManager->getClassMetadata(get_class($testDoc));
+
+        $this->freezer->freeze($testDoc, $metadata);
         $testDoc->setName('version 1');
 
         $documentManager->persist($testDoc);
@@ -62,13 +64,13 @@ class AccessControlThawDenyTest extends BaseTest
         $repository = $documentManager->getRepository(get_class($testDoc));
         $testDoc = $repository->find($id);
 
-        $this->freezer->thaw($testDoc);
+        $this->freezer->thaw($testDoc, $metadata);
 
         $documentManager->flush();
         $documentManager->clear();
 
         $testDoc = $repository->find($id);
-        $this->assertTrue($this->freezer->isFrozen($testDoc));
+        $this->assertTrue($this->freezer->isFrozen($testDoc, $metadata));
         $this->assertTrue(isset($this->calls[Events::THAW_DENIED]));
     }
 

@@ -43,6 +43,8 @@ class StampTest extends BaseTest
         $testDoc = new Stamped();
         $testDoc->setName('version1');
 
+        $metadata = $documentManager->getClassMetadata(get_class($testDoc));
+
         $documentManager->persist($testDoc);
         $documentManager->flush();
         $id = $testDoc->getId();
@@ -57,7 +59,7 @@ class StampTest extends BaseTest
         $this->assertNull($testDoc->getRestoredBy());
         $this->assertNull($testDoc->getRestoredOn());
 
-        $this->softDeleter->softDelete($testDoc);
+        $this->softDeleter->softDelete($testDoc, $metadata);
 
         $documentManager->flush();
         $documentManager->clear();
@@ -70,7 +72,7 @@ class StampTest extends BaseTest
         $this->assertNull($testDoc->getRestoredBy());
         $this->assertNull($testDoc->getRestoredOn());
 
-        $this->softDeleter->restore($testDoc);
+        $this->softDeleter->restore($testDoc, $metadata);
 
         $documentManager->flush();
         $documentManager->clear();

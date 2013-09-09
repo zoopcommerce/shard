@@ -6,33 +6,34 @@
  */
 namespace Zoop\Shard\Freeze;
 
-use Zoop\Shard\DocumentManagerAwareInterface;
-use Zoop\Shard\DocumentManagerAwareTrait;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Freezer implements DocumentManagerAwareInterface
+class Freezer
 {
-    use DocumentManagerAwareTrait;
-
-    public function isFrozen($document)
+    public function getFreezeField(ClassMetadata $metadata)
     {
-        $metadata = $this->documentManager->getClassMetadata(get_class($document));
+        if (isset($metadata->freeze) && isset($metadata->freeze['flag'])) {
+            return $metadata->freeze['flag'];
+        }
+    }
+
+    public function isFrozen($document, ClassMetadata $metadata)
+    {
         return $metadata->getFieldValue($document, $metadata->freeze['flag']);
     }
 
-    public function freeze($document)
+    public function freeze($document, ClassMetadata $metadata)
     {
-        $metadata = $this->documentManager->getClassMetadata(get_class($document));
         $metadata->setFieldValue($document, $metadata->freeze['flag'], true);
     }
 
-    public function thaw($document)
+    public function thaw($document, ClassMetadata $metadata)
     {
-        $metadata = $this->documentManager->getClassMetadata(get_class($document));
         $metadata->setFieldValue($document, $metadata->freeze['flag'], false);
     }
 }

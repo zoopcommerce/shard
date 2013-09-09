@@ -9,7 +9,6 @@ namespace Zoop\Shard\Validator;
 use Doctrine\Common\EventSubscriber;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
-use Zoop\Shard\GetDocumentManagerTrait;
 use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
 use Zoop\Shard\ODMCore\CoreEventArgs;
 
@@ -21,7 +20,6 @@ use Zoop\Shard\ODMCore\CoreEventArgs;
 class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 {
     use ServiceLocatorAwareTrait;
-    use GetDocumentManagerTrait;
 
     /**
      *
@@ -42,27 +40,18 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     public function validate(CoreEventArgs $eventArgs)
     {
         $document = $eventArgs->getDocument();
-        $documentManager = $this->getDocumentManager();
-        $unitOfWork = $documentManager->getUnitOfWork();
         $documentValidator = $this->getDocumentValidator();
 
-        $metadata = $documentManager->getClassMetadata(get_class($document));
-
-        $result = $documentValidator->isValid($document, $metadata);
+        $result = $documentValidator->isValid($document);
         if (! $result->getValue()) {
 
-            // Updates to invalid documents are not allowed. Roll them back
-            $unitOfWork->detach($document);
-
-            $eventManager = $documentManager->getEventManager();
-
             // Raise INVALID_OBJECT
-            $eventManager->dispatchEvent(
+            $eventArgs->getEventManager()->dispatchEvent(
                 Events::INVALID_OBJECT,
                 new EventArgs($document, $result)
             );
 
-            $eventArgs->setShortCircut(true);
+            $eventArgs->setReject(true);
         }
     }
 
