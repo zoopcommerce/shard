@@ -6,10 +6,13 @@
  */
 namespace Zoop\Shard\Stamp;
 
-use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
-use Doctrine\ODM\MongoDB\Events as ODMEvents;
+use Doctrine\Common\EventSubscriber;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Core\Events as CoreEvents;
+use Zoop\Shard\Core\CreateEventArgs;
 use Zoop\Shard\Core\MetadataSleepEventArgs;
+use Zoop\Shard\Core\UpdateEventArgs;
 
 /**
  * Adds create and update stamps during persist
@@ -17,8 +20,10 @@ use Zoop\Shard\Core\MetadataSleepEventArgs;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class MainSubscriber extends AbstractStampSubscriber
+class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 {
+    use ServiceLocatorAwareTrait;
+
     /**
      *
      * @return array
@@ -26,62 +31,68 @@ class MainSubscriber extends AbstractStampSubscriber
     public function getSubscribedEvents()
     {
         return [
-            // @codingStandardsIgnoreStart
-            ODMEvents::prePersist,
-            ODMEvents::preUpdate,
-            // @codingStandardsIgnoreEnd
+            CoreEvents::CREATE,
+            CoreEvents::UPDATE,
             CoreEvents::METADATA_SLEEP,
         ];
     }
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
+     * @param \Zoop\Shard\Stamp\CreateEventArgs $eventArgs
      */
-    public function prePersist(LifecycleEventArgs $eventArgs)
+    public function create(CreateEventArgs $eventArgs)
     {
         $document = $eventArgs->getDocument();
-        $metadata = $eventArgs->getDocumentManager()->getClassMetadata(get_class($document));
+        $metadata = $eventArgs->getMetadata();
 
         if (isset($metadata->stamp['createdBy'])) {
-            $metadata->reflFields[$metadata->stamp['createdBy']]->setValue($document, $this->getUsername());
+            $metadata->setFieldValue($document, $metadata->stamp['createdBy'], $this->getUsername());
+            $eventArgs->addRecompute($metadata->stamp['createdBy']);
         }
         if (isset($metadata->stamp['createdOn'])) {
-            $metadata->reflFields[$metadata->stamp['createdOn']]->setValue($document, time());
+            $metadata->setFieldValue($document, $metadata->stamp['createdOn'], time());
+            $eventArgs->addRecompute($metadata->stamp['createdOn']);
         }
         if (isset($metadata->stamp['updatedBy'])) {
-            $metadata->reflFields[$metadata->stamp['updatedBy']]->setValue($document, $this->getUsername());
+            $metadata->setFieldValue($document, $metadata->stamp['updatedBy'], $this->getUsername());
+            $eventArgs->addRecompute($metadata->stamp['updatedBy']);
         }
         if (isset($metadata->stamp['updatedOn'])) {
-            $metadata->reflFields[$metadata->stamp['updatedOn']]->setValue($document, time());
+            $metadata->setFieldValue($document, $metadata->stamp['updatedOn'], time());
+            $eventArgs->addRecompute($metadata->stamp['updatedOn']);
         }
     }
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
+     * @param \Zoop\Shard\Stamp\UpdateEventArgs $eventArgs
      */
-    public function preUpdate(LifecycleEventArgs $eventArgs)
+    public function update(UpdateEventArgs $eventArgs)
     {
-        $recomputeChangeSet = false;
         $document = $eventArgs->getDocument();
-        $metadata = $eventArgs->getDocumentManager()->getClassMetadata(get_class($document));
+        $metadata = $eventArgs->getMetadata();
 
         if (isset($metadata->stamp['updatedBy'])) {
-            $metadata->reflFields[$metadata->stamp['updatedBy']]->setValue($document, $this->getUsername());
-            $recomputeChangeSet = true;
+            $metadata->setFieldValue($document, $metadata->stamp['updatedBy'], $this->getUsername());
+            $eventArgs->addRecompute($metadata->stamp['updatedBy']);
         }
         if (isset($metadata->stamp['updatedOn'])) {
-            $metadata->reflFields[$metadata->stamp['updatedOn']]->setValue($document, time());
-            $recomputeChangeSet = true;
-        }
-
-        if ($recomputeChangeSet) {
-            $this->recomputeChangeset($eventArgs);
+            $metadata->setFieldValue($document, $metadata->stamp['updatedOn'], time());
+            $eventArgs->addRecompute($metadata->stamp['updatedOn']);
         }
     }
 
     public function metadataSleep(MetadataSleepEventArgs $eventArgs){
         $eventArgs->addSerialized('stamp');
+    }
+
+    protected function getUsername()
+    {
+        if ($this->serviceLocator->has('user')) {
+            return $this->serviceLocator->get('user')->getUsername();
+        } else {
+            return null;
+        }
     }
 }

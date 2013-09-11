@@ -230,10 +230,15 @@ class MainSubscriber implements EventSubscriber
         $metadata = $eventArgs->getMetadata();
 
         foreach ($eventArgs->getRecompute() as $field){
+            if (isset($changeSet[$field])) {
+                $oldValue = $changeSet[$field][0];
+            } else {
+                $oldValue = null;
+            }
             $unitOfWork->propertyChanged(
                 $document,
                 $field,
-                $changeSet[$field][0],
+                $oldValue,
                 $metadata->getFieldValue($document, $field)
             );
         }
