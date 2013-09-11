@@ -21,18 +21,6 @@ class DocumentValidator implements DocumentValidatorInterface, ServiceLocatorAwa
 
     use ServiceLocatorAwareTrait;
 
-    protected $currentDocument;
-
-    protected $currentField;
-
-    public function getCurrentDocument() {
-        return $this->currentDocument;
-    }
-
-    public function getCurrentField() {
-        return $this->currentField;
-    }
-
     /**
      *
      * @param object $document
@@ -40,12 +28,11 @@ class DocumentValidator implements DocumentValidatorInterface, ServiceLocatorAwa
      */
     public function isValid($document, ClassMetadata $metadata, array $changeSet = null)
     {
-        if (! isset($metadata->validator)) {
-            return new Result(['value' => true]);
-        }
-
         $result = new DocumentValidatorResult(['value' => true]);
-        $this->currentDocument = $document;
+
+        if (! isset($metadata->validator)) {
+            return $result;
+        }
 
         // Field level validators
         if (isset($metadata->validator['fields'])) {
@@ -56,35 +43,20 @@ class DocumentValidator implements DocumentValidatorInterface, ServiceLocatorAwa
                     continue;
                 }
 
-                $this->currentField = $field;
-
-                $validator = $this->getValidator($validatorDefinition);
-                $value = $metadata->getFieldValue($document, $field);
-
-                $validatorResult = $validator->isValid($value);
-
-                $result->addFieldResult($field, $validatorResult);
-                foreach ($validatorResult->getMessages() as $message) {
-                    $result->addMessage($field . ': ' . $message);
-                }
-                if (! $validatorResult->getValue()) {
-                    $result->setValue(false);
-                }
+                $result->addFieldResult(
+                    $field,
+                    $this->getValidator($validatorDefinition)->isValid(
+                        $metadata->getFieldValue($document, $field)
+                    )
+                );
             }
         }
 
         // Document level validators
         if (isset($metadata->validator['document'])) {
-            $validator = $this->getValidator($metadata->validator['document']);
-            $validatorResult = $validator->isValid($document);
-
-            $result->addClassResult($validatorResult);
-            foreach ($validatorResult->getMessages() as $message) {
-                $result->addMessage('document: ' . $message);
-            }
-            if (! $validatorResult->getValue()) {
-                $result->setValue(false);
-            }
+            $result->addClassResult(
+                $this->getValidator($metadata->validator['document'])->isValid($document)
+            );
         }
 
         return $result;
@@ -107,15 +79,6 @@ class DocumentValidator implements DocumentValidatorInterface, ServiceLocatorAwa
             $options['validators'] = $validators;
         }
 
-        if ($this->serviceLocator->has($class)) {
-            $instance = $this->serviceLocator->get($class);
-            foreach ($options as $key => $value) {
-                $setter = 'set' . ucfirst($key);
-                $instance->$setter($value);
-            }
-            return $instance;
-        } else {
-            return new $class($options);
-        }
+        return new $class($options);
     }
 }

@@ -67,7 +67,7 @@ class SerializerCustomTypeSerializerTest extends BaseTest
 
         $flavour = $this->unserializer->fromArray(
             $data,
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\Flavour'
+            $this->documentManager->getClassMetadata('Zoop\Shard\Test\Serializer\TestAsset\Document\Flavour')
         );
 
         $this->assertEquals('cherry', $flavour->getName());

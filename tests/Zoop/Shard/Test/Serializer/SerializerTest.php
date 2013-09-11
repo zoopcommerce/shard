@@ -31,7 +31,6 @@ class SerializerTest extends BaseTest
         );
 
         $this->serializer = $manifest->getServiceManager()->get('serializer');
-        $this->unserializer = $manifest->getServiceManager()->get('unserializer');
     }
 
     public function testSerializer()
@@ -114,52 +113,5 @@ class SerializerTest extends BaseTest
         $array = $this->serializer->toArray($testDoc);
 
         $this->assertEquals($correct, $array);
-    }
-
-    public function testUnserializer()
-    {
-        $data = array(
-            'id' => 1234567890,
-            'username' => 'superdweebie',
-            'password' => 'testIgnore',
-            'location' => 'here',
-            'groups' => array(
-                array('name' => 'groupA'),
-                array('name' => 'groupB'),
-            ),
-            'profile' => array(
-                'firstname' => 'Tim',
-                'lastname' => 'Roediger'
-            ),
-        );
-
-        $user = $this->unserializer->fromArray(
-            $data,
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
-        );
-
-        $this->assertTrue($user instanceof User);
-        $this->assertEquals(1234567890, $user->getId());
-        $this->assertEquals('superdweebie', $user->getUsername());
-        $this->assertEquals(null, $user->getPassword());
-        $this->assertEquals('here', $user->location());
-        $this->assertEquals('groupA', $user->getGroups()[0]->getName());
-        $this->assertEquals('groupB', $user->getGroups()[1]->getName());
-        $this->assertEquals('Tim', $user->getProfile()->getFirstname());
-        $this->assertEquals('Roediger', $user->getProfile()->getLastname());
-    }
-
-    public function testUnserializeClassName()
-    {
-        $data = array(
-            '_className' => 'Zoop\Shard\Test\Serializer\TestAsset\Document\ClassName',
-            'id' => null,
-            'name' => 'superdweebie',
-        );
-
-        $testDoc = $this->unserializer->fromArray($data);
-
-        $this->assertTrue($testDoc instanceof ClassName);
-        $this->assertEquals('superdweebie', $testDoc->getName());
     }
 }

@@ -27,8 +27,8 @@ class UnserializerFactory implements FactoryInterface
         $extension = $serviceLocator->get('extension.serializer');
         $instance = new Unserializer;
 
-        $instance->setClassNameField($extension->getClassNameField());
         $instance->setTypeSerializers($extension->getTypeSerializers());
+        $instance->setEventManager($serviceLocator->get('eventmanager'));
 
         return $instance;
     }

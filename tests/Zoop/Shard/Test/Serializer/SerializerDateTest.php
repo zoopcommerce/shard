@@ -100,7 +100,7 @@ class SerializerDateTest extends BaseTest
 
         $birthday = $this->unserializer->fromArray(
             $data,
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\Birthday'
+            $this->documentManager->getClassMetadata('Zoop\Shard\Test\Serializer\TestAsset\Document\Birthday')
         );
 
         $this->assertTrue($birthday instanceof Birthday);

@@ -54,10 +54,10 @@ class UnserializeModeTest extends BaseTest
 
         $updated = $this->unserializer->fromArray(
             [
-                '_className' => 'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
                 'id' => $id,
                 'location' => 'there'
-            ]
+            ],
+            $documentManager->getClassMetadata('Zoop\Shard\Test\Serializer\TestAsset\Document\User')
         );
 
         $this->assertEquals('there', $updated->location());
@@ -88,10 +88,10 @@ class UnserializeModeTest extends BaseTest
 
         $updated = $this->unserializer->fromArray(
             [
-                '_className' => 'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
                 'id' => $id,
                 'location' => 'there'
             ],
+            $documentManager->getClassMetadata('Zoop\Shard\Test\Serializer\TestAsset\Document\User'),
             null,
             Unserializer::UNSERIALIZE_UPDATE
         );

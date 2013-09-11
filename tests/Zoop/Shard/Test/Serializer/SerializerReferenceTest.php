@@ -84,7 +84,10 @@ class SerializerReferenceTest extends BaseTest
         $this->assertArrayHasKey('cakes', $array['flavour']);
 
         $array['ingredients'][3] = ['name' => 'coconut'];
-        $cake = $this->unserializer->fromArray($array);
+        $cake = $this->unserializer->fromArray(
+            $array,
+            $documentManager->getClassMetadata('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager')
+        );
 
         $this->assertInstanceOf('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager', $cake);
         $this->assertEquals('chocolate', $cake->getFlavour()->getName());
@@ -136,7 +139,10 @@ class SerializerReferenceTest extends BaseTest
 
 
         $array['ingredients'][3] = ['name' => 'coconut'];
-        $cake = $this->unserializer->fromArray($array);
+        $cake = $this->unserializer->fromArray(
+            $array,
+            $documentManager->getClassMetadata('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeRefLazy')
+        );
 
         $this->assertInstanceOf('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeRefLazy', $cake);
         $this->assertEquals('carrot', $cake->getFlavour()->getName());
@@ -299,7 +305,10 @@ class SerializerReferenceTest extends BaseTest
         $this->assertEquals('chocolate', $array['flavour']['name']);
 
         $array['ingredients'][3] = ['name' => 'coconut'];
-        $cake = $this->unserializer->fromArray($array);
+        $cake = $this->unserializer->fromArray(
+            $array,
+            $documentManager->getClassMetadata('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEagerSimpleReference')
+        );
 
         $this->assertInstanceOf('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEagerSimpleReference', $cake);
         $this->assertEquals('chocolate', $cake->getFlavour()->getName());

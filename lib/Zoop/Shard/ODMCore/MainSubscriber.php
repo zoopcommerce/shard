@@ -12,20 +12,27 @@ use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\ODM\MongoDB\Event\LoadClassMetadataEventArgs;
 use Doctrine\ODM\MongoDB\Event\OnFlushEventArgs;
 use Doctrine\ODM\MongoDB\Events as ODMEvents;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Core\AbstractChangeEventArgs;
 use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Core\LoadMetadataEventArgs;
 use Zoop\Shard\Core\CreateEventArgs;
 use Zoop\Shard\Core\DeleteEventArgs;
 use Zoop\Shard\Core\UpdateEventArgs;
+use Zoop\Shard\Core\GetMetadataEventArgs;
+use Zoop\Shard\Core\GetObjectEventArgs;
+use Zoop\Shard\GetDocumentManagerTrait;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class MainSubscriber implements EventSubscriber
+class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 {
+    use ServiceLocatorAwareTrait;
+    use GetDocumentManagerTrait;
 
     /**
      *
@@ -36,8 +43,10 @@ class MainSubscriber implements EventSubscriber
         return [
             // @codingStandardsIgnoreStart
             ODMEvents::loadClassMetadata,
-            ODMEvents::onFlush
+            ODMEvents::onFlush,
             // @codingStandardsIgnoreEnd
+            CoreEvents::GET_OBJECT,
+            CoreEvents::GET_METADATA
         ];
     }
 
@@ -90,6 +99,20 @@ class MainSubscriber implements EventSubscriber
         foreach ($unitOfWork->getScheduledDocumentDeletions() as $document) {
             $this->delete($document, $documentManager);
         }
+    }
+
+    public function getObject(GetObjectEventArgs $eventArgs)
+    {
+        $eventArgs->setObject(
+            $this->getDocumentManager()->getRepository($eventArgs->getClass())->find($eventArgs->getId())
+        );
+    }
+
+    public function getMetadata(GetMetadataEventArgs $eventArgs)
+    {
+        $eventArgs->setMetadata(
+            $this->getDocumentManager()->getClassMetadata($eventArgs->getClass())
+        );
     }
 
     protected function create($document, $documentManager)

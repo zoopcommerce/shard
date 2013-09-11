@@ -7,9 +7,10 @@
 namespace Zoop\Shard\Serializer;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
-use Zoop\Shard\DocumentManagerAwareInterface;
-use Zoop\Shard\DocumentManagerAwareTrait;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Zoop\Shard\Core\Events as CoreEvents;
+use Zoop\Shard\Core\GetMetadataEventArgs;
+use Zoop\Shard\Core\GetObjectEventArgs;
 use Zoop\Shard\Exception;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
@@ -20,10 +21,9 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Unserializer implements ServiceLocatorAwareInterface, DocumentManagerAwareInterface
+class Unserializer implements ServiceLocatorAwareInterface
 {
     use ServiceLocatorAwareTrait;
-    use DocumentManagerAwareTrait;
 
     const UNSERIALIZE_UPDATE = 'unserialize_update';
     const UNSERIALIZE_PATCH = 'unserliaze_patch';
@@ -31,39 +31,38 @@ class Unserializer implements ServiceLocatorAwareInterface, DocumentManagerAware
     /** @var array */
     protected $typeSerializers = [];
 
-    protected $classNameField;
+    protected $eventManager;
 
     public function setTypeSerializers(array $typeSerializers)
     {
         $this->typeSerializers = $typeSerializers;
     }
 
-    public function setClassNameField($classNameField)
-    {
-        $this->classNameField = (string) $classNameField;
+    public function getEventManager() {
+        return $this->eventManager;
     }
 
-    public function fieldListForUnserialize(ClassMetadata $classMetadata)
+    public function setEventManager($eventManager) {
+        $this->eventManager = $eventManager;
+    }
+
+    public function fieldListForUnserialize(ClassMetadata $metadata, $includeId = true)
     {
         $return = [];
 
-        foreach ($classMetadata->fieldMappings as $field => $mapping) {
-            if ($this->isUnserializableField($field, $classMetadata)) {
-                $return[] = $field;
+        foreach ($metadata->getFieldNames() as $field) {
+            if (isset($metadata->serializer['fields'][$field]['unserializeIgnore']) &&
+                $metadata->serializer['fields'][$field]['unserializeIgnore']
+            ) {
+                continue;
             }
+            $return[] = $field;
         }
 
+        if (!$includeId) {
+            unset($return[$metadata->getIdentifier()]);
+        }
         return $return;
-    }
-
-    public function isUnserializableField($field, ClassMetadata $classMetadata)
-    {
-        if (isset($classMetadata->serializer['fields'][$field]['unserializeIgnore']) &&
-            $classMetadata->serializer['fields'][$field]['unserializeIgnore']
-        ) {
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -76,11 +75,11 @@ class Unserializer implements ServiceLocatorAwareInterface, DocumentManagerAware
      */
     public function fromArray(
         array $data,
-        $className = null,
-        $mode = self::UNSERIALIZE_PATCH,
-        $document = null
+        ClassMetadata $metadata,
+        $document = null,
+        $mode = self::UNSERIALIZE_PATCH
     ) {
-        return $this->unserialize($data, $className, $mode, $document);
+        return $this->unserialize($data, $metadata, $document, $mode);
     }
 
     /**
@@ -94,29 +93,13 @@ class Unserializer implements ServiceLocatorAwareInterface, DocumentManagerAware
      */
     public function fromJson(
         $data,
-        $className = null,
-        $mode = self::UNSERIALIZE_PATCH,
-        $document = null
+        ClassMetadata $metadata,
+        $document = null,
+        $mode = self::UNSERIALIZE_PATCH
     ) {
-        return $this->unserialize(json_decode($data, true), $className, $mode, $document);
+        return $this->unserialize(json_decode($data, true), $metadata, $document, $mode);
     }
 
-    protected function removeClassNameAndDiscriminatorFromArray(
-        array $array,
-        $classNameField,
-        $discriminatorField = null
-    ) {
-        if (isset($array[$classNameField])) {
-            unset($array[$classNameField]);
-        }
-
-        if (isset($array[$discriminatorField])) {
-            unset($array[$discriminatorField]);
-        }
-
-        return $array;
-    }
-    
     /**
      *
      * @param array $data
@@ -128,215 +111,161 @@ class Unserializer implements ServiceLocatorAwareInterface, DocumentManagerAware
      */
     protected function unserialize(
         array $data,
-        $className = null,
-        $mode = self::UNSERIALIZE_PATCH,
+        ClassMetadata $metadata,
         $document = null,
-        $discriminatorField = null,
-        $discriminatorMap = null
+        $mode = self::UNSERIALIZE_PATCH
     ) {
 
-        $documentManager = $this->documentManager;
+        $eventManager = $this->eventManager;
 
-        if (isset($discriminatorField) && isset($data[$discriminatorField])) {
-            $metadata = $this->documentManager
-                ->getClassMetadata($discriminatorMap[$data[$discriminatorField]]);
-        } else {
-            if (! isset($className)) {
-                $className = $data[$this->classNameField];
-            }
-
-            if (! isset($className) || ! class_exists($className)) {
-                throw new Exception\ClassNotFoundException(sprintf('ClassName %s could not be loaded', $className));
-            }
-
-            $metadata = $this->documentManager->getClassMetadata($className);
-
-            // Check for discrimnator and discriminator field in data
-            if (isset($metadata->discriminatorField) && isset($data[$metadata->discriminatorField['fieldName']])) {
-                $metadata = $this->documentManager
-                    ->getClassMetadata($metadata->discriminatorMap[$data[$metadata->discriminatorField['fieldName']]]);
-            }
-        }
+        // Check for discrimnator and discriminator field in data
+        $metadata = $this->resolveMetadata($data, null, $metadata);
 
         // Check for reference
         if (isset($data['$ref'])) {
             $pieces = explode('/', $data['$ref']);
-            $id = $pieces[count($pieces) - 1];
-            return $documentManager->getReference($className, $id);
+            $getObjectEventArgs = new GetObjectEventArgs($pieces[count($pieces) - 1], $metadata->name, $eventManager);
+            $eventManager->dispatchEvent(CoreEvents::GET_OBJECT, $getObjectEventArgs);
+            return $getObjectEventArgs->getObject();
         }
 
-        // Attempt to load prexisting document from db
+        // Attempt to load prexisting object
         if (! isset($document) && isset($data[$metadata->identifier])) {
-            $document = $documentManager
-                ->createQueryBuilder()
-                ->find($metadata->name)
-                ->field($metadata->identifier)->equals($data[$metadata->identifier])
-                ->getQuery()
-                ->getSingleResult();
+            $getObjectEventArgs = new GetObjectEventArgs($data[$metadata->identifier], $metadata->name, $eventManager);
+            $eventManager->dispatchEvent(CoreEvents::GET_OBJECT, $getObjectEventArgs);
+            $document = $getObjectEventArgs->getObject();
         }
-        if (isset($document)) {
-            $newInstance = false;
-        } else {
-            $newInstance = true;
+
+        $newInstance = false;
+        if (! isset($document)) {
             $document = $metadata->newInstance();
+            $newInstance = true;
         }
 
-        foreach ($this->fieldListForUnserialize($metadata) as $field) {
-
-            if ($field == $metadata->identifier && !$newInstance) {
-                continue;
-            }
-
-            $mapping = $metadata->fieldMappings[$field];
-            unset($value);
-
-            switch (true){
-                case isset($mapping['embedded']) && $mapping['type'] == 'one' && isset($data[$field]):
-                    $value = $this->unserialize(
-                        $data[$field],
-                        $mapping['targetDocument'],
-                        $mode,
-                        $metadata->reflFields[$field]->getValue($document)
-                    );
-                    break;
-                case isset($mapping['embedded']) && $mapping['type'] == 'many':
-                    $newArray = [];
-                    if (isset($data[$field])) {
-                        if (! ($embeddedCollection = $metadata->reflFields[$field]->getValue($document))) {
-                            $embeddedCollection = new ArrayCollection;
-                        }
-                        foreach ($data[$field] as $index => $embeddedData) {
-                            $embeddedCollection[$index] = $this->unserialize(
-                                $embeddedData,
-                                isset($mapping['targetDocument']) ? $mapping['targetDocument'] : null,
-                                $mode,
-                                $embeddedCollection[$index],
-                                isset($mapping['discriminatorField']) ? $mapping['discriminatorField'] : null,
-                                isset($mapping['discriminatorMap']) ? $mapping['discriminatorMap'] : null
-                            );
-                        }
-                        $value = $embeddedCollection;
-                        break;
-                    }
-                    switch ($mode) {
-                        case self::UNSERIALIZE_PATCH:
-                            if ($metadata->reflFields[$field]->getValue($document) == null) {
-                                $value = new ArrayCollection([]);
-                            }
-                            break;
-                        case self::UNSERIALIZE_UPDATE:
-                            if ($embeddedCollection = $metadata->reflFields[$field]->getValue($document)) {
-                                foreach ($embeddedCollection as $key => $item) {
-                                    $embeddedCollection->remove($key);
-                                }
-                                $value = $embeddedCollection;
-                            } else {
-                                $value = new ArrayCollection([]);
-                            }
-                            break;
-                    }
-                    break;
-                case isset($mapping['reference']) && $mapping['type'] == 'one' && isset($data[$field]):
-                    if (isset($data[$field]['$ref'])) {
-                        $pieces = explode('/', $data[$field]['$ref']);
-                        $id = $pieces[count($pieces) - 1];
-                        $value = $documentManager->getReference($mapping['targetDocument'], $id);
-                    } elseif (is_array($data[$field])) {
-                        $value = $this->unserialize(
-                            $data[$field],
-                            isset($mapping['targetDocument']) ? $mapping['targetDocument'] : null,
-                            $mode,
-                            null,
-                            isset($mapping['discriminatorField']) ? $mapping['discriminatorField'] : null,
-                            isset($mapping['discriminatorMap']) ? $mapping['discriminatorMap'] : null
-                        );
-                    } else {
-                        $value = $documentManager->getReference($mapping['targetDocument'], $data[$field]);
-                    }
-                    break;
-                case isset($mapping['reference']) && $mapping['type'] == 'many':
-                    if (isset($data[$field])) {
-                        if (! ($referenceCollection = $metadata->reflFields[$field]->getValue($document))) {
-                            $referenceCollection = new ArrayCollection;
-                        }
-                        foreach ($data[$field] as $index => $referenceData) {
-
-                            //extract id for a reference, otherwise, unserialize array
-                            unset($id);
-                            if (is_array($referenceData)) {
-                                if (isset($referenceData['$ref'])) {
-                                    $pieces = explode('/', $referenceData['$ref']);
-                                    $id = $pieces[count($pieces) - 1];
-                                } else {
-                                    $referenceData = $this->removeClassNameAndDiscriminatorFromArray(
-                                        $referenceData,
-                                        $this->classNameField
-                                    );
-                                    $identifier = $documentManager
-                                        ->getClassMetadata($mapping['targetDocument'])
-                                        ->identifier;
-
-                                    if (count($referenceData) == 1 && isset($referenceData[$identifier])) {
-                                        $id = $referenceData[$identifier];
-                                    }
-                                }
-                            } else {
-                                $id = $referenceData;
-                            }
-
-                            if (isset($id)) {
-                                if (method_exists($referenceCollection, 'getMongoData') && $id !== $referenceCollection->getMongoData()[$index]['$id']) {
-                                    $referenceCollection[$index] =
-                                        $documentManager->getReference($mapping['targetDocument'], $id);
-                                }
-                            } else {
-                                $referenceCollection[$index] = $this->unserialize(
-                                    $referenceData,
-                                    $mapping['targetDocument'],
-                                    $mode,
-                                    $referenceCollection[$index]
-                                );
-                            }
-                        }
-                        $value = $referenceCollection;
-                        break;
-                    }
-                    switch ($mode) {
-                        case self::UNSERIALIZE_PATCH:
-                            if ($metadata->reflFields[$field]->getValue($document) == null) {
-                                $value = new ArrayCollection([]);
-                            }
-                            break;
-                        case self::UNSERIALIZE_UPDATE:
-                            if ($referenceCollection = $metadata->reflFields[$field]->getValue($document)) {
-                                foreach ($referenceCollection as $key => $item) {
-                                    $referenceCollection->remove($key);
-                                }
-                                $value = $referenceCollection;
-                            } else {
-                                $value = new ArrayCollection([]);
-                            }
-                            break;
-                    }
-                    break;
-                case array_key_exists($mapping['type'], $this->typeSerializers) && isset($data[$field]):
-                    $value = $this->getTypeSerializer($mapping['type'])->unserialize($data[$field]);
-                    break;
-                case $mapping['type'] == 'float' && isset($data[$field]) && is_integer($data[$field]):
-                    $value = (float) $data[$field];
-                    break;
-                case isset($data[$field]):
-                    $value = $data[$field];
-                    break;
-            }
-            if (isset($value)) {
-                $metadata->reflFields[$field]->setValue($document, $value);
+        foreach ($this->fieldListForUnserialize($metadata, $newInstance) as $field) {
+            if ($value = $this->unserializeField($data, $metadata, $document, $field, $mode)) {
+                $metadata->setFieldValue($document, $field, $value);
             } elseif ($mode == self::UNSERIALIZE_UPDATE) {
-                $metadata->reflFields[$field]->setValue($document, null);
+                $metadata->setFieldValue($document, $field, null);
             }
         }
 
         return $document;
+    }
+
+    protected function unserializeField($data, ClassMetadata $metadata, $document, $field, $mode)
+    {
+        if ($metadata->hasAssociation($field) && $metadata->isSingleValuedAssociation($field)) {
+            return $this->unserializeSingleObject($data, $metadata, $document, $field, $mode);
+        } else if ($metadata->hasAssociation($field)) {
+            return $this->unserializeCollection($data, $metadata, $document, $field, $mode);
+        } else {
+            return $this->unserializeSingleValue($data, $metadata, $field);
+        }
+    }
+
+    protected function unserializeSingleObject($data, ClassMetadata $metadata, $document, $field, $mode)
+    {
+        if (!isset($data[$field])) {
+            return null;
+        }
+
+        $eventManager = $this->eventManager;
+        $targetClass = $metadata->getAssociationTargetClass($field);
+
+        if (isset($data[$field]['$ref'])) {
+            $pieces = explode('/', $data[$field]['$ref']);
+            $getObjectEventArgs = new GetObjectEventArgs($pieces[count($pieces) - 1], $targetClass, $eventManager);
+            $eventManager->dispatchEvent(CoreEvents::GET_OBJECT, $getObjectEventArgs);
+            return $getObjectEventArgs->getObject();
+        }
+        if (is_string($data[$field])) {
+            $getObjectEventArgs = new GetObjectEventArgs($data[$field], $targetClass, $eventManager);
+            $eventManager->dispatchEvent(CoreEvents::GET_OBJECT, $getObjectEventArgs);
+            return $getObjectEventArgs->getObject();
+        }
+
+        $targetMetadata = $this->resolveMetadata($data[$field], $metadata->fieldMappings[$field]);
+
+        return $this->unserialize(
+            $data[$field],
+            $targetMetadata,
+            $metadata->getFieldValue($document, $field),
+            $mode
+        );
+    }
+
+    protected function unserializeCollection($data, ClassMetadata $metadata, $document, $field, $mode)
+    {
+        if (! ($collection = $metadata->getFieldValue($document, $field))) {
+            $collection = new ArrayCollection;
+        }
+
+        if (isset($data[$field])) {
+            $targetClass = $metadata->getAssociationTargetClass($field);
+            $mapping = $metadata->fieldMappings[$field];
+            $eventManager = $this->eventManager;
+
+            if (!isset($mapping->discriminatorField)) {
+                $getMetadataEventArgs = new GetMetadataEventArgs($targetClass, $eventManager);
+                $eventManager->dispatchEvent(CoreEvents::GET_METADATA, $getMetadataEventArgs);
+                $targetMetadata = $getMetadataEventArgs->getMetadata();
+            }
+
+            foreach ($data[$field] as $index => $dataItem) {
+                if (isset($mapping->discriminatorField) && isset($data[$mapping->discriminatorField['fieldName']])) {
+                    $targetClass = $mapping->discriminatorMap[$data[$mapping->discriminatorField['fieldName']]];
+                    $getMetadataEventArgs = new GetMetadataEventArgs($targetClass, $eventManager);
+                    $eventManager->dispatchEvent(CoreEvents::GET_METADATA, $getMetadataEventArgs);
+                    $targetMetadata = $getMetadataEventArgs->getMetadata();
+                }
+                $collection[$index] = $this->unserialize($dataItem, $targetMetadata, $collection[$index], $mode);
+            }
+        } else if ($mode == self::UNSERIALIZE_UPDATE) {
+            foreach ($collection->getKeys() as $key) {
+                $collection->remove($key);
+            }
+        }
+
+        return $collection;
+    }
+
+    protected function unserializeSingleValue($data, ClassMetadata $metadata, $field)
+    {
+        if (!isset($data[$field])) {
+            return null;
+        }
+
+        $type = $metadata->getTypeOfField($field);
+
+        if (isset($this->typeSerializers[$type])) {
+            return $this->getTypeSerializer($type)->unserialize($data[$field]);
+        }
+        if ($type == 'float' && is_integer($data[$field])) {
+            return (float) $data[$field];
+        }
+
+        return $data[$field];
+    }
+
+    protected function resolveMetadata($data, $mapping = null, $metadata = null)
+    {
+        $eventManager = $this->eventManager;
+
+        if (isset($metadata->discriminatorField) && isset($data[$metadata->discriminatorField['fieldName']])) {
+            $targetClass = $metadata->discriminatorMap[$data[$metadata->discriminatorField['fieldName']]];
+        } else if (isset($mapping['discriminatorField']) && isset($data[$mapping['discriminatorField']['fieldName']])) {
+            $targetClass = $mapping['discriminatorMap'][$data[$mapping['discriminatorField']['fieldName']]];
+        } else if (isset($mapping['targetDocument'])) {
+            $targetClass = $mapping['targetDocument'];
+        }
+
+        if (isset($targetClass)) {
+            $getMetadataEventArgs = new GetMetadataEventArgs($targetClass, $eventManager);
+            $eventManager->dispatchEvent(CoreEvents::GET_METADATA, $getMetadataEventArgs);
+            return $getMetadataEventArgs->getMetadata();
+        }
+        return $metadata;
     }
 
     protected function getTypeSerializer($type)
