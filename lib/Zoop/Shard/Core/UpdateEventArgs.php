@@ -4,14 +4,13 @@
  * @package    Zoop
  * @license    MIT
  */
-namespace Zoop\Shard\Annotation;
+namespace Zoop\Shard\Core;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-final class Events
+class UpdateEventArgs extends AbstractChangeEventArgs
 {
-    const POST_BUILD_METADATA = 'postBuildMetadata';
 }

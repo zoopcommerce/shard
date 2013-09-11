@@ -21,7 +21,7 @@ trait PasswordTrait
 {
     /**
      * @ODM\String
-     * @Shard\Serializer\Ignore("ignore_when_serializing"))
+     * @Shard\Serializer\Ignore
      * @Shard\Validator\Chain({
      *     @Shard\Validator\Required,
      *     @Shard\Validator\Password

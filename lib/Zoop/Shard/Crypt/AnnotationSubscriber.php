@@ -9,7 +9,6 @@ namespace Zoop\Shard\Crypt;
 use Doctrine\Common\EventSubscriber;
 use Zoop\Shard\Annotation\Annotations as Shard;
 use Zoop\Shard\Annotation\AnnotationEventArgs;
-use Zoop\Shard\Exception;
 
 /**
  * Listener hashes fields marked with CryptHash annotation

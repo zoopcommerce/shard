@@ -7,6 +7,7 @@
 namespace Zoop\Shard\ODMCore;
 
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadata as DoctrineClassMetadata;
+use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  * Extends ClassMetadata to support Shard metadata
@@ -34,8 +35,6 @@ class ClassMetadata extends DoctrineClassMetadata
      */
     public function __sleep()
     {
-        $serialized = parent::__sleep();
-
         $eventArgs = new MetadataSleepEventArgs($this, parent::__sleep(), $this->eventManager);
         $this->eventManager->dispatch(Events::METADATA_SLEEP, $eventArgs);
 

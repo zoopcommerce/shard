@@ -8,25 +8,19 @@ namespace Zoop\Shard\Freeze;
 
 use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-use Zoop\Shard\ODMCore\CoreEventArgs;
+use Zoop\Shard\Core\AbstractEventArgs;
+use Zoop\Shard\Core\RejectInterface;
+use Zoop\Shard\Core\RejectTrait;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class FreezerEventArgs extends CoreEventArgs
+class FreezerEventArgs extends AbstractEventArgs implements RejectInterface
 {
-    protected $recompute = false;
-
-    public function getRecompute() {
-        return $this->recompute;
-    }
-
-    public function setRecompute($recompute) {
-        $this->recompute = $recompute;
-    }
-
+    use RejectTrait;
+    
     public function __construct($document, ClassMetadata $metadata, EventManager $eventManager) {
         $this->document = $document;
         $this->metadata = $metadata;

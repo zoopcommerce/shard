@@ -48,7 +48,6 @@ class Extension extends AbstractExtension
      * @var array
      */
     protected $dependencies = [
-        'extension.annotation' => true,
-        'extension.odmcore'    => true,
+        'extension.annotation' => true
     ];
 }

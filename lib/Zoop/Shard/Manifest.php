@@ -28,6 +28,7 @@ class Manifest extends AbstractExtension
         'factories' => [
             'extension.accessControl'   => 'Zoop\Shard\AccessControl\ExtensionFactory',
             'extension.annotation'      => 'Zoop\Shard\Annotation\ExtensionFactory',
+            'extension.core'            => 'Zoop\Shard\Core\ExtensionFactory',
             'extension.crypt'           => 'Zoop\Shard\Crypt\ExtensionFactory',
             'extension.freeze'          => 'Zoop\Shard\Freeze\ExtensionFactory',
             'extension.generator'       => 'Zoop\Shard\Generator\ExtensionFactory',
@@ -43,6 +44,10 @@ class Manifest extends AbstractExtension
             'extension.zone'            => 'Zoop\Shard\Zone\ExtensionFactory',
             'subscriber.lazySubscriber' => 'Zoop\Shard\LazySubscriberFactory',
         ],
+    ];
+
+    protected $dependencies = [
+        'extension.odmcore' => true
     ];
 
     /**
@@ -129,9 +134,16 @@ class Manifest extends AbstractExtension
         }
         $serviceManager->setService('manifest', $this);
 
+        //initalize extensions
         foreach ($this->extensionConfigs as $name => $extensionConfig) {
             if (!$extensionConfig) {
                 unset($this->extensionConfigs[$name]);
+                continue;
+            }
+            $this->expandExtensionConfig($name);
+        }
+        foreach ($this->dependencies as $name => $extensionConfig) {
+            if (!$extensionConfig) {
                 continue;
             }
             $this->expandExtensionConfig($name);

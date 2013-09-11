@@ -9,9 +9,9 @@ namespace Zoop\Shard\Validator;
 use Doctrine\Common\EventSubscriber;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
-use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
-use Zoop\Shard\ODMCore\CoreEventArgs;
-use Zoop\Shard\ODMCore\MetadataSleepEventArgs;
+use Zoop\Shard\Core\Events as CoreEvents;
+use Zoop\Shard\Core\AbstractChangeEventArgs;
+use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  *
@@ -35,18 +35,18 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     public function getSubscribedEvents()
     {
         $events = [
-            ODMCoreEvents::VALIDATE,
-            ODMCoreEvents::METADATA_SLEEP,
+            CoreEvents::VALIDATE,
+            CoreEvents::METADATA_SLEEP,
         ];
         return $events;
     }
 
-    public function validate(CoreEventArgs $eventArgs)
+    public function validate(AbstractChangeEventArgs $eventArgs)
     {
         $document = $eventArgs->getDocument();
         $documentValidator = $this->getDocumentValidator();
 
-        $result = $documentValidator->isValid($document);
+        $result = $documentValidator->isValid($document, $eventArgs->getMetadata(), $eventArgs->getChangeSet());
         if (! $result->getValue()) {
 
             // Raise INVALID_OBJECT

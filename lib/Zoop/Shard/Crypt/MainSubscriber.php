@@ -11,10 +11,9 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Crypt\BlockCipher\BlockCipherServiceInterface;
 use Zoop\Shard\Crypt\Hash\HashServiceInterface;
-use Zoop\Shard\GetDocumentManagerTrait;
-use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
-use Zoop\Shard\ODMCore\CoreEventArgs;
-use Zoop\Shard\ODMCore\MetadataSleepEventArgs;
+use Zoop\Shard\Core\Events as CoreEvents;
+use Zoop\Shard\Core\AbstractChangeEventArgs;
+use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  * Listener hashes fields marked with CryptHash annotation
@@ -26,7 +25,6 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 {
 
     use ServiceLocatorAwareTrait;
-    use GetDocumentManagerTrait;
 
     protected $hashHelper;
 
@@ -38,8 +36,8 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     public function getSubscribedEvents()
     {
         return [
-            ODMCoreEvents::CRYPT,
-            ODMCoreEvents::METADATA_SLEEP,
+            CoreEvents::CRYPT,
+            CoreEvents::METADATA_SLEEP,
         ];
     }
 
@@ -59,73 +57,63 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         return $this->blockCipherHelper;
     }
 
-    public function crypt(CoreEventArgs $eventArgs)
+    public function crypt(AbstractChangeEventArgs $eventArgs)
     {
-        $documentManager = $this->getDocumentManager();
-        $document = $eventArgs->getDocument();
-        $metadata = $documentManager->getClassMetadata(get_class($document));
-
-        $this->hashFields($metadata, $document);
-        $this->blockCipherFields($metadata, $document);
+        $this->hashFields($eventArgs);
+        $this->blockCipherFields($eventArgs);
     }
 
-    protected function hashFields($metadata, $document)
+    protected function hashFields(AbstractChangeEventArgs $eventArgs)
     {
+        $metadata = $eventArgs->getMetadata();
+
         if (! isset($metadata->crypt['hash'])){
             return;
         }
 
+        $document = $eventArgs->getDocument();
+        $changeSet = $eventArgs->getChangeSet();
+
         foreach ($metadata->crypt['hash'] as $field => $setting){
-
-            $changeSet = $this->getDocumentManager()
-                ->getUnitOfWork()
-                ->getDocumentChangeSet($document);
-
             if ($this->hasChanged($field, $changeSet)) {
                 $service = $this->serviceLocator->get($setting['service']);
                 if (! $service instanceof HashServiceInterface) {
                     throw new \Zoop\Shard\Exception\InvalidArgumentException();
                 }
                 $service->hashField($field, $document, $metadata);
-                $this->getDocumentManager()->getUnitOfWork()->propertyChanged(
-                    $document,
-                    $field,
-                    $changeSet[$field][0],
-                    $metadata->getFieldValue($document, $field)
-                );
+                $eventArgs->addRecompute($field);
             }
         }
     }
 
-    protected function blockCipherFields($metadata, $document)
+    protected function blockCipherFields(AbstractChangeEventArgs $eventArgs)
     {
+        $metadata = $eventArgs->getMetadata();
+
         if (! isset($metadata->crypt['blockCipher'])){
             return;
         }
 
+        $document = $eventArgs->getDocument();
+        $changeSet = $eventArgs->getChangeSet();
+
         foreach ($metadata->crypt['blockCipher'] as $field => $setting){
-
-            $changeSet = $this->getDocumentManager()
-                ->getUnitOfWork()
-                ->getDocumentChangeSet($document);
-
             if ($this->hasChanged($field, $changeSet)) {
                 $service = $this->serviceLocator->get($setting['service']);
                 if (! $service instanceof BlockCipherServiceInterface) {
                     throw new \Zoop\Shard\Exception\InvalidArgumentException();
                 }
                 $service->encryptField($field, $document, $metadata);
-                $this->getDocumentManager()->getUnitOfWork()->propertyChanged(
-                    $document,
-                    $field,
-                    $changeSet[$field][0],
-                    $metadata->getFieldValue($document, $field)
-                );
+                $eventArgs->addRecompute($field);
             }
         }
     }
 
     protected function hasChanged($field, $changeSet){
+
+        if (!isset($changeSet[$field])) {
+            return false;
+        }
 
         list($old, $new) = $changeSet[$field];
 

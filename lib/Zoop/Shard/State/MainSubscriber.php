@@ -8,10 +8,10 @@ namespace Zoop\Shard\State;
 
 use Doctrine\Common\EventSubscriber;
 use Zoop\Common\State\Transition;
-use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
-use Zoop\Shard\ODMCore\UpdateEventArgs;
-use Zoop\Shard\ODMCore\CreateEventArgs;
-use Zoop\Shard\ODMCore\MetadataSleepEventArgs;
+use Zoop\Shard\Core\Events as CoreEvents;
+use Zoop\Shard\Core\UpdateEventArgs;
+use Zoop\Shard\Core\CreateEventArgs;
+use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  * Emits soft delete events
@@ -29,9 +29,9 @@ class MainSubscriber implements EventSubscriber
     public function getSubscribedEvents()
     {
         return [
-            ODMCoreEvents::CREATE,
-            ODMCoreEvents::UPDATE,
-            ODMCoreEvents::METADATA_SLEEP,
+            CoreEvents::CREATE,
+            CoreEvents::UPDATE,
+            CoreEvents::METADATA_SLEEP,
         ];
     }
 
@@ -71,14 +71,11 @@ class MainSubscriber implements EventSubscriber
             return;
         }
 
-        // Raise postTransition - this is when workflow vars should be updated
+        // Raise postTransition
         $eventManager->dispatchEvent(Events::POST_TRANSITION, $transitionEventArgs);
         if ($transitionEventArgs->getReject()) {
             $eventArgs->setReject(true);
             return;
-        }
-        if ($transitionEventArgs->getRecompute()) {
-            $eventArgs->setRecompute(true);
         }
     }
 

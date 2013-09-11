@@ -9,29 +9,23 @@ namespace Zoop\Shard\State;
 use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Zoop\Common\State\Transition;
-use Zoop\Shard\ODMCore\CoreEventArgs;
+use Zoop\Shard\Core\AbstractEventArgs;
+use Zoop\Shard\Core\RejectInterface;
+use Zoop\Shard\Core\RejectTrait;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class TransitionEventArgs extends CoreEventArgs
+class TransitionEventArgs extends AbstractEventArgs implements RejectInterface
 {
-    protected $transition;
+    use RejectTrait;
 
-    protected $recompute = false;
+    protected $transition;
 
     public function getTransition() {
         return $this->transition;
-    }
-
-    public function getRecompute() {
-        return $this->recompute;
-    }
-
-    public function setRecompute($recompute) {
-        $this->recompute = $recompute;
     }
 
     public function __construct($document, ClassMetadata $metadata, Transition $transition, EventManager $eventManager) {

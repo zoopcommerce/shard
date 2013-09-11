@@ -10,9 +10,9 @@ use Doctrine\Common\EventSubscriber;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\AccessControl\EventArgs as AccessControlEventArgs;
-use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
-use Zoop\Shard\ODMCore\UpdateEventArgs;
-use Zoop\Shard\ODMCore\MetadataSleepEventArgs;
+use Zoop\Shard\Core\Events as CoreEvents;
+use Zoop\Shard\Core\UpdateEventArgs;
+use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  * Emits soft delete events
@@ -34,8 +34,8 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     public function getSubscribedEvents()
     {
         return [
-            ODMCoreEvents::UPDATE,
-            ODMCoreEvents::METADATA_SLEEP,
+            CoreEvents::UPDATE,
+            CoreEvents::METADATA_SLEEP,
         ];
     }
 
@@ -45,7 +45,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         $softDeleter = $this->getSoftDeleter();
         $metadata = $eventArgs->getMetadata();
 
-        if (! ($field = $softDeleter->getSoftDeleteField($metadata)) || !$softDeleter->isSoftDeleted($document, $metadata)) {
+        if (! $softDeleter->getSoftDeleteField($metadata) || !$softDeleter->isSoftDeleted($document, $metadata)) {
             return;
         }
 

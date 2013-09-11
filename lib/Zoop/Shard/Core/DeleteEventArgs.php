@@ -4,9 +4,9 @@
  * @package    Zoop
  * @license    MIT
  */
-namespace Zoop\Shard\ODMCore;
+namespace Zoop\Shard\Core;
 
-use Doctrine\Common\EventManager;
+use Doctrine\Common\EventManager as BaseEventManager;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 
 /**
@@ -14,9 +14,11 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class CreateEventArgs extends CoreEventArgs
+class DeleteEventArgs extends AbstractEventArgs implements RejectInterface
 {
-    public function __construct($document, ClassMetadata $metadata, EventManager $eventManager) {
+    use RejectTrait;
+
+    public function __construct($document, ClassMetadata $metadata, BaseEventManager $eventManager) {
         $this->document = $document;
         $this->metadata = $metadata;
         $this->eventManager = $eventManager;

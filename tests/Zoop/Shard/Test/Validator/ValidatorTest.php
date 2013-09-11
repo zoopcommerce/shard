@@ -37,7 +37,7 @@ class ValidatorTest extends BaseTest
         $eventManager = $this->documentManager->getEventManager();
         $eventManager->addEventListener(Events::INVALID_OBJECT, $this);
 
-        $this->calls = array();
+        $this->calls = [];
     }
 
     public function testRequired()

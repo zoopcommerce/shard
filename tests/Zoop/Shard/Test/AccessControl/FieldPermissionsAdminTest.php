@@ -20,7 +20,7 @@ class FieldPermissionsAdminTest extends BaseTest
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
-                    'extension.accessControl' => true
+                    'extension.accesscontrol' => true
                 ],
                 'document_manager' => 'testing.documentmanager',
                 'service_manager_config' => [

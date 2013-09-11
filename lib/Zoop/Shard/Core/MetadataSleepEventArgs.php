@@ -4,7 +4,7 @@
  * @package    Zoop
  * @license    MIT
  */
-namespace Zoop\Shard\ODMCore;
+namespace Zoop\Shard\Core;
 
 use Doctrine\Common\EventManager;
 use Doctrine\Common\EventArgs as BaseEventArgs;

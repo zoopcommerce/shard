@@ -10,10 +10,10 @@ use Doctrine\Common\EventSubscriber;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\AccessControl\EventArgs as AccessControlEventArgs;
-use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
-use Zoop\Shard\ODMCore\UpdateEventArgs;
-use Zoop\Shard\ODMCore\DeleteEventArgs;
-use Zoop\Shard\ODMCore\MetadataSleepEventArgs;
+use Zoop\Shard\Core\Events as CoreEvents;
+use Zoop\Shard\Core\UpdateEventArgs;
+use Zoop\Shard\Core\DeleteEventArgs;
+use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  * Emits freeze events
@@ -34,9 +34,9 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     public function getSubscribedEvents()
     {
         return [
-            ODMCoreEvents::DELETE,
-            ODMCoreEvents::UPDATE,
-            ODMCoreEvents::METADATA_SLEEP,
+            CoreEvents::DELETE,
+            CoreEvents::UPDATE,
+            CoreEvents::METADATA_SLEEP,
         ];
     }
 
@@ -51,7 +51,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         $freezer = $this->getFreezer();
         $metadata = $eventArgs->getMetadata();
 
-        if (! ($field = $freezer->getFreezeField($metadata)) || !$freezer->isFrozen($document, $metadata)) {
+        if (! $freezer->getFreezeField($metadata) || !$freezer->isFrozen($document, $metadata)) {
             return;
         }
 

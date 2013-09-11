@@ -7,7 +7,7 @@
 namespace Zoop\Shard\Zone;
 
 use Doctrine\Common\EventSubscriber;
-use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
+use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\ODMCore\MetadataSleepEventArgs;
 
 /**
@@ -24,7 +24,7 @@ class MainSubscriber implements EventSubscriber
     public function getSubscribedEvents()
     {
         return [
-            ODMCoreEvents::METADATA_SLEEP,
+            CoreEvents::METADATA_SLEEP,
         ];
     }
 

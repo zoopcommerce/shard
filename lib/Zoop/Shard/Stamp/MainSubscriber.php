@@ -8,8 +8,8 @@ namespace Zoop\Shard\Stamp;
 
 use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
 use Doctrine\ODM\MongoDB\Events as ODMEvents;
-use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
-use Zoop\Shard\ODMCore\MetadataSleepEventArgs;
+use Zoop\Shard\Core\Events as CoreEvents;
+use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  * Adds create and update stamps during persist
@@ -30,7 +30,7 @@ class MainSubscriber extends AbstractStampSubscriber
             ODMEvents::prePersist,
             ODMEvents::preUpdate,
             // @codingStandardsIgnoreEnd
-            ODMCoreEvents::METADATA_SLEEP,
+            CoreEvents::METADATA_SLEEP,
         ];
     }
 

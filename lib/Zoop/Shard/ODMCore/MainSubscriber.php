@@ -7,8 +7,17 @@
 namespace Zoop\Shard\ODMCore;
 
 use Doctrine\Common\EventSubscriber;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\CachedReader;
+use Doctrine\ODM\MongoDB\Event\LoadClassMetadataEventArgs;
 use Doctrine\ODM\MongoDB\Event\OnFlushEventArgs;
 use Doctrine\ODM\MongoDB\Events as ODMEvents;
+use Zoop\Shard\Core\AbstractChangeEventArgs;
+use Zoop\Shard\Core\Events as CoreEvents;
+use Zoop\Shard\Core\LoadMetadataEventArgs;
+use Zoop\Shard\Core\CreateEventArgs;
+use Zoop\Shard\Core\DeleteEventArgs;
+use Zoop\Shard\Core\UpdateEventArgs;
 
 /**
  *
@@ -26,9 +35,39 @@ class MainSubscriber implements EventSubscriber
     {
         return [
             // @codingStandardsIgnoreStart
+            ODMEvents::loadClassMetadata,
             ODMEvents::onFlush
             // @codingStandardsIgnoreEnd
         ];
+    }
+
+    /**
+     *
+     * @param \Doctrine\ODM\MongoDB\Event\LoadClassMetadataEventArgs $eventArgs
+     */
+    public function loadClassMetadata(LoadClassMetadataEventArgs $eventArgs)
+    {
+        $metadata = $eventArgs->getClassMetadata();
+        $documentManager = $eventArgs->getDocumentManager();
+        $eventManager = $documentManager->getEventManager();
+
+        if (! isset($this->annotationReader)) {
+            $this->annotationReader = new AnnotationReader;
+            $this->annotationReader = new CachedReader(
+                $this->annotationReader,
+                $documentManager->getConfiguration()->getMetadataCacheImpl()
+            );
+        }
+
+        //Inherit document annotations from parent classes
+        $parentMetadata = [];
+        if (count($metadata->parentClasses) > 0) {
+            foreach ($metadata->parentClasses as $parentClass) {
+                $parentMetadata[] = $documentManager->getClassMetadata($parentClass);
+            }
+        }
+
+        $eventManager->dispatchEvent(CoreEvents::LOAD_METADATA, new LoadMetadataEventArgs($metadata, $parentMetadata, $this->annotationReader, $eventManager));
     }
 
     /**
@@ -56,65 +95,75 @@ class MainSubscriber implements EventSubscriber
     protected function create($document, $documentManager)
     {
         $eventManager = $documentManager->getEventManager();
+        $metadata = $documentManager->getClassMetadata(get_class($document));
 
         $createEventArgs = new CreateEventArgs(
             $document,
-            $documentManager->getClassMetadata(get_class($document)),
+            $metadata,
+            $documentManager->getUnitOfWork()->getDocumentChangeSet($document),
             $eventManager
         );
-        $eventManager->dispatchEvent(Events::CREATE, $createEventArgs);
-        if ($createEventArgs->getReject()) {
-            $this->rejectCreate($document, $documentManager);
-            return;
-        }
-        $eventManager->dispatchEvent(Events::VALIDATE, $createEventArgs);
-        if ($createEventArgs->getReject()) {
-            $this->rejectCreate($document, $documentManager);
-            return;
-        }
-        $eventManager->dispatchEvent(Events::CRYPT, $createEventArgs);
-        if ($createEventArgs->getReject()) {
-            $this->rejectCreate($document, $documentManager);
+
+        $events = [
+            CoreEvents::CREATE,
+            CoreEvents::VALIDATE,
+            CoreEvents::CRYPT
+        ];
+
+        foreach ($events as $event) {
+            $eventManager->dispatchEvent($event, $createEventArgs);
+            if ($createEventArgs->getReject()) {
+                $this->rejectCreate($document, $documentManager);
+                return;
+            }
+            if (count($createEventArgs->getRecompute()) > 0) {
+                $this->recompute($document, $createEventArgs, $documentManager);
+                $createEventArgs = new CreateEventArgs(
+                    $document,
+                    $metadata,
+                    $documentManager->getUnitOfWork()->getDocumentChangeSet($document),
+                    $eventManager
+                );
+            }
         }
     }
 
     protected function update($document, $documentManager)
     {
-        $unitOfWork = $documentManager->getUnitOfWork();
         $eventManager = $documentManager->getEventManager();
-
-        $changeSet = $unitOfWork->getDocumentChangeSet($document);
+        $metadata = $documentManager->getClassMetadata(get_class($document));
+        $changeSet = $documentManager->getUnitOfWork()->getDocumentChangeSet($document);
         if (count($changeSet) == 0) {
             return;
         }
         $updateEventArgs = new UpdateEventArgs(
             $document,
-            $documentManager->getClassMetadata(get_class($document)),
+            $metadata,
             $changeSet,
             $eventManager
         );
-        $eventManager->dispatchEvent(Events::UPDATE, $updateEventArgs);
-        if ($updateEventArgs->getReject()) {
-            $this->rejectUpdate($document, $changeSet, $documentManager);
-            return;
-        }
-        if ($updateEventArgs->getRecompute()) {
-            $this->recomputeUpdate($document, $documentManager);
-        }
-        $eventManager->dispatchEvent(Events::VALIDATE, $updateEventArgs);
-        if ($updateEventArgs->getReject()) {
-            $this->rejectUpdate($document, $changeSet, $documentManager);
-            return;
-        }
-        if ($updateEventArgs->getRecompute()) {
-            $this->recomputeUpdate($document, $documentManager);
-        }
-        $eventManager->dispatchEvent(Events::CRYPT, $updateEventArgs);
-        if ($updateEventArgs->getReject()) {
-            $this->rejectUpdate($document, $changeSet, $documentManager);
-        }
-        if ($updateEventArgs->getRecompute()) {
-            $this->recomputeUpdate($document, $documentManager);
+
+        $events = [
+            CoreEvents::UPDATE,
+            CoreEvents::VALIDATE,
+            CoreEvents::CRYPT
+        ];
+
+        foreach ($events as $event) {
+            $eventManager->dispatchEvent($event, $updateEventArgs);
+            if ($updateEventArgs->getReject()) {
+                $this->rejectUpdate($document, $updateEventArgs->getChangeSet(), $documentManager);
+                return;
+            }
+            if (count($updateEventArgs->getRecompute()) > 0) {
+                $this->recompute($document, $updateEventArgs, $documentManager);
+                $updateEventArgs = new UpdateEventArgs(
+                    $document,
+                    $metadata,
+                    $documentManager->getUnitOfWork()->getDocumentChangeSet($document),
+                    $eventManager
+                );
+            }
         }
     }
 
@@ -127,7 +176,7 @@ class MainSubscriber implements EventSubscriber
             $documentManager->getClassMetadata(get_class($document)),
             $eventManager
         );
-        $eventManager->dispatchEvent(Events::DELETE, $deleteEventArgs);
+        $eventManager->dispatchEvent(CoreEvents::DELETE, $deleteEventArgs);
         if ($deleteEventArgs->getReject()) {
             $this->rejectDelete($document, $documentManager);
         }
@@ -174,11 +223,19 @@ class MainSubscriber implements EventSubscriber
         $documentManager->persist($document);
     }
 
-    protected function recomputeUpdate($document, $documentManager)
+    protected function recompute($document, AbstractChangeEventArgs $eventArgs, $documentManager)
     {
-        $documentManager->getUnitOfWork()->recomputeSingleDocumentChangeSet(
-            $documentManager->getClassMetadata(get_class($document)),
-            $document
-        );
+        $unitOfWork = $documentManager->getUnitOfWork();
+        $changeSet = $eventArgs->getChangeSet();
+        $metadata = $eventArgs->getMetadata();
+
+        foreach ($eventArgs->getRecompute() as $field){
+            $unitOfWork->propertyChanged(
+                $document,
+                $field,
+                $changeSet[$field][0],
+                $metadata->getFieldValue($document, $field)
+            );
+        }
     }
 }

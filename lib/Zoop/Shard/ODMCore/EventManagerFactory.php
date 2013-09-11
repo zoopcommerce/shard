@@ -16,6 +16,7 @@ use Zend\ServiceManager\ServiceLocatorInterface;
  */
 class EventManagerFactory implements FactoryInterface
 {
+
     /**
      *
      * @param \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator

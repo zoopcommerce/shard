@@ -4,7 +4,7 @@
  * @package    Zoop
  * @license    MIT
  */
-namespace Zoop\Shard\ODMCore;
+namespace Zoop\Shard\Core;
 
 /**
  *
@@ -15,29 +15,32 @@ final class Events
 {
 
     /**
-     * Triggered by onFlush document creation
+     * Triggered by object creation
      */
     const CREATE = 'create';
 
     /**
-     * Triggered by onFlush document update
+     * Triggered by object update
      */
     const UPDATE = 'update';
 
     /**
-     * Triggered by onFlush document delete
+     * Triggered by object delete
      */
     const DELETE = 'delete';
 
     /**
-     * Triggered by onFlush
+     *
      */
     const VALIDATE = 'validate';
 
     /**
-     * Triggered by onFlush
+     *
      */
     const CRYPT = 'crypt';
+
+
+    const LOAD_METADATA = 'loadMetadata';
 
     /**
      * Triggered by classmetadata __sleep

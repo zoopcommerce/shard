@@ -25,6 +25,9 @@ class ClassMetadataFactory extends DoctrineClassMetadataFactory
      */
     protected function newClassMetadataInstance($className)
     {
-        return new ClassMetadata($className);
+        $instance = new ClassMetadata($className);
+        $instance->setEventManager($this->evm);
+        
+        return $instance;
     }
 }

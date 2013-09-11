@@ -4,7 +4,7 @@
  * @package    Zoop
  * @license    MIT
  */
-namespace Zoop\Shard\ODMCore;
+namespace Zoop\Shard\Core;
 
 use Doctrine\Common\EventArgs as BaseEventArgs;
 
@@ -13,15 +13,13 @@ use Doctrine\Common\EventArgs as BaseEventArgs;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-abstract class CoreEventArgs extends BaseEventArgs
+abstract class AbstractEventArgs extends BaseEventArgs
 {
     protected $document;
 
     protected $metadata;
 
     protected $eventManager;
-
-    protected $reject = false;
 
     public function getDocument() {
         return $this->document;
@@ -33,13 +31,5 @@ abstract class CoreEventArgs extends BaseEventArgs
 
     public function getEventManager() {
         return $this->eventManager;
-    }
-
-    public function getReject() {
-        return $this->reject;
-    }
-
-    public function setReject($reject) {
-        $this->reject = (boolean) $reject;
     }
 }

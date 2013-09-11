@@ -8,11 +8,11 @@ namespace Zoop\Shard\AccessControl;
 
 use Zoop\Shard\AccessControl\Events as AccessControlEvents;
 use Zoop\Shard\Events as ManifestEvents;
-use Zoop\Shard\ODMCore\Events as ODMCoreEvents;
-use Zoop\Shard\ODMCore\CreateEventArgs;
-use Zoop\Shard\ODMCore\DeleteEventArgs;
-use Zoop\Shard\ODMCore\UpdateEventArgs;
-use Zoop\Shard\ODMCore\MetadataSleepEventArgs;
+use Zoop\Shard\Core\Events as CoreEvents;
+use Zoop\Shard\Core\CreateEventArgs;
+use Zoop\Shard\Core\DeleteEventArgs;
+use Zoop\Shard\Core\UpdateEventArgs;
+use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  *
@@ -29,10 +29,10 @@ class MainSubscriber extends AbstractAccessControlSubscriber
     {
         return [
             ManifestEvents::ON_BOOTSTRAP,
-            ODMCoreEvents::CREATE,
-            ODMCoreEvents::DELETE,
-            ODMCoreEvents::UPDATE,
-            ODMCoreEvents::METADATA_SLEEP,
+            CoreEvents::CREATE,
+            CoreEvents::DELETE,
+            CoreEvents::UPDATE,
+            CoreEvents::METADATA_SLEEP,
         ];
     }
 

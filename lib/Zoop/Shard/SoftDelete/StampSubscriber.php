@@ -42,11 +42,9 @@ class StampSubscriber implements ServiceLocatorAwareInterface
 
         if (isset($metadata->softDelete['deletedBy'])) {
             $metadata->setFieldValue($document, $metadata->softDelete['deletedBy'], $this->getUsername());
-            $eventArgs->setRecompute(true);
         }
         if (isset($metadata->softDelete['deletedOn'])) {
             $metadata->setFieldValue($document, $metadata->softDelete['deletedOn'], time());
-            $eventArgs->setRecompute(true);
         }
     }
 
@@ -61,11 +59,9 @@ class StampSubscriber implements ServiceLocatorAwareInterface
 
         if (isset($metadata->softDelete['restoredBy'])) {
             $metadata->setFieldValue($document, $metadata->softDelete['restoredBy'], $this->getUsername());
-            $eventArgs->setRecompute(true);
         }
         if (isset($metadata->softDelete['restoredOn'])) {
             $metadata->setFieldValue($document, $metadata->softDelete['restoredOn'], time());
-            $eventArgs->setRecompute(true);
         }
     }
 

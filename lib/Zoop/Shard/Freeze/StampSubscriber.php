@@ -41,11 +41,9 @@ class StampSubscriber implements ServiceLocatorAwareInterface
 
         if (isset($metadata->freeze['frozenBy'])) {
             $metadata->setFieldValue($document, $metadata->freeze['frozenBy'], $this->getUsername());
-            $eventArgs->setRecompute(true);
         }
         if (isset($metadata->freeze['frozenOn'])) {
             $metadata->setFieldValue($document, $metadata->freeze['frozenOn'], time());
-            $eventArgs->setRecompute(true);
         }
     }
 
@@ -60,11 +58,9 @@ class StampSubscriber implements ServiceLocatorAwareInterface
 
         if (isset($metadata->freeze['thawedBy'])) {
             $metadata->setFieldValue($document, $metadata->freeze['thawedBy'], $this->getUsername());
-            $eventArgs->setRecompute(true);
         }
         if (isset($metadata->freeze['thawedOn'])) {
             $metadata->setFieldValue($document, $metadata->freeze['thawedOn'], time());
-            $eventArgs->setRecompute(true);
         }
     }
 

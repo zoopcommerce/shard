@@ -22,5 +22,5 @@ final class Email extends Annotation
 
     public $value = true;
 
-    public $class = 'Zoop\Mystique\Equal';
+    public $class = 'Zoop\Mystique\Email';
 }
