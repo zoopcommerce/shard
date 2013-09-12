@@ -184,14 +184,14 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
         $result = [];
 
         if (isset($mapping['embedded'])) {
-            foreach ($value as $embedDocument) {
-                $result = $this->serializeCollectionItem($embedDocument, $mapping, $this, $result);
+            foreach ($value as $index => $embedDocument) {
+                $result = $this->serializeCollectionItem($embedDocument, $index, $mapping, $this, $result);
             }
         } else {
             if ($this->nestingDepth < $this->maxNestingDepth) {
                 $this->nestingDepth++;
-                foreach ($value as $referenceDocument) {
-                    $result = $this->serializeCollectionItem($referenceDocument, $mapping, $this->getReferenceSerializer($field, $metadata), $result);
+                foreach ($value as $index => $referenceDocument) {
+                    $result = $this->serializeCollectionItem($referenceDocument, $index, $mapping, $this->getReferenceSerializer($field, $metadata), $result);
                 }
                 $this->nestingDepth--;
             }
@@ -203,7 +203,7 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
         return $result;
     }
 
-    protected function serializeCollectionItem($document, $mapping, $serializer, array $result)
+    protected function serializeCollectionItem($document, $index, $mapping, $serializer, array $result)
     {
         if (! $serializedDocument = $serializer->serialize($document)) {
             return $result;
@@ -214,9 +214,13 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
         }
         if ($mapping['strategy'] == 'set') {
             $targetMetadata = $this->objectManager->getClassMetadata(get_class($document));
-            $key = $serializedDocument[$targetMetadata->getIdentifier()];
-            unset($serializedDocument[$targetMetadata->getIdentifier()]);
-            $result[$key] = $serializedDocument;
+            if (isset($serializedDocument[$targetMetadata->getIdentifier()])) {
+                $key = $serializedDocument[$targetMetadata->getIdentifier()];
+                unset($serializedDocument[$targetMetadata->getIdentifier()]);
+                $result[$key] = $serializedDocument;
+            } else {
+                $result[$index] = $serializedDocument;
+            }
         } else {
             $result[] = $serializedDocument;
         }
