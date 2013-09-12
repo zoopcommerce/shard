@@ -32,10 +32,8 @@ class Extension extends AbstractExtension
             'subscriber.freeze.mainsubscriber' => 'Zoop\Shard\Freeze\MainSubscriber',
             'subscriber.freeze.stampsubscriber' => 'Zoop\Shard\Freeze\StampSubscriber',
             'subscriber.freeze.annotationsubscriber' => 'Zoop\Shard\Freeze\AnnotationSubscriber',
-            'subscriber.freeze.freezesubscriber' => 'Zoop\Shard\Freeze\AccessControl\FreezeSubscriber'
-        ],
-        'factories' => [
-            'freezer' => 'Zoop\Shard\Freeze\FreezerFactory',
+            'subscriber.freeze.freezesubscriber' => 'Zoop\Shard\Freeze\AccessControl\FreezeSubscriber',
+            'freezer' => 'Zoop\Shard\Freeze\Freezer',
         ]
     ];
 

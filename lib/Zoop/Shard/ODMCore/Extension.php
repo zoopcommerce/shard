@@ -26,8 +26,5 @@ class Extension extends AbstractExtension
             'subscriber.odmcore.mainsubscriber' =>
                 'Zoop\Shard\ODMCore\MainSubscriber'
         ],
-        'factories' => [
-            'eventmanager' => 'Zoop\Shard\ODMCore\EventManagerFactory'
-        ]
     ];
 }

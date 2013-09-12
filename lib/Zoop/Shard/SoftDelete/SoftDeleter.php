@@ -6,21 +6,18 @@
  */
 namespace Zoop\Shard\SoftDelete;
 
-use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Zoop\Shard\Core\ObjectManagerAwareInterface;
+use Zoop\Shard\Core\ObjectManagerAwareTrait;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class SoftDeleter
+class SoftDeleter implements ObjectManagerAwareInterface
 {
-    protected $eventManager;
-
-    public function __construct(EventManager $eventManager) {
-        $this->eventManager = $eventManager;
-    }
+    use ObjectManagerAwareTrait;
 
     public function getSoftDeleteField(ClassMetadata $metadata)
     {
@@ -41,7 +38,7 @@ class SoftDeleter
             return;
         }
 
-        $eventManager = $this->eventManager;
+        $eventManager = $this->objectManager->getEventManager();
 
         // Raise preSoftDelete
         $softDeleteEventArgs = new SoftDeleteEventArgs($document, $metadata, $eventManager);
@@ -64,7 +61,7 @@ class SoftDeleter
             return;
         }
 
-        $eventManager = $this->eventManager;
+        $eventManager = $this->objectManager->getEventManager();
 
         // Raise preRestore
         $softDeleteEventArgs = new SoftDeleteEventArgs($document, $metadata, $eventManager);

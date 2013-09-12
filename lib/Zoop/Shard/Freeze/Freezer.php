@@ -6,21 +6,18 @@
  */
 namespace Zoop\Shard\Freeze;
 
-use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Zoop\Shard\Core\ObjectManagerAwareInterface;
+use Zoop\Shard\Core\ObjectManagerAwareTrait;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Freezer
+class Freezer implements ObjectManagerAwareInterface
 {
-    protected $eventManager;
-
-    public function __construct(EventManager $eventManager) {
-        $this->eventManager = $eventManager;
-    }
+    use ObjectManagerAwareTrait;
 
     public function getFreezeField(ClassMetadata $metadata)
     {
@@ -41,7 +38,7 @@ class Freezer
             return;
         }
 
-        $eventManager = $this->eventManager;
+        $eventManager = $this->objectManager->getEventManager();
 
         // Raise preFreeze
         $freezerEventArgs = new FreezerEventArgs($document, $metadata, $eventManager);
@@ -64,7 +61,7 @@ class Freezer
             return;
         }
 
-        $eventManager = $this->eventManager;
+        $eventManager = $this->objectManager->getEventManager();
 
         // Raise preThaw
         $freezerEventArgs = new FreezerEventArgs($document, $metadata, $eventManager);

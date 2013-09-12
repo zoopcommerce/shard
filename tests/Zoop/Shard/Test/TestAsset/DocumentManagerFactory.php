@@ -47,6 +47,8 @@ class DocumentManagerFactory implements FactoryInterface
 
         $config->setDefaultDB(self::DEFAULT_DB);
 
+        $config->setClassMetadataFactoryName('Zoop\Shard\ODMCore\ClassMetadataFactory');
+        
         $config->setMetadataCacheImpl(new ArrayCache);
 
         //create driver chain
