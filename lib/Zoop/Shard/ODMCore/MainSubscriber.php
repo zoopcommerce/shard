@@ -20,8 +20,6 @@ use Zoop\Shard\Core\LoadMetadataEventArgs;
 use Zoop\Shard\Core\CreateEventArgs;
 use Zoop\Shard\Core\DeleteEventArgs;
 use Zoop\Shard\Core\UpdateEventArgs;
-use Zoop\Shard\Core\GetMetadataEventArgs;
-use Zoop\Shard\Core\GetObjectEventArgs;
 use Zoop\Shard\GetDocumentManagerTrait;
 
 /**
@@ -45,8 +43,6 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             ODMEvents::loadClassMetadata,
             ODMEvents::onFlush,
             // @codingStandardsIgnoreEnd
-            CoreEvents::GET_OBJECT,
-            CoreEvents::GET_METADATA
         ];
     }
 
@@ -99,20 +95,6 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         foreach ($unitOfWork->getScheduledDocumentDeletions() as $document) {
             $this->delete($document, $documentManager);
         }
-    }
-
-    public function getObject(GetObjectEventArgs $eventArgs)
-    {
-        $eventArgs->setObject(
-            $this->getDocumentManager()->getRepository($eventArgs->getClass())->find($eventArgs->getId())
-        );
-    }
-
-    public function getMetadata(GetMetadataEventArgs $eventArgs)
-    {
-        $eventArgs->setMetadata(
-            $this->getDocumentManager()->getClassMetadata($eventArgs->getClass())
-        );
     }
 
     protected function create($document, $documentManager)

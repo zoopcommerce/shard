@@ -28,7 +28,6 @@ class UnserializerFactory implements FactoryInterface
         $instance = new Unserializer;
 
         $instance->setTypeSerializers($extension->getTypeSerializers());
-        $instance->setEventManager($serviceLocator->get('eventmanager'));
 
         return $instance;
     }

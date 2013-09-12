@@ -8,12 +8,12 @@ namespace Zoop\Shard\Serializer;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-use Zoop\Shard\Core\Events as CoreEvents;
-use Zoop\Shard\Core\GetMetadataEventArgs;
-use Zoop\Shard\Core\GetObjectEventArgs;
-use Zoop\Shard\Exception;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zoop\Shard\Core\Events as CoreEvents;
+use Zoop\Shard\Exception;
+use Zoop\Shard\Core\ObjectManagerAwareInterface;
+use Zoop\Shard\Core\ObjectManagerAwareTrait;
 
 /**
  * Provides methods for unserializing documents
@@ -21,9 +21,10 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Unserializer implements ServiceLocatorAwareInterface
+class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInterface
 {
     use ServiceLocatorAwareTrait;
+    use ObjectManagerAwareTrait;
 
     const UNSERIALIZE_UPDATE = 'unserialize_update';
     const UNSERIALIZE_PATCH = 'unserliaze_patch';
@@ -31,21 +32,10 @@ class Unserializer implements ServiceLocatorAwareInterface
     /** @var array */
     protected $typeSerializers = [];
 
-    protected $eventManager;
-
     public function setTypeSerializers(array $typeSerializers)
     {
         $this->typeSerializers = $typeSerializers;
     }
-
-    public function getEventManager() {
-        return $this->eventManager;
-    }
-
-    public function setEventManager($eventManager) {
-        $this->eventManager = $eventManager;
-    }
-
     public function fieldList(ClassMetadata $metadata, $includeId = true)
     {
         $return = [];
@@ -115,25 +105,18 @@ class Unserializer implements ServiceLocatorAwareInterface
         $document = null,
         $mode = self::UNSERIALIZE_PATCH
     ) {
-
-        $eventManager = $this->eventManager;
-
         // Check for discrimnator and discriminator field in data
         $metadata = $this->resolveMetadata($data, null, $metadata);
 
         // Check for reference
         if (isset($data['$ref'])) {
             $pieces = explode('/', $data['$ref']);
-            $getObjectEventArgs = new GetObjectEventArgs($pieces[count($pieces) - 1], $metadata->name, $eventManager);
-            $eventManager->dispatchEvent(CoreEvents::GET_OBJECT, $getObjectEventArgs);
-            return $getObjectEventArgs->getObject();
+            return $this->objectManager->getRepository($metadata->name)->find($pieces[count($pieces) - 1]);
         }
 
         // Attempt to load prexisting object
         if (! isset($document) && isset($data[$metadata->identifier])) {
-            $getObjectEventArgs = new GetObjectEventArgs($data[$metadata->identifier], $metadata->name, $eventManager);
-            $eventManager->dispatchEvent(CoreEvents::GET_OBJECT, $getObjectEventArgs);
-            $document = $getObjectEventArgs->getObject();
+            $document = $this->objectManager->getRepository($metadata->name)->find($data[$metadata->identifier]);
         }
 
         $newInstance = false;
@@ -170,19 +153,14 @@ class Unserializer implements ServiceLocatorAwareInterface
             return null;
         }
 
-        $eventManager = $this->eventManager;
         $targetClass = $metadata->getAssociationTargetClass($field);
 
         if (isset($data[$field]['$ref'])) {
             $pieces = explode('/', $data[$field]['$ref']);
-            $getObjectEventArgs = new GetObjectEventArgs($pieces[count($pieces) - 1], $targetClass, $eventManager);
-            $eventManager->dispatchEvent(CoreEvents::GET_OBJECT, $getObjectEventArgs);
-            return $getObjectEventArgs->getObject();
+            return $this->objectManager->getRepository($targetClass)->find($pieces[count($pieces) - 1]);
         }
         if (is_string($data[$field])) {
-            $getObjectEventArgs = new GetObjectEventArgs($data[$field], $targetClass, $eventManager);
-            $eventManager->dispatchEvent(CoreEvents::GET_OBJECT, $getObjectEventArgs);
-            return $getObjectEventArgs->getObject();
+            $document = $this->objectManager->getRepository($metadata->name)->find($data[$field]);
         }
 
         $targetMetadata = $this->resolveMetadata($data[$field], $metadata->fieldMappings[$field]);
@@ -204,20 +182,14 @@ class Unserializer implements ServiceLocatorAwareInterface
         if (isset($data[$field])) {
             $targetClass = $metadata->getAssociationTargetClass($field);
             $mapping = $metadata->fieldMappings[$field];
-            $eventManager = $this->eventManager;
 
             if (!isset($mapping->discriminatorField)) {
-                $getMetadataEventArgs = new GetMetadataEventArgs($targetClass, $eventManager);
-                $eventManager->dispatchEvent(CoreEvents::GET_METADATA, $getMetadataEventArgs);
-                $targetMetadata = $getMetadataEventArgs->getMetadata();
+                $targetMetadata = $this->objectManager->getClassMetadata($targetClass);
             }
 
             foreach ($data[$field] as $index => $dataItem) {
                 if (isset($mapping->discriminatorField) && isset($data[$mapping->discriminatorField['fieldName']])) {
-                    $targetClass = $mapping->discriminatorMap[$data[$mapping->discriminatorField['fieldName']]];
-                    $getMetadataEventArgs = new GetMetadataEventArgs($targetClass, $eventManager);
-                    $eventManager->dispatchEvent(CoreEvents::GET_METADATA, $getMetadataEventArgs);
-                    $targetMetadata = $getMetadataEventArgs->getMetadata();
+                    $targetMetadata = $this->objectManager->getClassMetadata($mapping->discriminatorMap[$data[$mapping->discriminatorField['fieldName']]]);
                 }
                 $collection[$index] = $this->unserialize($dataItem, $targetMetadata, $collection[$index], $mode);
             }
@@ -250,8 +222,6 @@ class Unserializer implements ServiceLocatorAwareInterface
 
     protected function resolveMetadata($data, $mapping = null, $metadata = null)
     {
-        $eventManager = $this->eventManager;
-
         if (isset($metadata->discriminatorField) && isset($data[$metadata->discriminatorField['fieldName']])) {
             $targetClass = $metadata->discriminatorMap[$data[$metadata->discriminatorField['fieldName']]];
         } else if (isset($mapping['discriminatorField']) && isset($data[$mapping['discriminatorField']['fieldName']])) {
@@ -261,9 +231,7 @@ class Unserializer implements ServiceLocatorAwareInterface
         }
 
         if (isset($targetClass)) {
-            $getMetadataEventArgs = new GetMetadataEventArgs($targetClass, $eventManager);
-            $eventManager->dispatchEvent(CoreEvents::GET_METADATA, $getMetadataEventArgs);
-            return $getMetadataEventArgs->getMetadata();
+            return $this->objectManager->getClassMetadata($targetClass);
         }
         return $metadata;
     }

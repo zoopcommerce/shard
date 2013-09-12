@@ -46,8 +46,4 @@ final class Events
      * Triggered by classmetadata __sleep
      */
     const METADATA_SLEEP = 'metadataSleep';
-
-    const GET_OBJECT = 'getObject';
-
-    const GET_METADATA = 'getMetadata';
 }
