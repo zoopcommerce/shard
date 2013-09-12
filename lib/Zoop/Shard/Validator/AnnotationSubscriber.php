@@ -12,6 +12,8 @@ use Zoop\Shard\Annotation\AnnotationEventArgs;
 use Zoop\Shard\Annotation\EventType;
 
 /**
+ * @SuppressWarnings(PHPMD.TooManyMethods)
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
@@ -322,7 +324,11 @@ class AnnotationSubscriber implements EventSubscriber
         }
     }
 
-
+    /**
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @param type $name
+     * @param type $arguments
+     */
     public function __call($name, $arguments)
     {
         $this->setFieldValidator($arguments[0], ['class' => $arguments[0]->getAnnotation()->class]);

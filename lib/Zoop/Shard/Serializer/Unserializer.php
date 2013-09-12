@@ -129,11 +129,7 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
         }
 
         foreach ($this->fieldList($metadata, $newInstance) as $field) {
-            if ($value = $this->unserializeField($data, $metadata, $document, $field, $mode)) {
-                $metadata->setFieldValue($document, $field, $value);
-            } elseif ($mode == self::UNSERIALIZE_UPDATE) {
-                $metadata->setFieldValue($document, $field, null);
-            }
+            $this->unserializeField($data, $metadata, $document, $field, $mode);
         }
 
         return $document;
@@ -142,11 +138,17 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
     protected function unserializeField($data, ClassMetadata $metadata, $document, $field, $mode)
     {
         if ($metadata->hasAssociation($field) && $metadata->isSingleValuedAssociation($field)) {
-            return $this->unserializeSingleObject($data, $metadata, $document, $field, $mode);
+            $value = $this->unserializeSingleObject($data, $metadata, $document, $field, $mode);
         } else if ($metadata->hasAssociation($field)) {
-            return $this->unserializeCollection($data, $metadata, $document, $field, $mode);
+            $value = $this->unserializeCollection($data, $metadata, $document, $field, $mode);
         } else {
-            return $this->unserializeSingleValue($data, $metadata, $field);
+            $value = $this->unserializeSingleValue($data, $metadata, $field);
+        }
+
+        if (isset($value)) {
+            $metadata->setFieldValue($document, $field, $value);
+        } else if ($mode == self::UNSERIALIZE_UPDATE) {
+            $metadata->setFieldValue($document, $field, null);
         }
     }
 
