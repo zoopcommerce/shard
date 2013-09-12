@@ -18,8 +18,9 @@ class RefLazy implements ReferenceSerializerInterface, ObjectManagerAwareInterfa
 {
     use ObjectManagerAwareTrait;
 
-    public function serialize($id, array $mapping)
+    public function serialize($document)
     {
-        return ['$ref' => $this->objectManager->getClassMetadata($mapping['targetDocument'])->collection . '/' . $id];
+        $metadata = $this->objectManager->getClassMetadata(get_class($document));
+        return ['$ref' => $metadata->collection . '/' . $metadata->getFieldValue($document, $metadata->getIdentifier())];
     }
 }

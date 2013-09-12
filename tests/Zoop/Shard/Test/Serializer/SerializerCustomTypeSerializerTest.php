@@ -48,17 +48,6 @@ class SerializerCustomTypeSerializerTest extends BaseTest
         $this->assertEquals('Cherry', $array['name']);
     }
 
-
-    public function testApplySerializeMetadataToArray()
-    {
-        $array = $this->serializer->ApplySerializeMetadataToArray(
-            ['name' => 'cherry'],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\Flavour'
-        );
-
-        $this->assertEquals('Cherry', $array['name']);
-    }
-
     public function testUnserializer()
     {
         $data = array(
@@ -67,7 +56,7 @@ class SerializerCustomTypeSerializerTest extends BaseTest
 
         $flavour = $this->unserializer->fromArray(
             $data,
-            $this->documentManager->getClassMetadata('Zoop\Shard\Test\Serializer\TestAsset\Document\Flavour')
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\Flavour'
         );
 
         $this->assertEquals('cherry', $flavour->getName());

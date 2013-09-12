@@ -8,6 +8,7 @@ namespace Zoop\Shard\Serializer;
 
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\Proxy;
+use Doctrine\ODM\MongoDB\DocumentNotFoundException;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Core\ObjectManagerAwareInterface;
@@ -95,43 +96,6 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
     }
 
     /**
-     * Will take an associative array representing a document, and apply the
-     * serialization metadata rules to that array.
-     *
-     * @param array $array
-     * @param string $className
-     * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
-     * @return array
-     */
-    public function applySerializeMetadataToArray(array $array, $className)
-    {
-        $return = [];
-        $metadata = $this->objectManager->getClassMetadata($className);
-
-        if ($metadata->hasDiscriminator()) {
-            $return[$metadata->discriminatorField['name']] = $metadata->discriminatorValue;
-        }
-
-        //juggle id
-        if (isset($array['_id'])) {
-            $array[$metadata->getIdentifier()] = $array['_id'];
-        }
-
-        foreach ($this->fieldList($metadata) as $field) {
-            if (! isset($array[$field])) {
-                continue;
-            }
-
-            $serializedValue = $this->serializeField($metadata, $array[$field], $field);
-            if (isset($serializedValue)) {
-                $return[$field] = $serializedValue;
-            }
-        }
-
-        return $return;
-    }
-
-    /**
      *
      * @param object | array $document
      * @param DocumentManager $documentManager
@@ -149,7 +113,12 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
         }
 
         if ($document instanceof Proxy) {
-            $document->__load();
+            try {
+                $document->__load();
+            } catch (DocumentNotFoundException $ex) {
+                //Document may not be found due to access control
+                return;
+            }
         }
 
         foreach ($this->fieldList($metadata) as $field) {
@@ -197,18 +166,7 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
         //serialize reference
         if ($this->nestingDepth < $this->maxNestingDepth) {
             $this->nestingDepth++;
-            $targetMetadata = $this->objectManager->getClassMetadata($mapping['targetDocument']);
-
-            if ($value instanceof Proxy) {
-                $id = $value->{'get' . ucfirst($targetMetadata->getIdentifier())}();
-            } else if (is_array($value)) {
-                $id = $value['$id'];
-            } else if (is_string($value)) {
-                $id = $value;
-            } else {
-                $id = $targetMetadata->getFieldValue($value, $targetMetadata->getIdentifier());
-            }
-            $serializedDocument = $this->getReferenceSerializer($field, $metadata)->serialize($id, $mapping);
+            $serializedDocument = $this->getReferenceSerializer($field, $metadata)->serialize($value);
             $this->nestingDepth--;
             if ($serializedDocument) {
                 return $serializedDocument;
@@ -223,41 +181,47 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
         }
 
         $mapping = $metadata->fieldMappings[$field];
-        $return = [];
+        $result = [];
 
         if (isset($mapping['embedded'])) {
             foreach ($value as $embedDocument) {
-                if (is_array($value)) {
-                    $return[] = $this->applySerializeMetadataToArray($embedDocument, $mapping['targetDocument']);
-                } else {
-                    $return[] = $this->serialize($embedDocument);
-                }
+                $result = $this->serializeCollectionItem($embedDocument, $mapping, $this, $result);
             }
         } else {
             if ($this->nestingDepth < $this->maxNestingDepth) {
                 $this->nestingDepth++;
-                if (method_exists($value, 'getMongoData')) {
-                    $valueCollection = $value->getMongoData();
-                } else {
-                    $valueCollection = $value;
-                }
-                foreach ($valueCollection as $index => $referenceDocument) {
-                    $serializedDocument = $this->getReferenceSerializer($field, $metadata)->serialize(
-                        is_array($referenceDocument) ? $referenceDocument['$id'] : (string) $referenceDocument,
-                        $mapping
-                    );
-                    if ($serializedDocument) {
-                        $return[$index] = $serializedDocument;
-                    }
+                foreach ($value as $referenceDocument) {
+                    $result = $this->serializeCollectionItem($referenceDocument, $mapping, $this->getReferenceSerializer($field, $metadata), $result);
                 }
                 $this->nestingDepth--;
             }
         }
 
-        if (count($return) == 0) {
+        if (count($result) == 0) {
             return;
         }
-        return $return;
+        return $result;
+    }
+
+    protected function serializeCollectionItem($document, $mapping, $serializer, array $result)
+    {
+        if (! $serializedDocument = $serializer->serialize($document)) {
+            return $result;
+        }
+
+        if (isset($mapping['discriminatorMap'])) {
+            $serializedDocument[$mapping['discriminatorField']] = array_search(get_class($document), $mapping['discriminatorMap']);
+        }
+        if ($mapping['strategy'] == 'set') {
+            $targetMetadata = $this->objectManager->getClassMetadata(get_class($document));
+            $key = $serializedDocument[$targetMetadata->getIdentifier()];
+            unset($serializedDocument[$targetMetadata->getIdentifier()]);
+            $result[$key] = $serializedDocument;
+        } else {
+            $result[] = $serializedDocument;
+        }
+
+        return $result;
     }
 
     protected function serializeSingleValue(ClassMetadata $metadata, $value, $field)

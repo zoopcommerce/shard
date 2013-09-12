@@ -18,8 +18,9 @@ class SimpleLazy implements ReferenceSerializerInterface, ObjectManagerAwareInte
 {
     use ObjectManagerAwareTrait;
 
-    public function serialize($id, array $mapping)
+    public function serialize($document)
     {
-        return $this->objectManager->getClassMetadata($mapping['targetDocument'])->collection . '/' . $id;
+        $metadata = $this->objectManager->getClassMetadata(get_class($document));
+        return $metadata->collection . '/' . $metadata->getFieldValue($document, $metadata->getIdentifier());
     }
 }

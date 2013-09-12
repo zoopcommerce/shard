@@ -59,41 +59,4 @@ class SerializerTest extends BaseTest
 
         $this->assertEquals($correct, $array);
     }
-
-    public function testApplySerializeMetadataToArray()
-    {
-        $array = array(
-            'username' => 'superdweebie',
-            'location' => 'here',
-            'groups' => array(
-                array('name' => 'groupA'),
-                array('name' => 'groupB'),
-            ),
-            'password' => 'secret',
-            'profile' => array(
-                'firstname' => 'Tim',
-                'lastname' => 'Roediger'
-            ),
-        );
-
-        $correct = array(
-            'username' => 'superdweebie',
-            'location' => 'here',
-            'groups' => array(
-                array('name' => 'groupA'),
-                array('name' => 'groupB'),
-            ),
-            'profile' => array(
-                'firstname' => 'Tim',
-                'lastname' => 'Roediger'
-            ),
-        );
-
-        $array = $this->serializer->ApplySerializeMetadataToArray(
-            $array,
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
-        );
-
-        $this->assertEquals($correct, $array);
-    }
 }

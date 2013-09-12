@@ -86,7 +86,7 @@ class SerializerReferenceTest extends BaseTest
         $array['ingredients'][3] = ['name' => 'coconut'];
         $cake = $this->unserializer->fromArray(
             $array,
-            $documentManager->getClassMetadata('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager')
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager'
         );
 
         $this->assertInstanceOf('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager', $cake);
@@ -141,7 +141,7 @@ class SerializerReferenceTest extends BaseTest
         $array['ingredients'][3] = ['name' => 'coconut'];
         $cake = $this->unserializer->fromArray(
             $array,
-            $documentManager->getClassMetadata('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeRefLazy')
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\CakeRefLazy'
         );
 
         $this->assertInstanceOf('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeRefLazy', $cake);
@@ -150,100 +150,6 @@ class SerializerReferenceTest extends BaseTest
         $this->assertEquals('water', $cake->getIngredients()[2]->getName());
         $this->assertEquals('coconut', $cake->getIngredients()[3]->getName());
     }
-
-    public function testEagerApplyToArray()
-    {
-        $documentManager = $this->documentManager;
-
-        //bake the cake. Hmm yum.
-        $cake = new CakeEager();
-        $cake->setIngredients(
-            [
-                $this->createIngredient('flour'),
-                $this->createIngredient('sugar'),
-                $this->createIngredient('water'),
-                $this->createIngredient('eggs')
-            ]
-        );
-
-        $flavour = new FlavourEager('black_forest');
-        $documentManager->persist($flavour);
-        $cake->setFlavour($flavour);
-
-        //Persist cake and clear out documentManager
-        $documentManager->persist($cake);
-        $documentManager->flush();
-        $id = $cake->getId();
-        $documentManager->clear();
-
-        $cakeArray = $documentManager
-            ->createQueryBuilder()
-            ->find('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager')
-            ->field('id')->equals($id)
-            ->hydrate(false)
-            ->getQuery()
-            ->getSingleResult();
-
-        $array = $this->serializer->applySerializeMetadataToArray(
-            $cakeArray,
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager'
-        );
-
-        $this->assertCount(4, $array['ingredients']);
-        $this->assertEquals('flour', $array['ingredients'][0]['name']);
-        $this->assertEquals('black_forest', $array['flavour']['name']);
-    }
-
-    public function testRefLazyApplyToArray()
-    {
-        $documentManager = $this->documentManager;
-
-        //bake the cake. Hmm yum.
-        $cake = new CakeRefLazy();
-        $cake->setIngredients(
-            [
-                $this->createIngredient('flour'),
-                $this->createIngredient('sugar'),
-                $this->createIngredient('water'),
-                $this->createIngredient('eggs')
-            ]
-        );
-
-        $flavour = new Flavour('carrot');
-        $documentManager->persist($flavour);
-        $cake->setFlavour($flavour);
-
-        //Persist cake and clear out documentManager
-        $documentManager->persist($cake);
-        $documentManager->flush();
-        $id = $cake->getId();
-        $documentManager->clear();
-
-        $cakeArray = $documentManager
-            ->createQueryBuilder()
-            ->find('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeRefLazy')
-            ->field('id')->equals($id)
-            ->hydrate(false)
-            ->getQuery()
-            ->getSingleResult();
-
-        $array = $this->serializer->applySerializeMetadataToArray(
-            $cakeArray,
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\CakeRefLazy'
-        );
-
-        $this->assertCount(4, $array['ingredients']);
-        $this->assertArrayHasKey('$ref', $array['ingredients'][0]);
-        $pieces = explode('/', $array['ingredients'][0]['$ref']);
-        $this->assertCount(2, $pieces);
-        $this->assertEquals('Ingredient', $pieces[0]);
-
-        $this->assertArrayHasKey('$ref', $array['flavour']);
-        $pieces = explode('/', $array['flavour']['$ref']);
-        $this->assertCount(2, $pieces);
-        $this->assertEquals('Flavour', $pieces[0]);
-    }
-
 
     public function testEagerSerializerWithNull()
     {
@@ -307,7 +213,7 @@ class SerializerReferenceTest extends BaseTest
         $array['ingredients'][3] = ['name' => 'coconut'];
         $cake = $this->unserializer->fromArray(
             $array,
-            $documentManager->getClassMetadata('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEagerSimpleReference')
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEagerSimpleReference'
         );
 
         $this->assertInstanceOf('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEagerSimpleReference', $cake);
@@ -341,18 +247,14 @@ class SerializerReferenceTest extends BaseTest
         $id = $cake->getId();
         $documentManager->clear();
 
-        $cakeArray = $documentManager
+        $cake = $documentManager
             ->createQueryBuilder()
             ->find('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeSimpleLazySimpleReference')
             ->field('id')->equals($id)
-            ->hydrate(false)
             ->getQuery()
             ->getSingleResult();
 
-        $array = $this->serializer->applySerializeMetadataToArray(
-            $cakeArray,
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\CakeSimpleLazySimpleReference'
-        );
+        $array = $this->serializer->toArray($cake);
 
         $this->assertCount(4, $array['ingredients']);
         $pieces = explode('/', $array['ingredients'][0]);

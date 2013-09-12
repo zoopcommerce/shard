@@ -10,7 +10,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
-use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Exception;
 use Zoop\Shard\Core\ObjectManagerAwareInterface;
 use Zoop\Shard\Core\ObjectManagerAwareTrait;
@@ -65,11 +64,11 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
      */
     public function fromArray(
         array $data,
-        ClassMetadata $metadata,
+        $class,
         $document = null,
         $mode = self::UNSERIALIZE_PATCH
     ) {
-        return $this->unserialize($data, $metadata, $document, $mode);
+        return $this->unserialize($data, $class, $document, $mode);
     }
 
     /**
@@ -83,11 +82,11 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
      */
     public function fromJson(
         $data,
-        ClassMetadata $metadata,
+        $class,
         $document = null,
         $mode = self::UNSERIALIZE_PATCH
     ) {
-        return $this->unserialize(json_decode($data, true), $metadata, $document, $mode);
+        return $this->unserialize(json_decode($data, true), $class, $document, $mode);
     }
 
     /**
@@ -101,12 +100,16 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
      */
     protected function unserialize(
         array $data,
-        ClassMetadata $metadata,
+        $class,
         $document = null,
         $mode = self::UNSERIALIZE_PATCH
     ) {
+        $metadata = $this->objectManager->getClassMetadata($class);
+
         // Check for discrimnator and discriminator field in data
-        $metadata = $this->resolveMetadata($data, null, $metadata);
+        if (isset($metadata->discriminatorField) && isset($data[$metadata->discriminatorField['fieldName']])) {
+            $metadata = $this->objectManager->getClassMetadata($metadata->discriminatorMap[$data[$metadata->discriminatorField['fieldName']]]);
+        }
 
         // Check for reference
         if (isset($data['$ref'])) {
@@ -163,11 +166,9 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
             $document = $this->objectManager->getRepository($metadata->name)->find($data[$field]);
         }
 
-        $targetMetadata = $this->resolveMetadata($data[$field], $metadata->fieldMappings[$field]);
-
         return $this->unserialize(
             $data[$field],
-            $targetMetadata,
+            $targetClass,
             $metadata->getFieldValue($document, $field),
             $mode
         );
@@ -183,15 +184,11 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
             $targetClass = $metadata->getAssociationTargetClass($field);
             $mapping = $metadata->fieldMappings[$field];
 
-            if (!isset($mapping->discriminatorField)) {
-                $targetMetadata = $this->objectManager->getClassMetadata($targetClass);
-            }
-
             foreach ($data[$field] as $index => $dataItem) {
-                if (isset($mapping->discriminatorField) && isset($data[$mapping->discriminatorField['fieldName']])) {
-                    $targetMetadata = $this->objectManager->getClassMetadata($mapping->discriminatorMap[$data[$mapping->discriminatorField['fieldName']]]);
+                if (isset($mapping['discriminatorField']) && isset($dataItem[$mapping['discriminatorField']])) {
+                    $targetClass = $mapping['discriminatorMap'][$dataItem[$mapping['discriminatorField']]];
                 }
-                $collection[$index] = $this->unserialize($dataItem, $targetMetadata, $collection[$index], $mode);
+                $collection[$index] = $this->unserialize($dataItem, $targetClass, $collection[$index], $mode);
             }
         } else if ($mode == self::UNSERIALIZE_UPDATE) {
             foreach ($collection->getKeys() as $key) {
@@ -218,22 +215,6 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
         }
 
         return $data[$field];
-    }
-
-    protected function resolveMetadata($data, $mapping = null, $metadata = null)
-    {
-        if (isset($metadata->discriminatorField) && isset($data[$metadata->discriminatorField['fieldName']])) {
-            $targetClass = $metadata->discriminatorMap[$data[$metadata->discriminatorField['fieldName']]];
-        } else if (isset($mapping['discriminatorField']) && isset($data[$mapping['discriminatorField']['fieldName']])) {
-            $targetClass = $mapping['discriminatorMap'][$data[$mapping['discriminatorField']['fieldName']]];
-        } else if (isset($mapping['targetDocument'])) {
-            $targetClass = $mapping['targetDocument'];
-        }
-
-        if (isset($targetClass)) {
-            return $this->objectManager->getClassMetadata($targetClass);
-        }
-        return $metadata;
     }
 
     protected function getTypeSerializer($type)

@@ -57,7 +57,7 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'location' => 'there'
             ],
-            $documentManager->getClassMetadata('Zoop\Shard\Test\Serializer\TestAsset\Document\User')
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
         );
 
         $this->assertEquals('there', $updated->location());
@@ -91,7 +91,7 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'location' => 'there'
             ],
-            $documentManager->getClassMetadata('Zoop\Shard\Test\Serializer\TestAsset\Document\User'),
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
             null,
             Unserializer::UNSERIALIZE_UPDATE
         );

@@ -50,7 +50,7 @@ class UnserializerTest extends BaseTest
 
         $user = $this->unserializer->fromArray(
             $data,
-            $this->documentManager->getClassMetadata('Zoop\Shard\Test\Serializer\TestAsset\Document\User')
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
         );
 
         $this->assertTrue($user instanceof User);

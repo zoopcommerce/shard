@@ -60,37 +60,6 @@ class SerializerDateTest extends BaseTest
         $this->assertEquals($correct, $array);
     }
 
-    public function testApplySerializeMetadataToArray()
-    {
-        $documentManager = $this->documentManager;
-        $birthday = new Birthday('Miriam', new \DateTime('01/01/1950', new \DateTimeZone('Europe/Berlin')));
-        $documentManager->persist($birthday);
-        $documentManager->flush();
-        $id = $birthday->getId();
-        $documentManager->clear();
-
-        $array = $documentManager
-            ->createQueryBuilder()
-            ->find('Zoop\Shard\Test\Serializer\TestAsset\Document\Birthday')
-            ->field('id')->equals($id)
-            ->hydrate(false)
-            ->getQuery()
-            ->getSingleResult();
-
-        $correct = [
-            'id' => $id,
-            'name' => 'Miriam',
-            'date' => '1949-12-31T23:00:00+00:00'
-        ];
-
-        $array = $this->serializer->ApplySerializeMetadataToArray(
-            $array,
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\Birthday'
-        );
-
-        $this->assertEquals($correct, $array);
-    }
-
     public function testUnserializer()
     {
         $data = array(
@@ -100,7 +69,7 @@ class SerializerDateTest extends BaseTest
 
         $birthday = $this->unserializer->fromArray(
             $data,
-            $this->documentManager->getClassMetadata('Zoop\Shard\Test\Serializer\TestAsset\Document\Birthday')
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\Birthday'
         );
 
         $this->assertTrue($birthday instanceof Birthday);
