@@ -26,8 +26,6 @@ class AnnotationSubscriber implements EventSubscriber
     public function getSubscribedEvents()
     {
         return [
-            Shard\Serializer\ClassName::EVENT,
-            Shard\Serializer\Discriminator::EVENT,
             Shard\Serializer\Eager::EVENT,
             Shard\Serializer\Ignore::EVENT,
             Shard\Serializer\RefLazy::EVENT,
@@ -35,30 +33,6 @@ class AnnotationSubscriber implements EventSubscriber
             Shard\Serializer\SimpleLazy::EVENT,
             Shard\Unserializer\Ignore::EVENT,
         ];
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationSerializerClassName(AnnotationEventArgs $eventArgs)
-    {
-        $metadata = $eventArgs->getMetadata();
-        $annotation = $eventArgs->getAnnotation();
-        $this->createMetadata($metadata);
-        $metadata->serializer['className'] = (boolean) $annotation->value;
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationSerializerDiscriminator(AnnotationEventArgs $eventArgs)
-    {
-        $metadata = $eventArgs->getMetadata();
-        $annotation = $eventArgs->getAnnotation();
-        $this->createMetadata($metadata);
-        $metadata->serializer['discriminator'] = (boolean) $annotation->value;
     }
 
     /**

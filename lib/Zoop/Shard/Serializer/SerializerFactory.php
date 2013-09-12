@@ -27,7 +27,6 @@ class SerializerFactory implements FactoryInterface
         $extension = $serviceLocator->get('extension.serializer');
         $instance = new Serializer;
 
-        $instance->setClassNameField($extension->getClassNameField());
         $instance->setMaxNestingDepth($extension->getMaxNestingDepth());
         $instance->setTypeSerializers($extension->getTypeSerializers());
 

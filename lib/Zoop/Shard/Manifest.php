@@ -11,6 +11,7 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\ArrayUtils;
+use Zoop\Shard\Core\ObjectManagerAwareInterface;
 
 /**
  * Pass this class a configuration array with extension namespaces, and then retrieve the
@@ -229,8 +230,8 @@ class Manifest extends AbstractExtension
 
         $serviceManager->addInitializer(
             function ($instance, ServiceLocatorInterface $serviceLocator) {
-                if ($instance instanceof DocumentManagerAwareInterface) {
-                    $instance->setDocumentManager(
+                if ($instance instanceof ObjectManagerAwareInterface) {
+                    $instance->setObjectManager(
                         $serviceLocator->get(
                             $serviceLocator->get('manifest')->getDocumentManager()
                         )

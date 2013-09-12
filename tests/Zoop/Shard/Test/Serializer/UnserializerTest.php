@@ -5,9 +5,6 @@ namespace Zoop\Shard\Test\Serializer;
 use Zoop\Shard\Manifest;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\User;
-use Zoop\Shard\Test\Serializer\TestAsset\Document\Group;
-use Zoop\Shard\Test\Serializer\TestAsset\Document\Profile;
-use Zoop\Shard\Test\Serializer\TestAsset\Document\ClassName;
 
 class UnserializerTest extends BaseTest
 {

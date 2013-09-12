@@ -6,8 +6,8 @@
  */
 namespace Zoop\Shard\Serializer\Reference;
 
-use Zoop\Shard\DocumentManagerAwareInterface;
-use Zoop\Shard\DocumentManagerAwareTrait;
+use Zoop\Shard\Core\ObjectManagerAwareInterface;
+use Zoop\Shard\Core\ObjectManagerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
@@ -16,16 +16,16 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Eager implements ReferenceSerializerInterface, ServiceLocatorAwareInterface, DocumentManagerAwareInterface
+class Eager implements ReferenceSerializerInterface, ServiceLocatorAwareInterface, ObjectManagerAwareInterface
 {
     use ServiceLocatorAwareTrait;
-    use DocumentManagerAwareTrait;
+    use ObjectManagerAwareTrait;
 
     protected $serializer;
 
     public function serialize($id, array $mapping)
     {
-        $document = $this->documentManager->getRepository($mapping['targetDocument'])->find($id);
+        $document = $this->objectManager->getRepository($mapping['targetDocument'])->find($id);
         if ($document) {
             return $this->getSerializer()->toArray($document);
         } else {

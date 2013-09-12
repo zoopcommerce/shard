@@ -43,8 +43,6 @@ class AnnotationInheritaceTest extends BaseTest
 
         $metadata = $documentManager->getClassMetadata(get_class(new ChildA));
 
-        $this->assertTrue($metadata->serializer['className']);
-        $this->assertTrue($metadata->serializer['discriminator']);
         $this->assertEquals(['class' => 'ParentValidator', 'options' => []], $metadata->validator['document']);
         $this->assertEquals(true, $metadata->serializer['fields']['name']['serializeIgnore']);
     }
@@ -55,8 +53,6 @@ class AnnotationInheritaceTest extends BaseTest
 
         $metadata = $documentManager->getClassMetadata(get_class(new ChildB));
 
-        $this->assertFalse($metadata->serializer['className']);
-        $this->assertFalse($metadata->serializer['discriminator']);
         $this->assertEquals(['class' => 'ChildBValidator', 'options' => []], $metadata->validator['document']);
         $this->assertEquals(false, $metadata->serializer['fields']['name']['serializeIgnore']);
     }

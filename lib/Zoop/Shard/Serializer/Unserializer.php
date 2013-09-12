@@ -46,7 +46,7 @@ class Unserializer implements ServiceLocatorAwareInterface
         $this->eventManager = $eventManager;
     }
 
-    public function fieldListForUnserialize(ClassMetadata $metadata, $includeId = true)
+    public function fieldList(ClassMetadata $metadata, $includeId = true)
     {
         $return = [];
 
@@ -142,7 +142,7 @@ class Unserializer implements ServiceLocatorAwareInterface
             $newInstance = true;
         }
 
-        foreach ($this->fieldListForUnserialize($metadata, $newInstance) as $field) {
+        foreach ($this->fieldList($metadata, $newInstance) as $field) {
             if ($value = $this->unserializeField($data, $metadata, $document, $field, $mode)) {
                 $metadata->setFieldValue($document, $field, $value);
             } elseif ($mode == self::UNSERIALIZE_UPDATE) {

@@ -50,8 +50,6 @@ class Extension extends AbstractExtension
     /** @var int */
     protected $maxNestingDepth = 1;
 
-    protected $classNameField = '_className';
-
     public function getTypeSerializers()
     {
         return $this->typeSerializers;
@@ -70,15 +68,5 @@ class Extension extends AbstractExtension
     public function setMaxNestingDepth($maxNestingDepth)
     {
         $this->maxNestingDepth = (integer) $maxNestingDepth;
-    }
-
-    public function getClassNameField()
-    {
-        return $this->classNameField;
-    }
-
-    public function setClassNameField($classNameField)
-    {
-        $this->classNameField = (string) $classNameField;
     }
 }

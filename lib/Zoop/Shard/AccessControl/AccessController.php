@@ -7,8 +7,8 @@
 namespace Zoop\Shard\AccessControl;
 
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-use Zoop\Shard\DocumentManagerAwareInterface;
-use Zoop\Shard\DocumentManagerAwareTrait;
+use Zoop\Shard\Core\ObjectManagerAwareInterface;
+use Zoop\Shard\Core\ObjectManagerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
@@ -18,16 +18,16 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class AccessController implements ServiceLocatorAwareInterface, DocumentManagerAwareInterface
+class AccessController implements ServiceLocatorAwareInterface, ObjectManagerAwareInterface
 {
     use ServiceLocatorAwareTrait;
-    use DocumentManagerAwareTrait;
+    use ObjectManagerAwareTrait;
 
     protected $permissions = [];
 
     public function enableReadFilter()
     {
-        $filter = $this->documentManager->getFilterCollection()->enable('readAccessControl');
+        $filter = $this->objectManager->getFilterCollection()->enable('readAccessControl');
         $filter->setAccessController($this);
     }
 
@@ -83,7 +83,7 @@ class AccessController implements ServiceLocatorAwareInterface, DocumentManagerA
         }
 
         if (count($result->getOld()) > 0) {
-            $changeSet = $this->documentManager->getUnitOfWork()->getDocumentChangeSet($document);
+            $changeSet = $this->objectManager->getUnitOfWork()->getDocumentChangeSet($document);
             foreach ($result->getOld() as $field => $value) {
                 $oldValue = $changeSet[$field][0];
                 if (! $this->testCriteriaAgainstValue($oldValue, $value)) {
@@ -134,7 +134,7 @@ class AccessController implements ServiceLocatorAwareInterface, DocumentManagerA
 
     protected function getRoles($metadata, $document)
     {
-        $eventManager = $this->documentManager->getEventManager();
+        $eventManager = $this->objectManager->getEventManager();
 
         $event = new GetRolesEventArgs($metadata, $document, $this->getUser());
         $eventManager->dispatchEvent(

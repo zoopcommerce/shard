@@ -4,23 +4,23 @@
  * @package    Zoop
  * @license    MIT
  */
-namespace Zoop\Shard;
+namespace Zoop\Shard\Core;
 
-use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\Common\Persistence\ObjectManager;
 
-interface DocumentManagerAwareInterface
+interface ObjectManagerAwareInterface
 {
     /**
      * Set service locator
      *
      * @param ServiceLocatorInterface $serviceLocator
      */
-    public function setDocumentManager(DocumentManager $documentManager);
+    public function setObjectManager(ObjectManager $objectManager);
 
     /**
      * Get service locator
      *
      * @return ServiceLocatorInterface
      */
-    public function getDocumentManager();
+    public function getObjectManager();
 }

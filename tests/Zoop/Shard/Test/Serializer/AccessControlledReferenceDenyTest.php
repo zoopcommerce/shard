@@ -34,7 +34,7 @@ class AccessControlledReferenceDenyTest extends BaseTest
         $this->serializer = $manifest->getServiceManager()->get('serializer');
     }
 
-    public function testSerializeAllow()
+    public function testSerializeDeny()
     {
         $documentManager = $this->documentManager;
 
@@ -72,6 +72,5 @@ class AccessControlledReferenceDenyTest extends BaseTest
 
         $this->assertCount(2, $array['ingredients']);
         $this->assertFalse(isset($array['secretIngredients']));
-
     }
 }

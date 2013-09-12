@@ -7,7 +7,6 @@ use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\User;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\Group;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\Profile;
-use Zoop\Shard\Test\Serializer\TestAsset\Document\ClassName;
 
 class SerializerTest extends BaseTest
 {
@@ -64,7 +63,6 @@ class SerializerTest extends BaseTest
     public function testApplySerializeMetadataToArray()
     {
         $array = array(
-            'id' => null,
             'username' => 'superdweebie',
             'location' => 'here',
             'groups' => array(
@@ -79,7 +77,6 @@ class SerializerTest extends BaseTest
         );
 
         $correct = array(
-            'id' => null,
             'username' => 'superdweebie',
             'location' => 'here',
             'groups' => array(
@@ -96,21 +93,6 @@ class SerializerTest extends BaseTest
             $array,
             'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
         );
-
-        $this->assertEquals($correct, $array);
-    }
-
-    public function testSerializeClassName()
-    {
-        $testDoc = new ClassName();
-        $testDoc->setName('superdweebie');
-
-        $correct = array(
-            '_className' => 'Zoop\Shard\Test\Serializer\TestAsset\Document\ClassName',
-            'name' => 'superdweebie',
-        );
-
-        $array = $this->serializer->toArray($testDoc);
 
         $this->assertEquals($correct, $array);
     }
