@@ -43,7 +43,7 @@ class SoftDeleter implements ObjectManagerAwareInterface
         // Raise preSoftDelete
         $softDeleteEventArgs = new SoftDeleteEventArgs($document, $metadata, $eventManager);
         $eventManager->dispatchEvent(Events::PRE_SOFT_DELETE, $softDeleteEventArgs);
-        if ($softDeleteEventArgs->getReject()){
+        if ($softDeleteEventArgs->getReject()) {
             return;
         }
 
@@ -66,7 +66,7 @@ class SoftDeleter implements ObjectManagerAwareInterface
         // Raise preRestore
         $softDeleteEventArgs = new SoftDeleteEventArgs($document, $metadata, $eventManager);
         $eventManager->dispatchEvent(Events::PRE_RESTORE, $softDeleteEventArgs);
-        if ($softDeleteEventArgs->getReject()){
+        if ($softDeleteEventArgs->getReject()) {
             return;
         }
 

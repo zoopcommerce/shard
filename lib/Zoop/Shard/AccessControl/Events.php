@@ -31,6 +31,6 @@ final class Events
      * for
      */
     const DELETE_DENIED = 'deleteDenied';
-    
+
     const GET_ROLES = 'getRoles';
 }

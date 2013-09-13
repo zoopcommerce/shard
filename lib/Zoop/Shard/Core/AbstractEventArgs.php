@@ -21,15 +21,18 @@ abstract class AbstractEventArgs extends BaseEventArgs
 
     protected $eventManager;
 
-    public function getDocument() {
+    public function getDocument()
+    {
         return $this->document;
     }
 
-    public function getMetadata() {
+    public function getMetadata()
+    {
         return $this->metadata;
     }
 
-    public function getEventManager() {
+    public function getEventManager()
+    {
         return $this->eventManager;
     }
 }

@@ -28,7 +28,10 @@ class MainSubscriber implements EventSubscriber
         ];
     }
 
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs){
-        $eventArgs->addSerialized('serializer');
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
+    {
+        if (isset($eventArgs->getMetadata()->serializer)) {
+            $eventArgs->addSerialized('serializer');
+        }
     }
 }

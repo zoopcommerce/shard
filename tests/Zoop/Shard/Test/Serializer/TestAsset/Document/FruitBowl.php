@@ -47,19 +47,23 @@ class FruitBowl
         return $this->id;
     }
 
-    public function getEmbeddedFruit() {
+    public function getEmbeddedFruit()
+    {
         return $this->embeddedFruit;
     }
 
-    public function setEmbeddedFruit($embeddedFruit) {
+    public function setEmbeddedFruit($embeddedFruit)
+    {
         $this->embeddedFruit = $embeddedFruit;
     }
 
-    public function getReferencedFruit() {
+    public function getReferencedFruit()
+    {
         return $this->referencedFruit;
     }
 
-    public function setReferencedFruit($referencedFruit) {
+    public function setReferencedFruit($referencedFruit)
+    {
         $this->referencedFruit = $referencedFruit;
     }
 

@@ -24,11 +24,13 @@ class TransitionEventArgs extends AbstractEventArgs implements RejectInterface
 
     protected $transition;
 
-    public function getTransition() {
+    public function getTransition()
+    {
         return $this->transition;
     }
 
-    public function __construct($document, ClassMetadata $metadata, Transition $transition, EventManager $eventManager) {
+    public function __construct($document, ClassMetadata $metadata, Transition $transition, EventManager $eventManager)
+    {
         $this->document = $document;
         $this->metadata = $metadata;
         $this->transition = $transition;

@@ -55,7 +55,7 @@ class RolesSubscriber implements EventSubscriber
             }
 
             if (isset($metadata->stamp['updatedBy']) &&
-                $metadata->getFieldValue($document, $metadata->stamp['updatedBy']) == $username                         
+                $metadata->getFieldValue($document, $metadata->stamp['updatedBy']) == $username
             ) {
                 $eventArgs->addRole(self::UPDATER);
             }

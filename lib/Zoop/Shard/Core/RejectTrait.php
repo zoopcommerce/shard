@@ -15,11 +15,13 @@ trait RejectTrait
 {
     protected $reject = false;
 
-    public function getReject() {
+    public function getReject()
+    {
         return $this->reject;
     }
 
-    public function setReject($reject) {
+    public function setReject($reject)
+    {
         $this->reject = (boolean) $reject;
     }
 }

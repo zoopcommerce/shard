@@ -50,6 +50,7 @@ class AnnotationSubscriber implements EventSubscriber
             Shard\Validator\String::EVENT,
             Shard\Validator::EVENT,
         ];
+
         return $events;
     }
 
@@ -80,16 +81,16 @@ class AnnotationSubscriber implements EventSubscriber
             );
             if ($type == EventType::DOCUMENT && isset($metadata->validator['document'])) {
                 $validators[] = $metadata->validator['document'];
-            } else if (isset($metadata->validator['fields'][$reflection->getName()])) {
+            } elseif (isset($metadata->validator['fields'][$reflection->getName()])) {
                  $validators[] = $metadata->validator['fields'][$reflection->getName()];
             }
         }
 
         if (count($validators) == 0) {
             $validator = null;
-        } else if (count($validators) == 1) {
+        } elseif (count($validators) == 1) {
             $validator = $validators[0];
-        } else if (count($validators) > 1) {
+        } elseif (count($validators) > 1) {
             $validator = ['class' => $annotation->class, 'options' => ['validators' => $validators]];
         }
 

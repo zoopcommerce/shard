@@ -33,7 +33,6 @@ class CakeWithSecrets
      */
     protected $secretIngredients;
 
-
     public function __construct()
     {
         $this->ingredients = new ArrayCollection();

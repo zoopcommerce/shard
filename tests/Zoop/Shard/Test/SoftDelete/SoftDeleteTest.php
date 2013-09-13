@@ -20,15 +20,15 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
-                    'extension.softdelete' => true
+                    'extension.softdelete' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
                 'service_manager_config' => [
                     'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
                         'user' => function () {
                             $user = new User();
                             $user->setUsername('toby');
+
                             return $user;
                         }
                     ]
@@ -36,7 +36,7 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
         $this->softDeleter = $manifest->getServiceManager()->get('softDeleter');
     }
 
@@ -168,6 +168,7 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
             $returnNames[] = $testDoc->getName();
         }
         sort($returnNames);
+
         return array($returnDocs, $returnNames);
     }
 
@@ -269,7 +270,7 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
         $subscriber->reset();
         $subscriber->setRollbackRestore(true);
         $this->softDeleter->restore($testDoc, $metadata);
-        
+
         $documentManager->flush();
 
         $calls = $subscriber->getCalls();

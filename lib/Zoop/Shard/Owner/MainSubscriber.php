@@ -53,8 +53,11 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         }
     }
 
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs){
-        $eventArgs->addSerialized('owner');
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
+    {
+        if (isset($eventArgs->getMetadata()->owner)) {
+            $eventArgs->addSerialized('owner');
+        }
     }
 
     protected function getUsername()

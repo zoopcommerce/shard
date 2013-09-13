@@ -18,10 +18,10 @@ class Extension extends AbstractExtension
 {
 
     protected $subscribers = [
-        'subscriber.accessControl.mainsubscriber',
-        'subscriber.accessControl.annotationsubscriber',
-        'subscriber.accessControl.basicPermissionSubscriber',
-        'subscriber.accessControl.rolesSubscriber'
+        'subscriber.accesscontrol.mainsubscriber',
+        'subscriber.accesscontrol.annotationsubscriber',
+        'subscriber.accesscontrol.basicPermissionSubscriber',
+        'subscriber.accesscontrol.rolesSubscriber'
     ];
 
     protected $filters = [
@@ -30,15 +30,15 @@ class Extension extends AbstractExtension
 
     protected $serviceManagerConfig = [
         'invokables' => [
-            'subscriber.accessControl.mainsubscriber' =>
+            'subscriber.accesscontrol.mainsubscriber' =>
                 'Zoop\Shard\AccessControl\MainSubscriber',
-            'subscriber.accessControl.annotationsubscriber' =>
+            'subscriber.accesscontrol.annotationsubscriber' =>
                 'Zoop\Shard\AccessControl\AnnotationSubscriber',
-            'subscriber.accessControl.basicPermissionSubscriber' =>
+            'subscriber.accesscontrol.basicPermissionSubscriber' =>
                 'Zoop\Shard\AccessControl\BasicPermissionSubscriber',
-            'subscriber.accessControl.rolesSubscriber' =>
+            'subscriber.accesscontrol.rolesSubscriber' =>
                 'Zoop\Shard\AccessControl\RolesSubscriber',
-            'accessController' =>
+            'accesscontroller' =>
                 'Zoop\Shard\AccessControl\AccessController'
         ]
     ];

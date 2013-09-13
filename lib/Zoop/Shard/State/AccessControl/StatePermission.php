@@ -51,14 +51,15 @@ class StatePermission implements PermissionInterface
         if (! strpos(self::WILD, $string)) {
             return '/^' . str_replace(PermissionInterface::WILD, '[a-zA-Z0-9_:-]*', $string) . '$/';
         }
+
         return $string;
     }
 
     /**
      * Will test if a user with the supplied roles can do ALL the supplied actions.
      *
-     * @param array $roles
-     * @param array $action
+     * @param  array                                     $roles
+     * @param  array                                     $action
      * @return \Zoop\Shard\AccessControl\IsAllowedResult
      */
     public function areAllowed(array $testRoles, array $testActions)

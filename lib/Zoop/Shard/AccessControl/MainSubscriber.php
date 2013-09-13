@@ -7,7 +7,6 @@
 namespace Zoop\Shard\AccessControl;
 
 use Zoop\Shard\AccessControl\Events as AccessControlEvents;
-use Zoop\Shard\Events as ManifestEvents;
 use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Core\CreateEventArgs;
 use Zoop\Shard\Core\DeleteEventArgs;
@@ -28,7 +27,7 @@ class MainSubscriber extends AbstractAccessControlSubscriber
     public function getSubscribedEvents()
     {
         return [
-            ManifestEvents::ON_BOOTSTRAP,
+            CoreEvents::BOOTSTRAPPED,
             CoreEvents::CREATE,
             CoreEvents::DELETE,
             CoreEvents::UPDATE,
@@ -36,14 +35,14 @@ class MainSubscriber extends AbstractAccessControlSubscriber
         ];
     }
 
-    public function onBootstrap()
+    public function bootstrapped()
     {
         $this->getAccessController()->enableReadFilter();
     }
 
     public function create(CreateEventArgs $eventArgs)
     {
-        if ($eventArgs->getReject()){
+        if ($eventArgs->getReject()) {
             //don't do anything if the create has already been rejected
             return;
         }
@@ -51,7 +50,10 @@ class MainSubscriber extends AbstractAccessControlSubscriber
         $document = $eventArgs->getDocument();
 
         //Check create permissions
-        if ($this->getAccessController()->areAllowed([Actions::CREATE], $eventArgs->getMetadata(), $document)->getAllowed()) {
+        if ($this->getAccessController()
+                ->areAllowed([Actions::CREATE], $eventArgs->getMetadata(), $document)
+                ->getAllowed()
+        ) {
             return;
         }
 
@@ -90,7 +92,10 @@ class MainSubscriber extends AbstractAccessControlSubscriber
         //Check delete permsisions
         $document = $eventArgs->getDocument();
 
-        if ($this->getAccessController()->areAllowed([Actions::DELETE], $eventArgs->getMetadata(), $document)->getAllowed()) {
+        if ($this->getAccessController()
+                ->areAllowed([Actions::DELETE], $eventArgs->getMetadata(), $document)
+                ->getAllowed()
+        ) {
             return;
         }
 
@@ -102,8 +107,13 @@ class MainSubscriber extends AbstractAccessControlSubscriber
         );
     }
 
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs){
-        $eventArgs->addSerialized('accessConrol');
-        $eventArgs->addSerialized('permissions');
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
+    {
+        if (isset($eventArgs->getMetadata()->accessConrol)) {
+            $eventArgs->addSerialized('accessConrol');
+        }
+        if (isset($eventArgs->getMetadata()->permissions)) {
+            $eventArgs->addSerialized('permissions');
+        }
     }
 }

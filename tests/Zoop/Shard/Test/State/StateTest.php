@@ -18,20 +18,15 @@ class StateTest extends BaseTest
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
-                    'extension.state' => true
+                    'extension.state' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
-                'service_manager_config' => [
-                    'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    ]
-                ]
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
     }
-/*
+
     public function testBasicFunction()
     {
         $documentManager = $this->documentManager;
@@ -82,7 +77,6 @@ class StateTest extends BaseTest
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(array('lucy', 'miriam'), $docNames);
 
-
         $documentManager->flush();
         $documentManager->clear();
 
@@ -117,9 +111,10 @@ class StateTest extends BaseTest
             $returnNames[] = $testDoc->getName();
         }
         sort($returnNames);
+
         return array($returnDocs, $returnNames);
     }
-*/
+
     public function testEvents()
     {
         $subscriber = new Subscriber();

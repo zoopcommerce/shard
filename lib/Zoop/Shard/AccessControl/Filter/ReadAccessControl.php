@@ -35,7 +35,7 @@ class ReadAccessControl extends BsonFilter
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Mapping\ClassMetadata $targetDocument
+     * @param  \Doctrine\ODM\MongoDB\Mapping\ClassMetadata $targetDocument
      * @return array
      */
     public function addFilterCriteria(ClassMetadata $metadata)
@@ -55,6 +55,7 @@ class ReadAccessControl extends BsonFilter
                         $critiera[$field] = ['$ne' => $value];
                     }
                 }
+
                 return $critiera;
             }
         } else {

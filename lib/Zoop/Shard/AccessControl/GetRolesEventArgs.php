@@ -38,27 +38,33 @@ class GetRolesEventArgs extends BaseEventArgs
         $this->roles = $roles;
     }
 
-    public function getMetadata() {
+    public function getMetadata()
+    {
         return $this->metadata;
     }
 
-    public function getDocument() {
+    public function getDocument()
+    {
         return $this->document;
     }
 
-    public function getUser() {
+    public function getUser()
+    {
         return $this->user;
     }
 
-    public function getRoles() {
+    public function getRoles()
+    {
         return $this->roles;
     }
 
-    public function setRoles($roles) {
+    public function setRoles($roles)
+    {
         $this->roles = $roles;
     }
 
-    public function addRole($role) {
+    public function addRole($role)
+    {
         $this->roles[] = $role;
     }
 }

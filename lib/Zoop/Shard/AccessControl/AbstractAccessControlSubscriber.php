@@ -9,7 +9,6 @@ namespace Zoop\Shard\AccessControl;
 use Doctrine\Common\EventSubscriber;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
-use Zoop\Shard\GetDocumentManagerTrait;
 
 /**
  *
@@ -18,9 +17,7 @@ use Zoop\Shard\GetDocumentManagerTrait;
  */
 abstract class AbstractAccessControlSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 {
-
     use ServiceLocatorAwareTrait;
-    use GetDocumentManagerTrait;
 
     protected $accessController;
 
@@ -31,6 +28,7 @@ abstract class AbstractAccessControlSubscriber implements EventSubscriber, Servi
                 $this->accessController = $this->serviceLocator->get('accessController');
             }
         }
+
         return $this->accessController;
     }
 }

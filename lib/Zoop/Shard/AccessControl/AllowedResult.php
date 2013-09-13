@@ -63,6 +63,7 @@ class AllowedResult
         if (count($this->new) > 0 || count($this->old) > 0) {
             return true;
         }
+
         return false;
     }
 }

@@ -20,15 +20,15 @@ class FreezeTest extends BaseTest implements EventSubscriber
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
-                    'extension.freeze' => true
+                    'extension.freeze' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
                 'service_manager_config' => [
                     'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
                         'user' => function () {
                             $user = new User();
                             $user->setUsername('toby');
+
                             return $user;
                         }
                     ]
@@ -36,7 +36,7 @@ class FreezeTest extends BaseTest implements EventSubscriber
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
         $this->freezer = $manifest->getServiceManager()->get('freezer');
     }
 
@@ -176,6 +176,7 @@ class FreezeTest extends BaseTest implements EventSubscriber
             $returnNames[] = $testDoc->getName();
         }
         sort($returnNames);
+
         return array($returnDocs, $returnNames);
     }
 

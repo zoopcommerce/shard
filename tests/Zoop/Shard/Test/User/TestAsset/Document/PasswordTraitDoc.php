@@ -2,7 +2,6 @@
 
 namespace Zoop\Shard\Test\User\TestAsset\Document;
 
-use Zoop\Common\Crypt\Salt;
 use Zoop\Common\User\PasswordInterface;
 use Zoop\Shard\User\DataModel\PasswordTrait;
 

@@ -18,15 +18,15 @@ class PasswordTraitTest extends BaseTest
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
-                    'extension.crypt' => true
+                    'extension.crypt' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
                 'service_manager_config' => [
                     'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
                         'user' => function () {
                             $user = new User();
                             $user->setUsername('toby');
+
                             return $user;
                         }
                     ]
@@ -34,7 +34,7 @@ class PasswordTraitTest extends BaseTest
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
     }
 
     public function testPassword()

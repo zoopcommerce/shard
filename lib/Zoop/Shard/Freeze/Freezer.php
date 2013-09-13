@@ -43,7 +43,7 @@ class Freezer implements ObjectManagerAwareInterface
         // Raise preFreeze
         $freezerEventArgs = new FreezerEventArgs($document, $metadata, $eventManager);
         $eventManager->dispatchEvent(Events::PRE_FREEZE, $freezerEventArgs);
-        if ($freezerEventArgs->getReject()){
+        if ($freezerEventArgs->getReject()) {
             return;
         }
 
@@ -66,7 +66,7 @@ class Freezer implements ObjectManagerAwareInterface
         // Raise preThaw
         $freezerEventArgs = new FreezerEventArgs($document, $metadata, $eventManager);
         $eventManager->dispatchEvent(Events::PRE_THAW, $freezerEventArgs);
-        if ($freezerEventArgs->getReject()){
+        if ($freezerEventArgs->getReject()) {
             return;
         }
 

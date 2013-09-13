@@ -2,11 +2,8 @@
 
 namespace Zoop\Shard\Test;
 
-use Zoop\Shard\Test\TestAsset\DocumentManagerFactory;
-
 abstract class BaseTest extends \PHPUnit_Framework_TestCase
 {
-
     protected $documentManager;
 
     public function tearDown()
@@ -14,7 +11,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
         if ($this->documentManager) {
             $collections = $this->documentManager
                 ->getConnection()
-                ->selectDatabase(DocumentManagerFactory::DEFAULT_DB)->listCollections();
+                ->selectDatabase('zoop-shard')->listCollections();
 
             foreach ($collections as $collection) {
                 $collection->remove(array(), array('safe' => true));

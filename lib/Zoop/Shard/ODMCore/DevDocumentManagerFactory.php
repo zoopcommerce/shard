@@ -3,7 +3,7 @@
  * @package    Zoop
  * @license    MIT
  */
-namespace Zoop\Shard\Test\TestAsset;
+namespace Zoop\Shard\ODMCore;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
@@ -23,32 +23,30 @@ use Zoop\Shard\Core\EventManager;
  * @version $Revision$
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class DocumentManagerFactory implements FactoryInterface
+class DevDocumentManagerFactory implements FactoryInterface
 {
-
-    const DEFAULT_DB = 'zoop_shard_tests';
-
     /**
      *
-     * @param \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator
+     * @param  \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator
      * @return object
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
         $manifest = $serviceLocator->get('manifest');
+        $extension = $serviceLocator->get('extension.odmcore');
 
         $config = new Configuration();
 
-        $config->setProxyDir(__DIR__ . '/../../../../Proxies');
+        $config->setProxyDir($extension->getProxyDir());
         $config->setProxyNamespace('Proxies');
 
-        $config->setHydratorDir(__DIR__ . '/../../../../Hydrators');
+        $config->setHydratorDir($extension->getHydratorDir());
         $config->setHydratorNamespace('Hydrators');
 
-        $config->setDefaultDB(self::DEFAULT_DB);
+        $config->setDefaultDB($extension->getDefaultDb());
 
-        $config->setClassMetadataFactoryName('Zoop\Shard\ODMCore\ClassMetadataFactory');
-        
+        $config->setClassMetadataFactoryName($extension->getClassMetadataFactory());
+
         $config->setMetadataCacheImpl(new ArrayCache);
 
         //create driver chain

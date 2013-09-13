@@ -18,21 +18,18 @@ class CryptValidatorTest extends BaseTest
                 ],
                 'extension_configs' => [
                     'extension.crypt' => true,
-                    'extension.validator' => true
+                    'extension.validator' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
                 'service_manager_config' => [
                     'invokables' => [
                         'testkey' => 'Zoop\Shard\Test\Crypt\TestAsset\Key'
                     ],
-                    'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    ]
                 ]
            ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
         $this->blockCipherHelper = $manifest->getServiceManager()->get('crypt.blockcipherhelper');
 
         $eventManager = $this->documentManager->getEventManager();

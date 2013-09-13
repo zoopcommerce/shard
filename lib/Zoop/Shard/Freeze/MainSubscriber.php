@@ -42,7 +42,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 
     /**
      *
-     * @param \Zoop\Shard\ODMCore\UpdateEventArgs $eventArgs
+     * @param  \Zoop\Shard\ODMCore\UpdateEventArgs $eventArgs
      * @return type
      */
     public function update(UpdateEventArgs $eventArgs)
@@ -57,7 +57,8 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 
         $changeSet = $eventArgs->getChangeSet();
         $count = 0;
-        array_walk($metadata->freeze,
+        array_walk(
+            $metadata->freeze,
             function ($item) use ($changeSet, &$count) {
                 if (array_key_exists($item, $changeSet)) {
                     ++$count;
@@ -65,7 +66,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             }
         );
 
-        if (count($changeSet) == $count){
+        if (count($changeSet) == $count) {
             return;
         }
 
@@ -104,10 +105,14 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         if (! isset($this->freezer)) {
             $this->freezer = $this->serviceLocator->get('freezer');
         }
+
         return $this->freezer;
     }
 
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs){
-        $eventArgs->addSerialized('freeze');
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
+    {
+        if (isset($eventArgs->getMetadata()->freeze)) {
+            $eventArgs->addSerialized('freeze');
+        }
     }
 }

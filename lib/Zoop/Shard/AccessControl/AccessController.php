@@ -34,9 +34,9 @@ class AccessController implements ServiceLocatorAwareInterface, ObjectManagerAwa
     /**
      * Determines if an action can be done by the current User
      *
-     * @param array $action
-     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $metadata
-     * @param type $document
+     * @param  array                                              $action
+     * @param  \Doctrine\Common\Persistence\Mapping\ClassMetadata $metadata
+     * @param  type                                               $document
      * @return \Zoop\Shard\AccessControl\IsAllowedResult
      */
     public function areAllowed(array $actions, ClassMetadata $metadata, $document = null)
@@ -49,7 +49,7 @@ class AccessController implements ServiceLocatorAwareInterface, ObjectManagerAwa
 
         $roles = $this->getRoles($metadata, $document);
 
-        foreach ($this->getPermissions($metadata) as $permission){
+        foreach ($this->getPermissions($metadata) as $permission) {
 
             $newResult = $permission->areAllowed($roles, $actions);
             $allowed = $newResult->getAllowed();
@@ -77,6 +77,7 @@ class AccessController implements ServiceLocatorAwareInterface, ObjectManagerAwa
                 $newValue = $metadata->reflFields[$field]->getValue($document);
                 if (! $this->testCriteriaAgainstValue($newValue, $value)) {
                     $result->setAllowed(false);
+
                     return $result;
                 }
             }
@@ -88,6 +89,7 @@ class AccessController implements ServiceLocatorAwareInterface, ObjectManagerAwa
                 $oldValue = $changeSet[$field][0];
                 if (! $this->testCriteriaAgainstValue($oldValue, $value)) {
                     $result->setAllowed(false);
+
                     return $result;
                 }
             }
@@ -109,8 +111,10 @@ class AccessController implements ServiceLocatorAwareInterface, ObjectManagerAwa
                     return true;
                 }
             }
+
             return false;
         }
+
         return true;
     }
 
@@ -141,6 +145,7 @@ class AccessController implements ServiceLocatorAwareInterface, ObjectManagerAwa
             Events::GET_ROLES,
             $event
         );
+
         return $event->getRoles();
     }
 

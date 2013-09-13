@@ -26,23 +26,32 @@ class LoadMetadataEventArgs extends BaseEventArgs
 
     protected $eventManager;
 
-    public function getMetadata() {
+    public function getMetadata()
+    {
         return $this->metadata;
     }
 
-    public function getParentMetadata() {
+    public function getParentMetadata()
+    {
         return $this->parentMetadata;
     }
 
-    public function getAnnotationReader() {
+    public function getAnnotationReader()
+    {
         return $this->annotationReader;
     }
 
-    public function getEventManager() {
+    public function getEventManager()
+    {
         return $this->eventManager;
     }
 
-    public function __construct(ClassMetadata $metadata, array $parentMetadata, Reader $annotationReader, BaseEventManager $eventManager) {
+    public function __construct(
+        ClassMetadata $metadata,
+        array $parentMetadata,
+        Reader $annotationReader,
+        BaseEventManager $eventManager
+    ) {
         $this->metadata = $metadata;
         $this->parentMetadata = $parentMetadata;
         $this->annotationReader = $annotationReader;

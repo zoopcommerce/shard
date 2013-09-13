@@ -21,6 +21,7 @@ class SimpleLazy implements ReferenceSerializerInterface, ObjectManagerAwareInte
     public function serialize($document)
     {
         $metadata = $this->objectManager->getClassMetadata(get_class($document));
+
         return $metadata->collection . '/' . $metadata->getFieldValue($document, $metadata->getIdentifier());
     }
 }

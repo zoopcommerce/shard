@@ -59,15 +59,22 @@ class MainSubscriber implements EventSubscriber
             $metadata->setFieldValue($document, $field, $fromState);
             $eventArgs->setReject(true);
             $eventManager->dispatchEvent(Events::BAD_STATE, $eventArgs);
+
             return;
         }
 
         // Raise preTransition
-        $transitionEventArgs = new TransitionEventArgs($document, $metadata, new Transition($fromState, $toState), $eventManager);
+        $transitionEventArgs = new TransitionEventArgs(
+            $document,
+            $metadata,
+            new Transition($fromState, $toState),
+            $eventManager
+        );
         $eventManager->dispatchEvent(Events::PRE_TRANSITION, $transitionEventArgs);
 
         if ($transitionEventArgs->getReject()) {
             $eventArgs->setReject(true);
+
             return;
         }
 
@@ -75,6 +82,7 @@ class MainSubscriber implements EventSubscriber
         $eventManager->dispatchEvent(Events::POST_TRANSITION, $transitionEventArgs);
         if ($transitionEventArgs->getReject()) {
             $eventArgs->setReject(true);
+
             return;
         }
     }
@@ -104,7 +112,10 @@ class MainSubscriber implements EventSubscriber
         }
     }
 
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs){
-        $eventArgs->addSerialized('state');
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
+    {
+        if (isset($eventArgs->getMetadata()->state)) {
+            $eventArgs->addSerialized('state');
+        }
     }
 }

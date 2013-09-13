@@ -23,7 +23,7 @@ class DocumentValidator implements DocumentValidatorInterface, ServiceLocatorAwa
 
     /**
      *
-     * @param object $document
+     * @param  object  $document
      * @return boolean
      */
     public function isValid($document, ClassMetadata $metadata, array $changeSet = null)
@@ -39,7 +39,7 @@ class DocumentValidator implements DocumentValidatorInterface, ServiceLocatorAwa
             foreach ($metadata->validator['fields'] as $field => $validatorDefinition) {
 
                 //if a change set is provided, only validate fields that have changed
-                if (isset($changeSet) && ! isset($changeSet[$field])){
+                if (isset($changeSet) && ! isset($changeSet[$field])) {
                     continue;
                 }
 

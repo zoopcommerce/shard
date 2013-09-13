@@ -8,7 +8,7 @@ namespace Zoop\Shard\Zone;
 
 use Doctrine\Common\EventSubscriber;
 use Zoop\Shard\Core\Events as CoreEvents;
-use Zoop\Shard\ODMCore\MetadataSleepEventArgs;
+use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  *
@@ -28,7 +28,10 @@ class MainSubscriber implements EventSubscriber
         ];
     }
 
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs){
-        $eventArgs->addSerialized('zones');
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
+    {
+        if (isset($eventArgs->getMetadata()->zones)) {
+            $eventArgs->addSerialized('zones');
+        }
     }
 }

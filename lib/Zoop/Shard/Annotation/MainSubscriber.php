@@ -27,7 +27,6 @@ class MainSubscriber implements EventSubscriber
         return [Events::LOAD_METADATA];
     }
 
-
     public function loadMetadata(LoadMetadataEventArgs $eventArgs)
     {
         $metadata = $eventArgs->getMetadata();
@@ -49,8 +48,12 @@ class MainSubscriber implements EventSubscriber
         $this->processMethodAnnotations($source, $target, $annotationReader, $eventManager);
     }
 
-    protected function processDocumentAnnotations(ClassMetadata $source, ClassMetadata $target, $annotationReader, $eventManager)
-    {
+    protected function processDocumentAnnotations(
+        ClassMetadata $source,
+        ClassMetadata $target,
+        $annotationReader,
+        $eventManager
+    ) {
         $sourceReflClass = $source->getReflectionClass();
         $targetReflClass = $target->getReflectionClass();
 
@@ -73,8 +76,12 @@ class MainSubscriber implements EventSubscriber
         }
     }
 
-    protected function processFieldAnnotations(ClassMetadata $source, ClassMetadata $target, $annotationReader, $eventManager)
-    {
+    protected function processFieldAnnotations(
+        ClassMetadata $source,
+        ClassMetadata $target,
+        $annotationReader,
+        $eventManager
+    ) {
         $sourceReflClass = $source->getReflectionClass();
 
         //Field annotations
@@ -85,15 +92,25 @@ class MainSubscriber implements EventSubscriber
                     // Raise annotation event
                     $eventManager->dispatchEvent(
                         $annotation::EVENT,
-                        new AnnotationEventArgs($target, EventType::FIELD, $annotation, $reflField, $eventManager)
+                        new AnnotationEventArgs(
+                            $target,
+                            EventType::FIELD,
+                            $annotation,
+                            $reflField,
+                            $eventManager
+                        )
                     );
                 }
             }
         }
     }
 
-    protected function processMethodAnnotations(ClassMetadata $source, ClassMetadata $target, $annotationReader, $eventManager)
-    {
+    protected function processMethodAnnotations(
+        ClassMetadata $source,
+        ClassMetadata $target,
+        $annotationReader,
+        $eventManager
+    ) {
         $sourceReflClass = $source->getReflectionClass();
 
         //Method annotations

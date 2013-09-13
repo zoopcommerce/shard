@@ -49,19 +49,23 @@ class Family
         return $this->id;
     }
 
-    public function getParents() {
+    public function getParents()
+    {
         return $this->parents;
     }
 
-    public function setParents($parents) {
+    public function setParents($parents)
+    {
         $this->parents = $parents;
     }
 
-    public function getKids() {
+    public function getKids()
+    {
         return $this->kids;
     }
 
-    public function setKids($kids) {
+    public function setKids($kids)
+    {
         $this->kids = $kids;
     }
 

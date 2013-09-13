@@ -22,18 +22,13 @@ class SerializerReferenceTest extends BaseTest
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
-                    'extension.serializer' => true
+                    'extension.serializer' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
-                'service_manager_config' => [
-                    'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    ]
-                ]
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
         $this->serializer = $manifest->getServiceManager()->get('serializer');
         $this->unserializer = $manifest->getServiceManager()->get('unserializer');
     }
@@ -136,7 +131,6 @@ class SerializerReferenceTest extends BaseTest
         $pieces = explode('/', $array['flavour']['$ref']);
         $this->assertCount(2, $pieces);
         $this->assertEquals('Flavour', $pieces[0]);
-
 
         $array['ingredients'][3] = ['name' => 'coconut'];
         $cake = $this->unserializer->fromArray(
@@ -270,6 +264,7 @@ class SerializerReferenceTest extends BaseTest
     {
         $ingredient = new Ingredient($name);
         $this->documentManager->persist($ingredient);
+
         return $ingredient;
     }
 }

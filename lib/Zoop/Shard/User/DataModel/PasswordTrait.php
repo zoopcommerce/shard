@@ -60,6 +60,7 @@ trait PasswordTrait
         if (!isset($this->salt)) {
             $this->salt = SaltGenerator::generateSalt();
         }
+
         return $this->salt;
     }
 

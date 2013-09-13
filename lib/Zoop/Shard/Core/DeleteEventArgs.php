@@ -18,7 +18,8 @@ class DeleteEventArgs extends AbstractEventArgs implements RejectInterface
 {
     use RejectTrait;
 
-    public function __construct($document, ClassMetadata $metadata, BaseEventManager $eventManager) {
+    public function __construct($document, ClassMetadata $metadata, BaseEventManager $eventManager)
+    {
         $this->document = $document;
         $this->metadata = $metadata;
         $this->eventManager = $eventManager;

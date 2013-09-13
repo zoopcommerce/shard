@@ -51,7 +51,8 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 
         $changeSet = $eventArgs->getChangeSet();
         $count = 0;
-        array_walk($metadata->softDelete,
+        array_walk(
+            $metadata->softDelete,
             function ($item) use ($changeSet, &$count) {
                 if (array_key_exists($item, $changeSet)) {
                     ++$count;
@@ -59,7 +60,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             }
         );
 
-        if (count($changeSet) == $count){
+        if (count($changeSet) == $count) {
             return;
         }
 
@@ -78,10 +79,14 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         if (! isset($this->softDeleter)) {
             $this->softDeleter = $this->serviceLocator->get('softDeleter');
         }
+
         return $this->softDeleter;
     }
 
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs){
-        $eventArgs->addSerialized('softDelete');
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
+    {
+        if (isset($eventArgs->getMetadata()->softDelete)) {
+            $eventArgs->addSerialized('softDelete');
+        }
     }
 }

@@ -22,23 +22,28 @@ abstract class AbstractChangeEventArgs extends AbstractEventArgs implements Reje
 
     protected $recompute = [];
 
-    public function getChangeSet() {
+    public function getChangeSet()
+    {
         return $this->changeSet;
     }
 
-    public function getRecompute() {
+    public function getRecompute()
+    {
         return $this->recompute;
     }
 
-    public function setRecompute(array $recompute) {
+    public function setRecompute(array $recompute)
+    {
         $this->recompute = $recompute;
     }
 
-    public function addRecompute($field) {
+    public function addRecompute($field)
+    {
         $this->recompute[] = $field;
     }
 
-    public function __construct($document, ClassMetadata $metadata, array $changeSet, BaseEventManager $eventManager) {
+    public function __construct($document, ClassMetadata $metadata, array $changeSet, BaseEventManager $eventManager)
+    {
         $this->document = $document;
         $this->metadata = $metadata;
         $this->changeSet = $changeSet;

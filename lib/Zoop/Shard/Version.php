@@ -4,5 +4,5 @@ namespace Zoop\Shard;
 
 class Version
 {
-    const VERSION = '1.0';
+    const VERSION = '2.0';
 }

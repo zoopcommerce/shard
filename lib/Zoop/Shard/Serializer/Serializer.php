@@ -49,8 +49,8 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
 
     /**
      *
-     * @param object $document
-     * @param DocumentManager $documentManager
+     * @param  object          $document
+     * @param  DocumentManager $documentManager
      * @return array
      */
     public function toArray($document)
@@ -60,8 +60,8 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
 
     /**
      *
-     * @param object $document
-     * @param DocumentManager $documentManager
+     * @param  object          $document
+     * @param  DocumentManager $documentManager
      * @return string
      */
     public function toJson($document)
@@ -92,13 +92,14 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
         ) {
             return false;
         }
+
         return true;
     }
 
     /**
      *
-     * @param object | array $document
-     * @param DocumentManager $documentManager
+     * @param  object | array          $document
+     * @param  DocumentManager         $documentManager
      * @return array
      * @throws \BadMethodCallException
      */
@@ -144,7 +145,7 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
             $metadata->isSingleValuedAssociation($field)
         ) {
             return $this->serializeSingleObject($metadata, $value, $field);
-        } else if ($metadata->hasAssociation($field)) {
+        } elseif ($metadata->hasAssociation($field)) {
             return $this->serializeCollection($metadata, $value, $field);
         } else {
             return $this->serializeSingleValue($metadata, $value, $field);
@@ -191,7 +192,13 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
             if ($this->nestingDepth < $this->maxNestingDepth) {
                 $this->nestingDepth++;
                 foreach ($value as $index => $referenceDocument) {
-                    $result = $this->serializeCollectionItem($referenceDocument, $index, $mapping, $this->getReferenceSerializer($field, $metadata), $result);
+                    $result = $this->serializeCollectionItem(
+                        $referenceDocument,
+                        $index,
+                        $mapping,
+                        $this->getReferenceSerializer($field, $metadata),
+                        $result
+                    );
                 }
                 $this->nestingDepth--;
             }
@@ -200,6 +207,7 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
         if (count($result) == 0) {
             return;
         }
+
         return $result;
     }
 
@@ -210,7 +218,8 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
         }
 
         if (isset($mapping['discriminatorMap'])) {
-            $serializedDocument[$mapping['discriminatorField']] = array_search(get_class($document), $mapping['discriminatorMap']);
+            $serializedDocument[$mapping['discriminatorField']] =
+                array_search(get_class($document), $mapping['discriminatorMap']);
         }
         if ($mapping['strategy'] == 'set') {
             $targetMetadata = $this->objectManager->getClassMetadata(get_class($document));
@@ -235,6 +244,7 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
         if (array_key_exists($type, $this->typeSerializers)) {
             return $this->getTypeSerializer($type)->serialize($value);
         }
+
         return $value;
     }
 
@@ -245,6 +255,7 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
         } else {
             $name = 'serializer.reference.refLazy';
         }
+
         return $this->serviceLocator->get($name);
     }
 

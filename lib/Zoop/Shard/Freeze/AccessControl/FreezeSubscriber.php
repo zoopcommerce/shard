@@ -93,6 +93,7 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
         if (! isset($this->freezer)) {
             $this->freezer = $this->serviceLocator->get('freezer');
         }
+
         return $this->freezer;
     }
 }

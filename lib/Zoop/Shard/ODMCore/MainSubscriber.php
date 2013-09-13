@@ -20,7 +20,6 @@ use Zoop\Shard\Core\LoadMetadataEventArgs;
 use Zoop\Shard\Core\CreateEventArgs;
 use Zoop\Shard\Core\DeleteEventArgs;
 use Zoop\Shard\Core\UpdateEventArgs;
-use Zoop\Shard\GetDocumentManagerTrait;
 
 /**
  *
@@ -30,7 +29,6 @@ use Zoop\Shard\GetDocumentManagerTrait;
 class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 {
     use ServiceLocatorAwareTrait;
-    use GetDocumentManagerTrait;
 
     /**
      *
@@ -72,7 +70,10 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             }
         }
 
-        $eventManager->dispatchEvent(CoreEvents::LOAD_METADATA, new LoadMetadataEventArgs($metadata, $parentMetadata, $this->annotationReader, $eventManager));
+        $eventManager->dispatchEvent(
+            CoreEvents::LOAD_METADATA,
+            new LoadMetadataEventArgs($metadata, $parentMetadata, $this->annotationReader, $eventManager)
+        );
     }
 
     /**
@@ -119,6 +120,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             $eventManager->dispatchEvent($event, $createEventArgs);
             if ($createEventArgs->getReject()) {
                 $this->rejectCreate($document, $documentManager);
+
                 return;
             }
             if (count($createEventArgs->getRecompute()) > 0) {
@@ -157,7 +159,8 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         foreach ($events as $event) {
             $eventManager->dispatchEvent($event, $updateEventArgs);
             if ($updateEventArgs->getReject()) {
-                $this->rejectUpdate($document, $updateEventArgs->getChangeSet(), $documentManager);
+                $this->rejectUpdate($document, $documentManager);
+
                 return;
             }
             if (count($updateEventArgs->getRecompute()) > 0) {
@@ -208,18 +211,11 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         $unitOfWork->detach($document);
     }
 
-    protected function rejectUpdate($document, $changeSet, $documentManager)
+    protected function rejectUpdate($document, $documentManager)
     {
-        $unitOfWork = $documentManager->getUnitOfWork();
-        $metadata = $documentManager->getClassMetadata(get_class($document));
-
-        //roll back changes
-        foreach ($changeSet as $field => $change) {
-            $metadata->setFieldValue($document, $field, $change[0]);
-        }
-
         //stop updates
-        $unitOfWork->clearDocumentChangeSet(spl_object_hash($document));
+        $documentManager->refresh($document);
+        $documentManager->getUnitOfWork()->clearDocumentChangeSet(spl_object_hash($document));
     }
 
     protected function rejectDelete($document, $documentManager)
@@ -234,7 +230,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         $changeSet = $eventArgs->getChangeSet();
         $metadata = $eventArgs->getMetadata();
 
-        foreach ($eventArgs->getRecompute() as $field){
+        foreach ($eventArgs->getRecompute() as $field) {
             if (isset($changeSet[$field])) {
                 $oldValue = $changeSet[$field][0];
             } else {

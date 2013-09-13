@@ -20,21 +20,16 @@ class SerializerCustomTypeSerializerTest extends BaseTest
                         'type_serializers' => [
                             'string' => 'stringTypeSerializer'
                         ]
-                    ]
+                    ],
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
-                'service_manager_config' => [
-                    'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    ]
-                ]
             ]
         );
 
         $manifest->getServiceManager()
             ->setInvokableClass('stringTypeSerializer', 'Zoop\Shard\Test\Serializer\TestAsset\StringSerializer');
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
         $this->serializer = $manifest->getServiceManager()->get('serializer');
         $this->unserializer = $manifest->getServiceManager()->get('unserializer');
     }

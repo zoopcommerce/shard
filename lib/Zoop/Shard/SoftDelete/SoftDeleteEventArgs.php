@@ -20,8 +20,9 @@ use Zoop\Shard\Core\RejectTrait;
 class SoftDeleteEventArgs extends AbstractEventArgs implements RejectInterface
 {
     use RejectTrait;
-    
-    public function __construct($document, ClassMetadata $metadata, EventManager $eventManager) {
+
+    public function __construct($document, ClassMetadata $metadata, EventManager $eventManager)
+    {
         $this->document = $document;
         $this->metadata = $metadata;
         $this->eventManager = $eventManager;

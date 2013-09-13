@@ -91,6 +91,7 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
         if (! isset($this->softDeleter)) {
             $this->softDeleter = $this->serviceLocator->get('softDeleter');
         }
+
         return $this->softDeleter;
     }
 }

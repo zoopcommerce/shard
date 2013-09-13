@@ -44,7 +44,7 @@ class Freeze extends BsonFilter
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Mapping\ClassMetadata $targetMetadata
+     * @param  \Doctrine\ODM\MongoDB\Mapping\ClassMetadata $targetMetadata
      * @return array
      */
     public function addFilterCriteria(ClassMetadata $metadata)
@@ -52,6 +52,7 @@ class Freeze extends BsonFilter
         if (isset($metadata->freeze['flag'])) {
             return array($metadata->freeze['flag'] => $this->parameters['frozen']);
         }
+
         return array();
     }
 }

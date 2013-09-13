@@ -37,6 +37,7 @@ class Eager implements ReferenceSerializerInterface, ServiceLocatorAwareInterfac
         if (!isset($this->serializer)) {
             $this->serializer = $this->serviceLocator->get('serializer');
         }
+
         return $this->serializer;
     }
 }

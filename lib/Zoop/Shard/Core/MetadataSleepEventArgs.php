@@ -15,7 +15,7 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-abstract class MetadataSleepEventArgs extends BaseEventArgs
+class MetadataSleepEventArgs extends BaseEventArgs
 {
     protected $metadata;
 
@@ -23,27 +23,33 @@ abstract class MetadataSleepEventArgs extends BaseEventArgs
 
     protected $serialized;
 
-    public function getMetadata() {
+    public function getMetadata()
+    {
         return $this->metadata;
     }
 
-    public function getEventManager() {
+    public function getEventManager()
+    {
         return $this->eventManager;
     }
 
-    public function getSerialized() {
+    public function getSerialized()
+    {
         return $this->serialized;
     }
 
-    public function setSerialized($serialized) {
+    public function setSerialized($serialized)
+    {
         $this->serialized = $serialized;
     }
 
-    public function addSerialized($name) {
+    public function addSerialized($name)
+    {
         $this->serialized[] = $name;
     }
 
-    public function __construct(ClassMetadata $metadata, array $serialized, EventManager $eventManager) {
+    public function __construct(ClassMetadata $metadata, array $serialized, EventManager $eventManager)
+    {
         $this->metadata = $metadata;
         $this->serialized = $serialized;
         $this->eventManager = $eventManager;

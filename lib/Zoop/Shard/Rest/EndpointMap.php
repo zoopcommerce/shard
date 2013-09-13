@@ -38,6 +38,7 @@ class EndpointMap
             $endpoint->setName($name);
             $this->map[$name] = $endpoint;
         }
+
         return $endpoint;
     }
 

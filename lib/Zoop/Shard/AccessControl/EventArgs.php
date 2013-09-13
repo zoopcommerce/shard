@@ -32,7 +32,7 @@ class EventArgs extends BaseEventArgs
     /**
      *
      * @param object $document
-     * @param array $messages
+     * @param array  $messages
      */
     public function __construct(
         $document,

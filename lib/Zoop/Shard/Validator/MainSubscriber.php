@@ -38,6 +38,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             CoreEvents::VALIDATE,
             CoreEvents::METADATA_SLEEP,
         ];
+
         return $events;
     }
 
@@ -59,8 +60,11 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         }
     }
 
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs){
-        $eventArgs->addSerialized('validator');
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
+    {
+        if (isset($eventArgs->getMetadata()->validator)) {
+            $eventArgs->addSerialized('validator');
+        }
     }
 
     /**
@@ -72,6 +76,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         if (! isset($this->documentValidator)) {
             $this->documentValidator = $this->serviceLocator->get('documentValidator');
         }
+
         return $this->documentValidator;
     }
 }

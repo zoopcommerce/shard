@@ -28,7 +28,6 @@ class User
      */
     protected $password;
 
-
     /** @ODM\EmbedMany(targetDocument="Group") */
     protected $groups;
 

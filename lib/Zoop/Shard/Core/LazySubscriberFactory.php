@@ -3,7 +3,7 @@
  * @package    Zoop
  * @license    MIT
  */
-namespace Zoop\Shard;
+namespace Zoop\Shard\Core;
 
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -19,7 +19,7 @@ class LazySubscriberFactory implements FactoryInterface
 
     /**
      *
-     * @param \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator
+     * @param  \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator
      * @return object
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
@@ -27,6 +27,7 @@ class LazySubscriberFactory implements FactoryInterface
         $instance = new LazySubscriber();
 
         $instance->setConfig($serviceLocator->get('manifest')->getLazySubscriberConfig());
+
         return $instance;
     }
 }

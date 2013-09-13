@@ -16,7 +16,7 @@ class DateToTimestamp implements TypeSerializerInterface
 {
     public function serialize($value)
     {
-        switch (true){
+        switch (true) {
             case $value instanceof \MongoDate:
                 return $value->sec;
                 break;

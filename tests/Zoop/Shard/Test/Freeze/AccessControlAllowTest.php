@@ -21,16 +21,16 @@ class AccessControlAllowTest extends BaseTest
                 ],
                 'extension_configs' => [
                     'extension.freeze' => true,
-                    'extension.accessControl' => true
+                    'extension.accessControl' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
                 'service_manager_config' => [
                     'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
                         'user' => function () {
                             $user = new RoleAwareUser();
                             $user->setUsername('toby');
                             $user->addRole('admin');
+
                             return $user;
                         }
                     ]
@@ -38,7 +38,7 @@ class AccessControlAllowTest extends BaseTest
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
         $this->freezer = $manifest->getServiceManager()->get('freezer');
     }
 

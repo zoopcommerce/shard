@@ -51,15 +51,16 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
         if (!$includeId) {
             unset($return[$metadata->getIdentifier()]);
         }
+
         return $return;
     }
 
     /**
      * This will create a document from the supplied array.
      *
-     * @param array $data
-     * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
-     * @param string $className
+     * @param  array                                 $data
+     * @param  \Doctrine\ODM\MongoDB\DocumentManager $documentManager
+     * @param  string                                $className
      * @return object
      */
     public function fromArray(
@@ -75,9 +76,9 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
      * This will create a document from the supplied json string.
      * WARNING: the constructor of the document will not be called.
      *
-     * @param string $data
-     * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
-     * @param string $className
+     * @param  string                                $data
+     * @param  \Doctrine\ODM\MongoDB\DocumentManager $documentManager
+     * @param  string                                $className
      * @return object
      */
     public function fromJson(
@@ -91,10 +92,10 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
 
     /**
      *
-     * @param array $data
-     * @param array $className
-     * @param type $mode
-     * @param type $document
+     * @param  array                            $data
+     * @param  array                            $className
+     * @param  type                             $mode
+     * @param  type                             $document
      * @return type
      * @throws Exception\ClassNotFoundException
      */
@@ -108,12 +109,15 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
 
         // Check for discrimnator and discriminator field in data
         if (isset($metadata->discriminatorField) && isset($data[$metadata->discriminatorField['fieldName']])) {
-            $metadata = $this->objectManager->getClassMetadata($metadata->discriminatorMap[$data[$metadata->discriminatorField['fieldName']]]);
+            $metadata = $this->objectManager->getClassMetadata(
+                $metadata->discriminatorMap[$data[$metadata->discriminatorField['fieldName']]]
+            );
         }
 
         // Check for reference
         if (isset($data['$ref'])) {
             $pieces = explode('/', $data['$ref']);
+
             return $this->objectManager->getRepository($metadata->name)->find($pieces[count($pieces) - 1]);
         }
 
@@ -139,7 +143,7 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
     {
         if ($metadata->hasAssociation($field) && $metadata->isSingleValuedAssociation($field)) {
             $value = $this->unserializeSingleObject($data, $metadata, $document, $field, $mode);
-        } else if ($metadata->hasAssociation($field)) {
+        } elseif ($metadata->hasAssociation($field)) {
             $value = $this->unserializeCollection($data, $metadata, $document, $field, $mode);
         } else {
             $value = $this->unserializeSingleValue($data, $metadata, $field);
@@ -147,7 +151,7 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
 
         if (isset($value)) {
             $metadata->setFieldValue($document, $field, $value);
-        } else if ($mode == self::UNSERIALIZE_UPDATE) {
+        } elseif ($mode == self::UNSERIALIZE_UPDATE) {
             $metadata->setFieldValue($document, $field, null);
         }
     }
@@ -162,6 +166,7 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
 
         if (isset($data[$field]['$ref'])) {
             $pieces = explode('/', $data[$field]['$ref']);
+
             return $this->objectManager->getRepository($targetClass)->find($pieces[count($pieces) - 1]);
         }
         if (is_string($data[$field])) {
@@ -192,7 +197,7 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
                 }
                 $collection[$index] = $this->unserialize($dataItem, $targetClass, $collection[$index], $mode);
             }
-        } else if ($mode == self::UNSERIALIZE_UPDATE) {
+        } elseif ($mode == self::UNSERIALIZE_UPDATE) {
             foreach ($collection->getKeys() as $key) {
                 $collection->remove($key);
             }
