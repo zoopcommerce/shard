@@ -1349,7 +1349,6 @@ $manifest = new Zoop\Shard\Manifest([
     ...
     'extension_configs' => [
         'extension.serializer' => [
-            'class_name_field' => ...,
             'type_serializers' => [...]
             'max_nesting_depth' => [...]
         ]
@@ -1368,12 +1367,6 @@ $manifest = new Zoop\Shard\Manifest([
    </tr>
   </thead>
   <tbody>
-<tr>
-    <td>class_name_filed</td>
-    <td>string</td>
-    <td>_className</td>
-    <td>If the class name of a document is serialized, this is the property name that will be used.</td>
-</tr>
 <tr>
     <td>type_serializer</td>
     <td>array</td>
@@ -1399,48 +1392,13 @@ $array = $serializer->toArray($myDocument); //serialize to array
 $json = $serializer->toJson($myDocument);   //serialize to json
 </pre>
 
-    <p>Serialization rules can be applied to an array. This can be very handy when retrieving a document using doctrine without hydration.</p>
-<pre class="prettyprint linenums">
-$array = $serializer->applySerializeMetadataToArray($myDocumentArray, 'My\Documents\Class');
-</pre>
-
-    <h2>@Shard\Serializer\ClassName</h2>
-
-    <p>Put this annotation on a document to make sure the class name of the document is also serialized. Eg:</p>
-<pre class="prettyprint linenums">
-namespace My\Document;
-/**
- * @ODM\Document
- * @Shard\Serializer\ClassName
- */
-class Test {
-    ...
-}
-</pre>
-
-    <p>When an instance of this document is serialized to an array, it will look like this:</p>
-<pre class="prettyprint linenums">
-[
-    '_className' => 'My\Document\Test',
-    ...
-]
-</pre>
-
-    <p>Serializing the class name makes future unserialization much simpler.</p>
-    <p>The <code>_className</code> field name can be changed in the serializer extencion configuration.</p>
-
-    <h2>@Shard\Serializer\Discriminator</h2>
-
-    <p>Much the same as <code>@Shard\Serializer\ClassName</code>. Will serialize a document's discriminator if it has one.</p>
-
-    <h2>@Shard\Serializer\Ignore</h2>
+    <h2>@Shard\Serializer\Ignore and @Shard\Unserializer\Ignore</h2>
     <p>Place on a document field to control if the field is serialized</p>
 
     <p>Always ignore the field, eg:</p>
 <pre class="prettyprint linenums">
 /**
  * @ODM\String
- * @Shard\Serializer\Ignore
  */
 protected MyProperty;
 
@@ -1448,7 +1406,8 @@ protected MyProperty;
 
 /**
  * @ODM\String
- * @Shard\Serializer\Ignore("ignore_always")
+ * @Shard\Serializer\Ignore
+ * @Shard\Unserializer\Ignore
  */
 protected MyProperty;
 </pre>
@@ -1457,7 +1416,7 @@ protected MyProperty;
 <pre class="prettyprint linenums">
 /**
  * @ODM\String
- * @Shard\Serializer\Ignore("ignore_when_serializing")
+ * @Shard\Serializer\Ignore
  */
 protected MyProperty;
 </pre>
@@ -1466,7 +1425,7 @@ protected MyProperty;
 <pre class="prettyprint linenums">
 /**
  * @ODM\String
- * @Shard\Serializer\Ignore("ignore_when_unserializing")
+ * @Shard\Unserializer\Ignore
  */
 protected MyProperty;
 </pre>
@@ -1598,6 +1557,12 @@ $manifest = new Zoop\Shard\Manifest([
 
     <h2>Unserializing Documents</h2>
 
+    <p>Get the unserializer from the service manager:</p>
+
+<pre class="prettyprint linenums">
+$unserializer = $manifest->getServiceManager()->get('unserializer');
+</pre>
+
     <p>Both <code>fromArray</code> and <code>fromJson</code> will unserialize an array or json into a document. They take up to four arguments:</p>
 
 <table class="table table-bordered table-striped">
@@ -1620,13 +1585,7 @@ $manifest = new Zoop\Shard\Manifest([
     <td>className</td>
     <td>string</td>
     <td>null</td>
-    <td>The class name of the document instance to create. If not supplied, the <code>_className</code> field of the <code>data</code> argument will be used.</td>
-</tr>
-<tr>
-    <td>mode</td>
-    <td>string</td>
-    <td>unserialize_patch</td>
-    <td>Must be either <code>unserialize_update</code> or <code>unserialize_patch</code>. If <code>unserialize_update</code> is used, the unserialized document will replace any existing document in the db with the same id. If <code>unserialize_patch</code> is used the unserialized data will be merged with any existing document in the db.</td>
+    <td>The class name of the document instance to create.</td>
 </tr>
 <tr>
     <td>document</td>
@@ -1634,9 +1593,14 @@ $manifest = new Zoop\Shard\Manifest([
     <td>null</td>
     <td>If supplied, the unserializer won't attempt to load any document from the db, but use this one instead.</td>
 </tr>
+<tr>
+    <td>mode</td>
+    <td>string</td>
+    <td>unserialize_patch</td>
+    <td>Must be either <code>unserialize_update</code> or <code>unserialize_patch</code>. If <code>unserialize_update</code> is used, the unserialized document will replace any existing document in the db with the same id. If <code>unserialize_patch</code> is used the unserialized data will be merged with any existing document in the db.</td>
+</tr>
 </tbody>
 </table>
-
 
 </section>
 <section id="soft-delete" title="Soft Delete">
