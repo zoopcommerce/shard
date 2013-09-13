@@ -20,16 +20,16 @@ class AccessControlledReferenceAllowTest extends BaseTest
                 ],
                 'extension_configs' => [
                     'extension.accessControl' => true,
-                    'extension.serializer' => true
+                    'extension.serializer' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
                 'service_manager_config' => [
                     'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
                         'user' => function () {
                             $user = new RoleAwareUser();
                             $user->setUsername('toby');
                             $user->addRole('user');
+
                             return $user;
                         }
                     ]
@@ -37,7 +37,7 @@ class AccessControlledReferenceAllowTest extends BaseTest
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
         $this->serializer = $manifest->getServiceManager()->get('serializer');
     }
 

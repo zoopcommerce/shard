@@ -4,7 +4,7 @@ namespace Zoop\Shard\Test\Serializer;
 
 use Zoop\Shard\Manifest;
 use Zoop\Shard\Test\BaseTest;
-use Zoop\Shard\Serializer\Serializer;
+use Zoop\Shard\Serializer\Unserializer;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\User;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\Group;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\Profile;
@@ -19,19 +19,15 @@ class UnserializeModeTest extends BaseTest
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
-                    'extension.serializer' => true
+                    'extension.serializer' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
-                'service_manager_config' => [
-                    'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    ]
-                ]
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
         $this->serializer = $manifest->getServiceManager()->get('serializer');
+        $this->unserializer = $manifest->getServiceManager()->get('unserializer');
     }
 
     public function testUnserializePatch()
@@ -51,12 +47,12 @@ class UnserializeModeTest extends BaseTest
         $id = $user->getId();
         $documentManager->clear();
 
-        $updated = $this->serializer->fromArray(
+        $updated = $this->unserializer->fromArray(
             [
-                '_className' => 'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
                 'id' => $id,
                 'location' => 'there'
-            ]
+            ],
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
         );
 
         $this->assertEquals('there', $updated->location());
@@ -85,14 +81,14 @@ class UnserializeModeTest extends BaseTest
         $id = $user->getId();
         $documentManager->clear();
 
-        $updated = $this->serializer->fromArray(
+        $updated = $this->unserializer->fromArray(
             [
-                '_className' => 'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
                 'id' => $id,
                 'location' => 'there'
             ],
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
             null,
-            Serializer::UNSERIALIZE_UPDATE
+            Unserializer::UNSERIALIZE_UPDATE
         );
 
         $this->assertEquals('there', $updated->location());

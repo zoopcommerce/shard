@@ -21,24 +21,18 @@ class ValidatorTest extends BaseTest
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
-                    'extension.validator' => true
+                    'extension.validator' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
-                'service_manager_config' => [
-                    'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    ]
-                ]
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
 
         $eventManager = $this->documentManager->getEventManager();
-        $eventManager->addEventListener(Events::INVALID_CREATE, $this);
-        $eventManager->addEventListener(Events::INVALID_UPDATE, $this);
+        $eventManager->addEventListener(Events::INVALID_OBJECT, $this);
 
-        $this->calls = array();
+        $this->calls = [];
     }
 
     public function testRequired()
@@ -50,11 +44,10 @@ class ValidatorTest extends BaseTest
         $documentManager->persist($testDoc);
         $documentManager->flush();
 
-        $this->assertTrue(isset($this->calls[Events::INVALID_CREATE]));
-        $this->assertFalse(isset($this->calls[Events::INVALID_UPDATE]));
+        $this->assertTrue(isset($this->calls[Events::INVALID_OBJECT]));
         $this->assertCount(
             1,
-            $this->calls[Events::INVALID_CREATE][0]->getResult()->getFieldResults()['name']->getMessages()
+            $this->calls[Events::INVALID_OBJECT][0]->getResult()->getFieldResults()['name']->getMessages()
         );
 
         $id = $testDoc->getId();
@@ -76,11 +69,10 @@ class ValidatorTest extends BaseTest
         $documentManager->persist($testDoc);
         $documentManager->flush();
 
-        $this->assertTrue(isset($this->calls[Events::INVALID_CREATE]));
-        $this->assertFalse(isset($this->calls[Events::INVALID_UPDATE]));
+        $this->assertTrue(isset($this->calls[Events::INVALID_OBJECT]));
         $this->assertCount(
             2,
-            $this->calls[Events::INVALID_CREATE][0]->getResult()->getFieldResults()['name']->getMessages()
+            $this->calls[Events::INVALID_OBJECT][0]->getResult()->getFieldResults()['name']->getMessages()
         );
 
         $id = $testDoc->getId();
@@ -102,8 +94,7 @@ class ValidatorTest extends BaseTest
         $documentManager->persist($testDoc);
         $documentManager->flush();
 
-        $this->assertFalse(isset($this->calls[Events::INVALID_CREATE]));
-        $this->assertFalse(isset($this->calls[Events::INVALID_UPDATE]));
+        $this->assertFalse(isset($this->calls[Events::INVALID_OBJECT]));
 
         $id = $testDoc->getId();
         $documentManager->clear();
@@ -132,11 +123,10 @@ class ValidatorTest extends BaseTest
         $testDoc->setName('invalid');
         $documentManager->flush();
 
-        $this->assertFalse(isset($this->calls[Events::INVALID_CREATE]));
-        $this->assertTrue(isset($this->calls[Events::INVALID_UPDATE]));
+        $this->assertTrue(isset($this->calls[Events::INVALID_OBJECT]));
         $this->assertCount(
             2,
-            $this->calls[Events::INVALID_UPDATE][0]->getResult()->getFieldResults()['name']->getMessages()
+            $this->calls[Events::INVALID_OBJECT][0]->getResult()->getFieldResults()['name']->getMessages()
         );
 
         $documentManager->clear();
@@ -163,8 +153,7 @@ class ValidatorTest extends BaseTest
         $testDoc->setName('alsoValid');
         $documentManager->flush();
 
-        $this->assertFalse(isset($this->calls[Events::INVALID_CREATE]));
-        $this->assertFalse(isset($this->calls[Events::INVALID_UPDATE]));
+        $this->assertFalse(isset($this->calls[Events::INVALID_OBJECT]));
 
         $documentManager->clear();
         $testDoc = $repository->find($id);

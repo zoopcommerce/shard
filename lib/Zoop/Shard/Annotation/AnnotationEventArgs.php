@@ -32,9 +32,9 @@ class AnnotationEventArgs extends BaseEventArgs
     /**
      *
      * @param \Doctrine\ODM\MongoDB\Mapping\ClassMetadataInfo $metadata
-     * @param string $eventType
-     * @param \Doctrine\Common\Annotations\Annotation $annotation
-     * @param mixed $reflection
+     * @param string                                          $eventType
+     * @param \Doctrine\Common\Annotations\Annotation         $annotation
+     * @param mixed                                           $reflection
      */
     public function __construct(
         ClassMetadataInfo $metadata,

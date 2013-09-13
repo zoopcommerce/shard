@@ -20,18 +20,13 @@ class AccessControlFreezeDenyTest extends BaseTest
                 ],
                 'extension_configs' => [
                     'extension.freeze' => true,
-                    'extension.accesscontrol' => true
+                    'extension.accesscontrol' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
-                'service_manager_config' => [
-                    'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    ]
-                ]
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
         $this->freezer = $manifest->getServiceManager()->get('freezer');
     }
 
@@ -44,6 +39,7 @@ class AccessControlFreezeDenyTest extends BaseTest
         $eventManager->addEventListener(Events::FREEZE_DENIED, $this);
 
         $testDoc = new AccessControlled();
+        $metadata = $documentManager->getClassMetadata(get_class($testDoc));
 
         $testDoc->setName('version 1');
 
@@ -55,13 +51,13 @@ class AccessControlFreezeDenyTest extends BaseTest
         $repository = $documentManager->getRepository(get_class($testDoc));
         $testDoc = $repository->find($id);
 
-        $this->freezer->freeze($testDoc);
+        $this->freezer->freeze($testDoc, $metadata);
 
         $documentManager->flush();
         $documentManager->clear();
 
         $testDoc = $repository->find($id);
-        $this->assertFalse($this->freezer->isFrozen($testDoc));
+        $this->assertFalse($this->freezer->isFrozen($testDoc, $metadata));
         $this->assertTrue(isset($this->calls[Events::FREEZE_DENIED]));
     }
 

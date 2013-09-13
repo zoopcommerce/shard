@@ -20,23 +20,18 @@ class SerializerCustomTypeSerializerTest extends BaseTest
                         'type_serializers' => [
                             'string' => 'stringTypeSerializer'
                         ]
-                    ]
+                    ],
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
-                'service_manager_config' => [
-                    'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    ]
-                ]
             ]
         );
 
         $manifest->getServiceManager()
             ->setInvokableClass('stringTypeSerializer', 'Zoop\Shard\Test\Serializer\TestAsset\StringSerializer');
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
         $this->serializer = $manifest->getServiceManager()->get('serializer');
-
+        $this->unserializer = $manifest->getServiceManager()->get('unserializer');
     }
 
     public function testSerializer()
@@ -48,24 +43,13 @@ class SerializerCustomTypeSerializerTest extends BaseTest
         $this->assertEquals('Cherry', $array['name']);
     }
 
-
-    public function testApplySerializeMetadataToArray()
-    {
-        $array = $this->serializer->ApplySerializeMetadataToArray(
-            ['name' => 'cherry'],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\Flavour'
-        );
-
-        $this->assertEquals('Cherry', $array['name']);
-    }
-
     public function testUnserializer()
     {
         $data = array(
             'name' => 'Cherry'
         );
 
-        $flavour = $this->serializer->fromArray(
+        $flavour = $this->unserializer->fromArray(
             $data,
             'Zoop\Shard\Test\Serializer\TestAsset\Document\Flavour'
         );

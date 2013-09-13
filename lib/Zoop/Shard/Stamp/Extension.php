@@ -19,12 +19,14 @@ class Extension extends AbstractExtension
     protected $subscribers = [
         'subscriber.stamp.mainsubscriber',
         'subscriber.stamp.annotationsubscriber',
+        'subscriber.stamp.rolessubscriber',
     ];
 
     protected $serviceManagerConfig = [
         'invokables' => [
             'subscriber.stamp.mainsubscriber' => 'Zoop\Shard\Stamp\MainSubscriber',
             'subscriber.stamp.annotationsubscriber' => 'Zoop\Shard\Stamp\AnnotationSubscriber',
+            'subscriber.stamp.rolessubscriber' => 'Zoop\Shard\Stamp\RolesSubscriber',
         ]
     ];
 

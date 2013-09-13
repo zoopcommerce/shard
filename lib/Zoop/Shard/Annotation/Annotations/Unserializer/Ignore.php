@@ -4,24 +4,21 @@
  * @package    Zoop
  * @license    MIT
  */
-namespace Zoop\Shard\Annotation\Annotations\Serializer;
+namespace Zoop\Shard\Annotation\Annotations\Unserializer;
 
 use Doctrine\Common\Annotations\Annotation;
 
 /**
- * Serializer class annotation. If true, the serializer will add the
- * discriminator field to serialization
- *
+ * Mark a field to be skipped during unserialization.
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  *
  * @Annotation
  */
-final class Discriminator extends Annotation
+final class Ignore extends Annotation
 {
-
-    const EVENT = 'annotationSerializerDiscriminator';
+    const EVENT = 'annotationUnserializerIgnore';
 
     public $value = true;
 }

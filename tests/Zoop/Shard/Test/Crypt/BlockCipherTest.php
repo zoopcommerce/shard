@@ -2,7 +2,6 @@
 
 namespace Zoop\Shard\Test\Crypt;
 
-use Zoop\Shard\Crypt\BlockCipherHelper;
 use Zoop\Shard\Manifest;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\Crypt\TestAsset\Document\Simple;
@@ -18,18 +17,18 @@ class BlockCipherTest extends BaseTest
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
-                    'extension.crypt' => true
+                    'extension.crypt' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
                 'service_manager_config' => [
                     'invokables' => [
                         'testkey' => 'Zoop\Shard\Test\Crypt\TestAsset\Key'
                     ],
                     'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
                         'user' => function () {
                             $user = new User();
                             $user->setUsername('toby');
+
                             return $user;
                         }
                     ]
@@ -37,7 +36,7 @@ class BlockCipherTest extends BaseTest
            ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
         $this->blockCipherHelper = $manifest->getServiceManager()->get('crypt.blockcipherhelper');
     }
 

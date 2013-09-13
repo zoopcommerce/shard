@@ -7,7 +7,6 @@
 namespace Zoop\Shard\Validator;
 
 use Doctrine\Common\EventArgs as BaseEventArgs;
-use Doctrine\ODM\MongoDB\DocumentManager;
 use Zoop\Mystique\Result;
 
 /**
@@ -27,12 +26,6 @@ class EventArgs extends BaseEventArgs
 
     /**
      *
-     * @var \Doctrine\ODM\MongoDB\DocumentManager
-     */
-    protected $documentManager;
-
-    /**
-     *
      * @var array
      */
     protected $result;
@@ -40,16 +33,11 @@ class EventArgs extends BaseEventArgs
     /**
      *
      * @param object $document
-     * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
-     * @param array $messages
+     * @param array  $messages
      */
-    public function __construct(
-        $document,
-        DocumentManager $documentManager,
-        Result $result
-    ) {
+    public function __construct($document, Result $result)
+    {
         $this->document = $document;
-        $this->documentManager = $documentManager;
         $this->result = $result;
     }
 
@@ -62,22 +50,8 @@ class EventArgs extends BaseEventArgs
         return $this->document;
     }
 
-    /**
-     *
-     * @return \Doctrine\ODM\MongoDB\DocumentManager
-     */
-    public function getDocumentManager()
-    {
-        return $this->documentManager;
-    }
-
     public function getResult()
     {
         return $this->result;
-    }
-
-    public function setResult(Result $result)
-    {
-        $this->result = $result;
     }
 }

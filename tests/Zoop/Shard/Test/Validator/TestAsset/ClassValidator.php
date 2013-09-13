@@ -2,10 +2,10 @@
 
 namespace Zoop\Shard\Test\Validator\TestAsset;
 
-use Zoop\Mystique\ValidatorInterface;
+use Zoop\Mystique\Base;
 use Zoop\Mystique\Result;
 
-class ClassValidator implements ValidatorInterface
+class ClassValidator extends Base
 {
     public function isValid($value)
     {

@@ -9,7 +9,7 @@ namespace Zoop\Shard\State\AccessControl;
 use Zoop\Shard\AccessControl\AbstractAccessControlSubscriber;
 use Zoop\Shard\Annotation\Annotations as Shard;
 use Zoop\Shard\Annotation\AnnotationEventArgs;
-use Zoop\Shard\State\EventArgs as TransitionEventArgs;
+use Zoop\Shard\State\TransitionEventArgs;
 use Zoop\Shard\State\Events as Events;
 
 /**
@@ -90,24 +90,20 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber
         }
 
         $document = $eventArgs->getDocument();
-        $documentManager = $eventArgs->getDocumentManager();
-        $eventManager = $documentManager->getEventManager();
+        $eventManager = $eventArgs->getEventManager();
         $action = $eventArgs->getTransition()->getAction();
+        $metadata = $eventArgs->getMetadata();
 
-        if (! $accessController->areAllowed([$action], null, $document)->getAllowed()) {
+        if (! $accessController->areAllowed([$action], $metadata, $document)->getAllowed()) {
             //stop transition
-            $metadata = $documentManager->getClassMetadata(get_class($document));
             $metadata
                 ->reflFields[array_keys($metadata->state)[0]]
                 ->setValue($document, $eventArgs->getTransition()->getFrom());
 
-            $eventManager = $eventArgs->getDocumentManager()->getEventManager();
-            if ($eventManager->hasListeners(Events::TRANSITION_DENIED)) {
-                $eventManager->dispatchEvent(
-                    Events::TRANSITION_DENIED,
-                    $eventArgs
-                );
-            }
+            $eventManager->dispatchEvent(
+                Events::TRANSITION_DENIED,
+                $eventArgs
+            );
         }
     }
 }

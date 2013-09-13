@@ -5,8 +5,9 @@
  */
 namespace Zoop\Shard\Validator;
 
-use Zoop\Shard\DocumentManagerAwareInterface;
-use Zoop\Shard\DocumentManagerAwareTrait;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Mystique\Result;
 
 /**
@@ -15,75 +16,69 @@ use Zoop\Mystique\Result;
  * @version $Revision$
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class DocumentValidator implements DocumentValidatorInterface, DocumentManagerAwareInterface
+class DocumentValidator implements DocumentValidatorInterface, ServiceLocatorAwareInterface
 {
 
-    use DocumentManagerAwareTrait;
+    use ServiceLocatorAwareTrait;
 
     /**
      *
-     * @param object $document
+     * @param  object  $document
      * @return boolean
      */
-    public function isValid($document)
+    public function isValid($document, ClassMetadata $metadata, array $changeSet = null)
     {
-        $metadata = $this->documentManager->getClassMetadata(get_class($document));
+        $result = new DocumentValidatorResult(['value' => true]);
 
         if (! isset($metadata->validator)) {
-            return new Result(['value' => true]);
+            return $result;
         }
-
-        $result = new DocumentValidatorResult(['value' => true]);
 
         // Field level validators
         if (isset($metadata->validator['fields'])) {
             foreach ($metadata->validator['fields'] as $field => $validatorDefinition) {
 
-                //check for hashed or encrypted values - if the field has been persisted, and is unchanged,
-                //it is assumed to be vaild. If the encrypted value is passed to the validators, then
-                //it is likely fail, which isn't correct.
-                if ((isset($metadata->crypt['hash'][$field]) ||
-                    isset($metadata->crypt['blockCipher'][$field]))
-                ) {
-                    $originalDocumentData = $this->documentManager->getUnitOfWork()->getOriginalDocumentData($document);
-                    if (isset($originalDocumentData) &&
-                        isset($originalDocumentData[$field]) &&
-                        $originalDocumentData[$field] == $metadata->reflFields[$field]->getValue($document)
-                    ) {
-                        //encrypted value hasn't changed, so skip validation of it.
-                        continue;
-                    }
+                //if a change set is provided, only validate fields that have changed
+                if (isset($changeSet) && ! isset($changeSet[$field])) {
+                    continue;
                 }
 
-                $validator = ValidatorFactory::create($validatorDefinition);
-                $value = $metadata->reflFields[$field]->getValue($document);
-
-                $validatorResult = $validator->isValid($value);
-
-                $result->addFieldResult($field, $validatorResult);
-                foreach ($validatorResult->getMessages() as $message) {
-                    $result->addMessage($field . ': ' . $message);
-                }
-                if (! $validatorResult->getValue()) {
-                    $result->setValue(false);
-                }
+                $result->addFieldResult(
+                    $field,
+                    $this->getValidator($validatorDefinition)->isValid(
+                        $metadata->getFieldValue($document, $field)
+                    )
+                );
             }
         }
 
         // Document level validators
         if (isset($metadata->validator['document'])) {
-            $validator = ValidatorFactory::create($metadata->validator['document']);
-            $validatorResult = $validator->isValid($value);
-
-            $result->addClassResult($validatorResult);
-            foreach ($validatorResult->getMessages() as $message) {
-                $result->addMessage('document: ' . $message);
-            }
-            if (! $validatorResult->getValue()) {
-                $result->setValue(false);
-            }
+            $result->addClassResult(
+                $this->getValidator($metadata->validator['document'])->isValid($document)
+            );
         }
 
         return $result;
+    }
+
+    protected function getValidator($validatorDefinition)
+    {
+        $class = $validatorDefinition['class'];
+        if (isset($validatorDefinition['options'])) {
+            $options = $validatorDefinition['options'];
+        } else {
+            $options = [];
+        }
+
+        if ($class == 'Zoop\Mystique\Chain') {
+            $validators = [];
+            foreach ($options['validators'] as $subDef) {
+                $validators[] = $this->getValidator($subDef);
+            }
+            $options['validators'] = $validators;
+        }
+
+        return new $class($options);
     }
 }

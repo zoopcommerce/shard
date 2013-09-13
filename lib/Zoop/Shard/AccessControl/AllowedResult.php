@@ -51,7 +51,7 @@ class AllowedResult
         $this->new = $new;
     }
 
-    public function __construct($allowed = null, array $old = null, array $new = null)
+    public function __construct($allowed = null, array $old = [], array $new = [])
     {
         $this->allowed = isset($allowed) ? (boolean) $allowed : null;
         $this->old = $old;
@@ -60,9 +60,10 @@ class AllowedResult
 
     public function hasCriteria()
     {
-        if (isset($this->new) || isset($this->old)) {
+        if (count($this->new) > 0 || count($this->old) > 0) {
             return true;
         }
+
         return false;
     }
 }

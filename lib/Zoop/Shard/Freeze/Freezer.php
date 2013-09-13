@@ -6,34 +6,73 @@
  */
 namespace Zoop\Shard\Freeze;
 
-use Zoop\Shard\DocumentManagerAwareInterface;
-use Zoop\Shard\DocumentManagerAwareTrait;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Zoop\Shard\Core\ObjectManagerAwareInterface;
+use Zoop\Shard\Core\ObjectManagerAwareTrait;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Freezer implements DocumentManagerAwareInterface
+class Freezer implements ObjectManagerAwareInterface
 {
+    use ObjectManagerAwareTrait;
 
-    use DocumentManagerAwareTrait;
-
-    public function isFrozen($document)
+    public function getFreezeField(ClassMetadata $metadata)
     {
-        $metadata = $this->documentManager->getClassMetadata(get_class($document));
-        return $metadata->reflFields[$metadata->freeze['flag']]->getValue($document);
+        if (isset($metadata->freeze) && isset($metadata->freeze['flag'])) {
+            return $metadata->freeze['flag'];
+        }
     }
 
-    public function freeze($document)
+    public function isFrozen($document, ClassMetadata $metadata)
     {
-        $metadata = $this->documentManager->getClassMetadata(get_class($document));
-        $metadata->reflFields[$metadata->freeze['flag']]->setValue($document, true);
+        return $metadata->getFieldValue($document, $metadata->freeze['flag']);
     }
 
-    public function thaw($document)
+    public function freeze($document, ClassMetadata $metadata)
     {
-        $metadata = $this->documentManager->getClassMetadata(get_class($document));
-        $metadata->reflFields[$metadata->freeze['flag']]->setValue($document, false);
+        if (!($field = $this->getFreezeField($metadata)) || $this->isFrozen($document, $metadata)) {
+            //nothing to do
+            return;
+        }
+
+        $eventManager = $this->objectManager->getEventManager();
+
+        // Raise preFreeze
+        $freezerEventArgs = new FreezerEventArgs($document, $metadata, $eventManager);
+        $eventManager->dispatchEvent(Events::PRE_FREEZE, $freezerEventArgs);
+        if ($freezerEventArgs->getReject()) {
+            return;
+        }
+
+        //do the freeze
+        $metadata->setFieldValue($document, $field, true);
+
+        //raise post freeze
+        $eventManager->dispatchEvent(Events::POST_FREEZE, $freezerEventArgs);
+    }
+
+    public function thaw($document, ClassMetadata $metadata)
+    {
+        if (!($field = $this->getFreezeField($metadata)) || !$this->isFrozen($document, $metadata)) {
+            //nothing to do
+            return;
+        }
+
+        $eventManager = $this->objectManager->getEventManager();
+
+        // Raise preThaw
+        $freezerEventArgs = new FreezerEventArgs($document, $metadata, $eventManager);
+        $eventManager->dispatchEvent(Events::PRE_THAW, $freezerEventArgs);
+        if ($freezerEventArgs->getReject()) {
+            return;
+        }
+
+        $metadata->setFieldValue($document, $field, false);
+
+        //raise post thaw
+        $eventManager->dispatchEvent(Events::POST_THAW, $freezerEventArgs);
     }
 }

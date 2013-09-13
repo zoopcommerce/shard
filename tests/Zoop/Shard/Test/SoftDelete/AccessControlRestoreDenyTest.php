@@ -21,16 +21,16 @@ class AccessControlRestoreDenyTest extends BaseTest
                 ],
                 'extension_configs' => [
                     'extension.softDelete' => true,
-                    'extension.accessControl' => true
+                    'extension.accessControl' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
                 'service_manager_config' => [
                     'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
                         'user' => function () {
                             $user = new RoleAwareUser();
                             $user->setUsername('toby');
                             $user->addRole('user');
+
                             return $user;
                         }
                     ]
@@ -38,7 +38,7 @@ class AccessControlRestoreDenyTest extends BaseTest
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
         $this->softDeleter = $manifest->getServiceManager()->get('softDeleter');
     }
 
@@ -51,7 +51,10 @@ class AccessControlRestoreDenyTest extends BaseTest
         $eventManager->addEventListener(Events::RESTORE_DENIED, $this);
 
         $testDoc = new AccessControlled();
-        $this->softDeleter->softDelete($testDoc);
+
+        $metadata = $documentManager->getClassMetadata(get_class($testDoc));
+
+        $this->softDeleter->softDelete($testDoc, $metadata);
         $testDoc->setName('version 1');
 
         $documentManager->persist($testDoc);
@@ -62,13 +65,13 @@ class AccessControlRestoreDenyTest extends BaseTest
         $repository = $documentManager->getRepository(get_class($testDoc));
         $testDoc = $repository->find($id);
 
-        $this->softDeleter->restore($testDoc);
+        $this->softDeleter->restore($testDoc, $metadata);
 
         $documentManager->flush();
         $documentManager->clear();
 
         $testDoc = $repository->find($id);
-        $this->assertTrue($this->softDeleter->isSoftDeleted($testDoc));
+        $this->assertTrue($this->softDeleter->isSoftDeleted($testDoc, $metadata));
         $this->assertTrue(isset($this->calls[Events::RESTORE_DENIED]));
     }
 

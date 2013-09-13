@@ -51,14 +51,15 @@ class StatePermission implements PermissionInterface
         if (! strpos(self::WILD, $string)) {
             return '/^' . str_replace(PermissionInterface::WILD, '[a-zA-Z0-9_:-]*', $string) . '$/';
         }
+
         return $string;
     }
 
     /**
      * Will test if a user with the supplied roles can do ALL the supplied actions.
      *
-     * @param array $roles
-     * @param array $action
+     * @param  array                                     $roles
+     * @param  array                                     $action
      * @return \Zoop\Shard\AccessControl\IsAllowedResult
      */
     public function areAllowed(array $testRoles, array $testActions)
@@ -114,7 +115,7 @@ class StatePermission implements PermissionInterface
 
             if ($denyMatch) {
                 //one or more actions are explicitly denied
-                return new AllowedResult(false, null, [$this->stateField => $this->mongoRegex($this->states)]);
+                return new AllowedResult(false, [], [$this->stateField => $this->mongoRegex($this->states)]);
             }
             if ($allowMatch) {
                 $allowMatches++;
@@ -122,7 +123,7 @@ class StatePermission implements PermissionInterface
         }
         if ($allowMatches == count($testActions)) {
             //all actions are explicitly allowed
-            return new AllowedResult(true, null, [$this->stateField => $this->mongoRegex($this->states)]);
+            return new AllowedResult(true, [], [$this->stateField => $this->mongoRegex($this->states)]);
         }
 
         //Permission is neither explicitly allowed or denied.

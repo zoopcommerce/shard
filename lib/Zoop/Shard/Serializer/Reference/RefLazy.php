@@ -6,20 +6,24 @@
  */
 namespace Zoop\Shard\Serializer\Reference;
 
-use Zoop\Shard\DocumentManagerAwareInterface;
-use Zoop\Shard\DocumentManagerAwareTrait;
+use Zoop\Shard\Core\ObjectManagerAwareInterface;
+use Zoop\Shard\Core\ObjectManagerAwareTrait;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class RefLazy implements ReferenceSerializerInterface, DocumentManagerAwareInterface
+class RefLazy implements ReferenceSerializerInterface, ObjectManagerAwareInterface
 {
-    use DocumentManagerAwareTrait;
+    use ObjectManagerAwareTrait;
 
-    public function serialize($id, array $mapping)
+    public function serialize($document)
     {
-        return ['$ref' => $this->documentManager->getClassMetadata($mapping['targetDocument'])->collection . '/' . $id];
+        $metadata = $this->objectManager->getClassMetadata(get_class($document));
+
+        return [
+            '$ref' => $metadata->collection . '/' . $metadata->getFieldValue($document, $metadata->getIdentifier())
+        ];
     }
 }

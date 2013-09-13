@@ -7,11 +7,9 @@
 namespace Zoop\Shard\Annotation\Annotations\Serializer;
 
 use Doctrine\Common\Annotations\Annotation;
-use Zoop\Shard\Serializer\Serializer as Constants;
 
 /**
- * Mark a field to be skipped during serialization. Must be used in the context
- * of the Serializer annotation
+ * Mark a field to be skipped during serialization.
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
@@ -22,5 +20,5 @@ final class Ignore extends Annotation
 {
     const EVENT = 'annotationSerializerIgnore';
 
-    public $value = Constants::IGNORE_ALWAYS;
+    public $value = true;
 }

@@ -6,11 +6,10 @@
  */
 namespace Zoop\Shard\Annotation;
 
-use Doctrine\Common\Annotations;
 use Doctrine\Common\EventSubscriber;
-use Doctrine\ODM\MongoDB\Event\LoadClassMetadataEventArgs;
-use Doctrine\ODM\MongoDB\Events as ODMEvents;
-use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Zoop\Shard\Core\Events;
+use Zoop\Shard\Core\LoadMetadataEventArgs;
 
 /**
  *
@@ -19,112 +18,112 @@ use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
  */
 class MainSubscriber implements EventSubscriber
 {
-
-    protected $annotationReader;
-
     /**
      *
      * @return array
      */
     public function getSubscribedEvents()
     {
-        return [
-            // @codingStandardsIgnoreStart
-            ODMEvents::loadClassMetadata
-            // @codingStandardsIgnoreEnd
-        ];
+        return [Events::LOAD_METADATA];
     }
 
-    /**
-     *
-     * @param \Doctrine\ODM\MongoDB\Event\LoadClassMetadataEventArgs $eventArgs
-     */
-    public function loadClassMetadata(LoadClassMetadataEventArgs $eventArgs)
+    public function loadMetadata(LoadMetadataEventArgs $eventArgs)
     {
-        $metadata = $eventArgs->getClassMetadata();
-        $documentManager = $eventArgs->getDocumentManager();
-        $eventManager = $documentManager->getEventManager();
-
-        if (! isset($this->annotationReader)) {
-            $this->annotationReader = new Annotations\AnnotationReader;
-            $this->annotationReader = new Annotations\CachedReader(
-                $this->annotationReader,
-                $documentManager->getConfiguration()->getMetadataCacheImpl()
-            );
-        }
+        $metadata = $eventArgs->getMetadata();
+        $eventManager = $eventArgs->getEventManager();
+        $annotationReader = $eventArgs->getAnnotationReader();
 
         //Inherit document annotations from parent classes
-        if (count($metadata->parentClasses) > 0) {
-            foreach ($metadata->parentClasses as $parentClass) {
-                $this->buildMetadata($documentManager->getClassMetadata($parentClass), $metadata, $eventManager);
-            }
+        foreach ($eventArgs->getParentMetadata() as $parentMetadata) {
+            $this->buildMetadata($parentMetadata, $metadata, $annotationReader, $eventManager);
         }
 
-        $this->buildMetadata($metadata, $metadata, $eventManager);
-
-        // Raise post build metadata event
-        if ($eventManager->hasListeners(Events::POST_BUILD_METADATA)) {
-            $eventManager->dispatchEvent(
-                Events::POST_BUILD_METADATA,
-                $eventArgs
-            );
-        }
+        $this->buildMetadata($metadata, $metadata, $annotationReader, $eventManager);
     }
 
-    protected function buildMetadata(ClassMetadata $source, ClassMetadata $target, $eventManager)
+    protected function buildMetadata(ClassMetadata $source, ClassMetadata $target, $annotationReader, $eventManager)
     {
+        $this->processDocumentAnnotations($source, $target, $annotationReader, $eventManager);
+        $this->processFieldAnnotations($source, $target, $annotationReader, $eventManager);
+        $this->processMethodAnnotations($source, $target, $annotationReader, $eventManager);
+    }
+
+    protected function processDocumentAnnotations(
+        ClassMetadata $source,
+        ClassMetadata $target,
+        $annotationReader,
+        $eventManager
+    ) {
         $sourceReflClass = $source->getReflectionClass();
         $targetReflClass = $target->getReflectionClass();
 
         //Document annotations
-        foreach ($this->annotationReader->getClassAnnotations($sourceReflClass) as $annotation) {
+        foreach ($annotationReader->getClassAnnotations($sourceReflClass) as $annotation) {
             if (defined(get_class($annotation) . '::EVENT')) {
 
                 // Raise annotation event
-                if ($eventManager->hasListeners($annotation::EVENT)) {
+                $eventManager->dispatchEvent(
+                    $annotation::EVENT,
+                    new AnnotationEventArgs(
+                        $target,
+                        EventType::DOCUMENT,
+                        $annotation,
+                        $targetReflClass,
+                        $eventManager
+                    )
+                );
+            }
+        }
+    }
+
+    protected function processFieldAnnotations(
+        ClassMetadata $source,
+        ClassMetadata $target,
+        $annotationReader,
+        $eventManager
+    ) {
+        $sourceReflClass = $source->getReflectionClass();
+
+        //Field annotations
+        foreach ($sourceReflClass->getProperties() as $reflField) {
+            foreach ($annotationReader->getPropertyAnnotations($reflField) as $annotation) {
+                if (defined(get_class($annotation) . '::EVENT')) {
+
+                    // Raise annotation event
                     $eventManager->dispatchEvent(
                         $annotation::EVENT,
                         new AnnotationEventArgs(
                             $target,
-                            EventType::DOCUMENT,
+                            EventType::FIELD,
                             $annotation,
-                            $targetReflClass,
+                            $reflField,
                             $eventManager
                         )
                     );
                 }
             }
         }
+    }
 
-        //Field annotations
-        foreach ($sourceReflClass->getProperties() as $reflField) {
-            foreach ($this->annotationReader->getPropertyAnnotations($reflField) as $annotation) {
-                if (defined(get_class($annotation) . '::EVENT')) {
-
-                    // Raise annotation event
-                    if ($eventManager->hasListeners($annotation::EVENT)) {
-                        $eventManager->dispatchEvent(
-                            $annotation::EVENT,
-                            new AnnotationEventArgs($target, EventType::FIELD, $annotation, $reflField, $eventManager)
-                        );
-                    }
-                }
-            }
-        }
+    protected function processMethodAnnotations(
+        ClassMetadata $source,
+        ClassMetadata $target,
+        $annotationReader,
+        $eventManager
+    ) {
+        $sourceReflClass = $source->getReflectionClass();
 
         //Method annotations
         foreach ($sourceReflClass->getMethods() as $reflMethod) {
 
-            foreach ($this->annotationReader->getMethodAnnotations($reflMethod) as $annotation) {
+            foreach ($annotationReader->getMethodAnnotations($reflMethod) as $annotation) {
                 if (defined(get_class($annotation) . '::EVENT')) {
 
                     // Raise annotation event
-                    if ($eventManager->hasListeners($annotation::EVENT)) {
-                        $eventManager->dispatchEvent(
-                            $annotation::EVENT,
-                            new AnnotationEventArgs($target, EventType::METHOD, $annotation, $reflMethod, $eventManager)
-                        );
-                    }
+                    $eventManager->dispatchEvent(
+                        $annotation::EVENT,
+                        new AnnotationEventArgs($target, EventType::METHOD, $annotation, $reflMethod, $eventManager)
+                    );
                 }
             }
         }

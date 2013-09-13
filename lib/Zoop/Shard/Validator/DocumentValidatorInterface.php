@@ -5,6 +5,8 @@
  */
 namespace Zoop\Shard\Validator;
 
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+
 /**
  *
  * @since   1.0
@@ -21,9 +23,9 @@ interface DocumentValidatorInterface
      * getMessages() will return an array of messages that explain why the
      * validation failed.
      *
-     * @param  document $value
+     * @param  document                       $value
      * @return Zoop\Validator\ValidatorResult
-     * @throws Exception\RuntimeException If validation of $value is impossible
+     * @throws Exception\RuntimeException     If validation of $value is impossible
      */
-    public function isValid($document);
+    public function isValid($document, ClassMetadata $metadata, array $changeSet = null);
 }

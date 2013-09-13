@@ -14,7 +14,6 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  *     "apple"="Zoop\Shard\Test\Serializer\TestAsset\Document\Apple",
  *     "orange"="Zoop\Shard\Test\Serializer\TestAsset\Document\Orange"
  * })
- * @Shard\Serializer\Discriminator
  */
 abstract class Fruit
 {

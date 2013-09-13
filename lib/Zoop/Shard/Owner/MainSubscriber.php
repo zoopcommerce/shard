@@ -6,17 +6,22 @@
  */
 namespace Zoop\Shard\Owner;
 
-use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
-use Doctrine\ODM\MongoDB\Events as ODMEvents;
-use Zoop\Shard\Stamp\AbstractStampSubscriber;
+use Doctrine\Common\EventSubscriber;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zoop\Shard\Core\Events as CoreEvents;
+use Zoop\Shard\Core\CreateEventArgs;
+use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class MainSubscriber extends AbstractStampSubscriber
+class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 {
+    use ServiceLocatorAwareTrait;
+
     /**
      *
      * @return array
@@ -24,27 +29,43 @@ class MainSubscriber extends AbstractStampSubscriber
     public function getSubscribedEvents()
     {
         return [
-            // @codingStandardsIgnoreStart
-            ODMEvents::prePersist
-            // @codingStandardsIgnoreEnd
+            CoreEvents::CREATE,
+            CoreEvents::METADATA_SLEEP,
         ];
     }
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
+     * @param \Zoop\Shard\Stamp\CreateEventArgs $eventArgs
      */
-    public function prePersist(LifecycleEventArgs $eventArgs)
+    public function create(CreateEventArgs $eventArgs)
     {
         $document = $eventArgs->getDocument();
-        $metadata = $eventArgs->getDocumentManager()->getClassMetadata(get_class($document));
+        $metadata = $eventArgs->getMetadata();
 
         if (isset($metadata->owner)) {
             $reflField = $metadata->reflFields[$metadata->owner];
             $owner = $reflField->getValue($document);
             if (! isset($owner)) {
                 $reflField->setValue($document, $this->getUsername());
+                $eventArgs->addRecompute($metadata->owner);
             }
+        }
+    }
+
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
+    {
+        if (isset($eventArgs->getMetadata()->owner)) {
+            $eventArgs->addSerialized('owner');
+        }
+    }
+
+    protected function getUsername()
+    {
+        if ($this->serviceLocator->has('user')) {
+            return $this->serviceLocator->get('user')->getUsername();
+        } else {
+            return null;
         }
     }
 }

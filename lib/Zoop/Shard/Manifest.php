@@ -11,10 +11,13 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\ArrayUtils;
+use Zoop\Shard\Core\ObjectManagerAwareInterface;
 
 /**
  * Pass this class a configuration array with extension namespaces, and then retrieve the
  * required filters, subscribers, and document locations
+ *
+ * @SuppressWarnings(PHPMD.LongVariable)
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
@@ -23,25 +26,30 @@ class Manifest extends AbstractExtension
 {
     protected $defaultServiceManagerConfig = [
         'invokables' => [
-            'documentManagerDelegatorFactory' => 'Zoop\Shard\DocumentManagerDelegatorFactory'
+            'objectmanager.delegator.factory' => 'Zoop\Shard\Core\ObjectManagerDelegatorFactory'
         ],
         'factories' => [
-            'extension.accessControl' => 'Zoop\Shard\AccessControl\ExtensionFactory',
-            'extension.annotation' => 'Zoop\Shard\Annotation\ExtensionFactory',
-            'extension.crypt' => 'Zoop\Shard\Crypt\ExtensionFactory',
-            'extension.freeze' => 'Zoop\Shard\Freeze\ExtensionFactory',
-            'extension.generator' => 'Zoop\Shard\Generator\ExtensionFactory',
-            'extension.owner' => 'Zoop\Shard\Owner\ExtensionFactory',
-            'extension.reference' => 'Zoop\Shard\Reference\ExtensionFactory',
-            'extension.rest' => 'Zoop\Shard\Rest\ExtensionFactory',
-            'extension.serializer' => 'Zoop\Shard\Serializer\ExtensionFactory',
-            'extension.softdelete' => 'Zoop\Shard\SoftDelete\ExtensionFactory',
-            'extension.stamp' => 'Zoop\Shard\Stamp\ExtensionFactory',
-            'extension.state' => 'Zoop\Shard\State\ExtensionFactory',
-            'extension.validator' => 'Zoop\Shard\Validator\ExtensionFactory',
-            'extension.zone' => 'Zoop\Shard\Zone\ExtensionFactory',
-            'subscriber.lazySubscriber' => 'Zoop\Shard\LazySubscriberFactory',
+            'extension.accesscontrol'   => 'Zoop\Shard\AccessControl\ExtensionFactory',
+            'extension.annotation'      => 'Zoop\Shard\Annotation\ExtensionFactory',
+            'extension.core'            => 'Zoop\Shard\Core\ExtensionFactory',
+            'extension.crypt'           => 'Zoop\Shard\Crypt\ExtensionFactory',
+            'extension.freeze'          => 'Zoop\Shard\Freeze\ExtensionFactory',
+            'extension.generator'       => 'Zoop\Shard\Generator\ExtensionFactory',
+            'extension.odmcore'         => 'Zoop\Shard\ODMCore\ExtensionFactory',
+            'extension.owner'           => 'Zoop\Shard\Owner\ExtensionFactory',
+            'extension.reference'       => 'Zoop\Shard\Reference\ExtensionFactory',
+            'extension.rest'            => 'Zoop\Shard\Rest\ExtensionFactory',
+            'extension.serializer'      => 'Zoop\Shard\Serializer\ExtensionFactory',
+            'extension.softdelete'      => 'Zoop\Shard\SoftDelete\ExtensionFactory',
+            'extension.stamp'           => 'Zoop\Shard\Stamp\ExtensionFactory',
+            'extension.state'           => 'Zoop\Shard\State\ExtensionFactory',
+            'extension.validator'       => 'Zoop\Shard\Validator\ExtensionFactory',
+            'extension.zone'            => 'Zoop\Shard\Zone\ExtensionFactory',
+            'subscriber.lazysubscriber' => 'Zoop\Shard\Core\LazySubscriberFactory',
         ],
+        'delegators' => [
+            'objectmanager' => ['objectmanager.delegator.factory']
+        ]
     ];
 
     /**
@@ -54,7 +62,7 @@ class Manifest extends AbstractExtension
 
     protected $lazySubscriberConfig;
 
-    protected $documentManager;
+    protected $objectManager;
 
     protected $serviceManager;
 
@@ -80,14 +88,14 @@ class Manifest extends AbstractExtension
         $this->lazySubscriberConfig = $lazySubscriberConfig;
     }
 
-    public function getDocumentManager()
+    public function getObjectManager()
     {
-        return $this->documentManager;
+        return $this->objectManager;
     }
 
-    public function setDocumentManager($documentManager)
+    public function setObjectManager($objectManager)
     {
-        $this->documentManager = $documentManager;
+        $this->objectManager = $objectManager;
     }
 
     public function setServiceManager($serviceManager)
@@ -98,6 +106,7 @@ class Manifest extends AbstractExtension
     public function getServiceManager()
     {
         $this->initalize();
+
         return $this->serviceManager;
     }
 
@@ -121,13 +130,12 @@ class Manifest extends AbstractExtension
         if (isset($this->serviceManager)) {
             $serviceManager = $this->serviceManager;
         } else {
-            $this->defaultServiceManagerConfig['delegators'][$this->documentManager] =
-                ['documentManagerDelegatorFactory'];
             $serviceManager = self::createServiceManager($this->defaultServiceManagerConfig);
             $this->serviceManager = $serviceManager;
         }
         $serviceManager->setService('manifest', $this);
 
+        //initalize extensions
         foreach ($this->extensionConfigs as $name => $extensionConfig) {
             if (!$extensionConfig) {
                 unset($this->extensionConfigs[$name]);
@@ -169,7 +177,13 @@ class Manifest extends AbstractExtension
             $this->serviceManagerConfig
         );
 
-        //create lazySubscriber configuration
+        //setup lazySubscriber configuration
+        $this->lazySubscriberConfig = $this->getLazySubscirberConfig($serviceManager);
+        $this->subscribers = ['subscriber.lazysubscriber'];
+    }
+
+    protected function getLazySubscirberConfig($serviceManager)
+    {
         $lazySubscriberConfig = [];
         foreach ($this->extensionConfigs as $extensionConfig) {
             foreach ($extensionConfig['subscribers'] as $subscriber) {
@@ -189,8 +203,8 @@ class Manifest extends AbstractExtension
                 }
             }
         }
-        $this->lazySubscriberConfig = $lazySubscriberConfig;
-        $this->subscribers = ['subscriber.lazySubscriber'];
+
+        return $lazySubscriberConfig;
     }
 
     protected function expandExtensionConfig($name)
@@ -199,7 +213,7 @@ class Manifest extends AbstractExtension
         $extension = $this->serviceManager->get($name);
 
         //ensure dependencies get expaned also
-        foreach ($extension->getDependencies() as $dependencyName => $dependencyConfig) {
+        foreach (array_keys($extension->getDependencies()) as $dependencyName) {
             if (! isset($this->extensionConfigs[$dependencyName]) ||
                 is_bool($this->extensionConfigs[$dependencyName])
             ) {
@@ -210,18 +224,20 @@ class Manifest extends AbstractExtension
         $this->extensionConfigs[$name] = $extension->toArray();
     }
 
-    public static function createServiceManager($config = [])
+    /**
+     * Creates a service manager instnace
+     *
+     * @param  array                               $config
+     * @return \Zend\ServiceManager\ServiceManager
+     */
+    public static function createServiceManager(array $config = [])
     {
         $serviceManager = new ServiceManager(new Config($config));
 
         $serviceManager->addInitializer(
             function ($instance, ServiceLocatorInterface $serviceLocator) {
-                if ($instance instanceof DocumentManagerAwareInterface) {
-                    $instance->setDocumentManager(
-                        $serviceLocator->get(
-                            $serviceLocator->get('manifest')->getDocumentManager()
-                        )
-                    );
+                if ($instance instanceof ObjectManagerAwareInterface) {
+                    $instance->setObjectManager($serviceLocator->get('objectmanager'));
                 }
             }
         );
@@ -239,6 +255,8 @@ class Manifest extends AbstractExtension
 
     /**
      * Cast to array
+     * This allows the merged manifest config to be cached
+     * between requests for significant performance improvement
      *
      * @return array
      */
@@ -248,6 +266,7 @@ class Manifest extends AbstractExtension
         $array = parent::toArray();
         unset($array['default_service_manager_config']);
         unset($array['service_manager']);
+
         return $array;
     }
 }

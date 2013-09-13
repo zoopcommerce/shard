@@ -13,5 +13,5 @@ namespace Zoop\Shard\Serializer\Reference;
  */
 interface ReferenceSerializerInterface
 {
-    public function serialize($id, array $mapping);
+    public function serialize($document);
 }

@@ -8,8 +8,6 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 
 /**
  * @ODM\Document
- * @Shard\Serializer\ClassName
- * @Shard\Serializer\Discriminator
  * @Shard\Validator(class = "ParentValidator")
  */
 class ParentClass

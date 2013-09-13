@@ -23,6 +23,7 @@ class BasicHashService implements HashServiceInterface, ServiceLocatorAwareInter
     public function hashValue($plaintext, $salt = null)
     {
         $bcrypt = new Bcrypt(['salt' => $salt]);
+
         return $bcrypt->create($plaintext);
 
     }

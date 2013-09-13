@@ -26,14 +26,9 @@ class RestTest extends BaseTest
                                 ]
                             ]
                         ]
-                    ]
+                    ],
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
-                'service_manager_config' => [
-                    'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    ]
-                ]
             ]
         );
 

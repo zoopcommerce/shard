@@ -8,24 +8,18 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 
 /**
  * @ODM\Document
- * @Shard\Serializer\ClassName
  */
-class ClassName
+class Female
 {
     /**
-     * @ODM\Id(strategy="UUID")
-     */
-    protected $id;
-
-    /**
-     * @ODM\Field(type="string")
+     * @ODM\Id(strategy="none")
      */
     protected $name;
 
-    public function getId()
-    {
-        return $this->id;
-    }
+    /**
+     * @ODM\Int
+     */
+    protected $age;
 
     public function getName()
     {
@@ -34,6 +28,16 @@ class ClassName
 
     public function setName($name)
     {
-        $this->name = (string) $name;
+        $this->name = $name;
+    }
+
+    public function getAge()
+    {
+        return $this->age;
+    }
+
+    public function setAge($age)
+    {
+        $this->age = $age;
     }
 }

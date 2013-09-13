@@ -27,6 +27,7 @@ trait RoleAwareUserTrait
     public function setRoles(array $roles)
     {
         $this->roles = $roles;
+
         return $this;
     }
 
@@ -37,6 +38,7 @@ trait RoleAwareUserTrait
     public function addRole($role)
     {
         $this->roles[] = (string) $role;
+
         return $this;
     }
 
@@ -46,7 +48,7 @@ trait RoleAwareUserTrait
      */
     public function removeRole($role)
     {
-        if (($key = array_search((string)$role, $this->roles)) !== false) {
+        if (($key = array_search((string) $role, $this->roles)) !== false) {
             unset($this->roles[$key]);
         }
     }
@@ -62,11 +64,11 @@ trait RoleAwareUserTrait
 
     /**
      *
-     * @param string $role
+     * @param  string  $role
      * @return boolean
      */
     public function hasRole($role)
     {
-        return in_array((string)$role, $this->roles);
+        return in_array((string) $role, $this->roles);
     }
 }

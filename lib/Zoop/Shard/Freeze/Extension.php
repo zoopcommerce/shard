@@ -16,10 +16,6 @@ use Zoop\Shard\AbstractExtension;
  */
 class Extension extends AbstractExtension
 {
-    protected $dependencies = [
-        'extension.annotation' => true
-    ];
-
     protected $subscribers = [
         'subscriber.freeze.mainsubscriber',
         'subscriber.freeze.stampsubscriber',
@@ -33,11 +29,15 @@ class Extension extends AbstractExtension
 
     protected $serviceManagerConfig = [
         'invokables' => [
-            'freezer' => 'Zoop\Shard\Freeze\Freezer',
             'subscriber.freeze.mainsubscriber' => 'Zoop\Shard\Freeze\MainSubscriber',
             'subscriber.freeze.stampsubscriber' => 'Zoop\Shard\Freeze\StampSubscriber',
             'subscriber.freeze.annotationsubscriber' => 'Zoop\Shard\Freeze\AnnotationSubscriber',
-            'subscriber.freeze.freezesubscriber' => 'Zoop\Shard\Freeze\AccessControl\FreezeSubscriber'
+            'subscriber.freeze.freezesubscriber' => 'Zoop\Shard\Freeze\AccessControl\FreezeSubscriber',
+            'freezer' => 'Zoop\Shard\Freeze\Freezer',
         ]
+    ];
+
+    protected $dependencies = [
+        'extension.annotation' => true
     ];
 }

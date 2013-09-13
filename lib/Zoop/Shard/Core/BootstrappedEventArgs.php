@@ -4,14 +4,15 @@
  * @package    Zoop
  * @license    MIT
  */
-namespace Zoop\Shard\Annotation;
+namespace Zoop\Shard\Core;
+
+use Doctrine\Common\EventArgs as BaseEventArgs;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-final class Events
+class BootstrappedEventArgs extends BaseEventArgs
 {
-    const POST_BUILD_METADATA = 'postBuildMetadata';
 }

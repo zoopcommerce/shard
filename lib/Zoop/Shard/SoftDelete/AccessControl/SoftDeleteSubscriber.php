@@ -6,9 +6,9 @@
  */
 namespace Zoop\Shard\SoftDelete\AccessControl;
 
-use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
 use Zoop\Shard\AccessControl\AbstractAccessControlSubscriber;
 use Zoop\Shard\SoftDelete\Events;
+use Zoop\Shard\SoftDelete\SoftDeleteEventArgs;
 
 /**
  *
@@ -36,7 +36,7 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
      *
      * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
      */
-    public function preSoftDelete(LifecycleEventArgs $eventArgs)
+    public function preSoftDelete(SoftDeleteEventArgs $eventArgs)
     {
         if (! ($accessController = $this->getAccessController())) {
             //Access control is not enabled
@@ -44,18 +44,18 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
         }
 
         $document = $eventArgs->getDocument();
+        $metadata = $eventArgs->getMetadata();
 
-        if (! $accessController->areAllowed([Actions::SOFT_DELETE], null, $document)->getAllowed()) {
+        if (! $accessController->areAllowed([Actions::SOFT_DELETE], $metadata, $document)->getAllowed()) {
             //stop SoftDelete
-            $this->getSoftDeleter()->restore($document);
+            $this->getSoftDeleter()->restore($document, $metadata);
 
-            $eventManager = $eventArgs->getDocumentManager()->getEventManager();
-            if ($eventManager->hasListeners(Events::SOFT_DELETE_DENIED)) {
-                $eventManager->dispatchEvent(
-                    Events::SOFT_DELETE_DENIED,
-                    $eventArgs
-                );
-            }
+            $eventArgs->setReject(true);
+
+            $eventArgs->getEventManager()->dispatchEvent(
+                Events::SOFT_DELETE_DENIED,
+                $eventArgs
+            );
         }
     }
 
@@ -63,7 +63,7 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
      *
      * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
      */
-    public function preRestore(LifecycleEventArgs $eventArgs)
+    public function preRestore(SoftDeleteEventArgs $eventArgs)
     {
         if (! ($accessController = $this->getAccessController())) {
             //Access control is not enabled
@@ -71,18 +71,18 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
         }
 
         $document = $eventArgs->getDocument();
+        $metadata = $eventArgs->getMetadata();
 
-        if (! $accessController->areAllowed([Actions::RESTORE], null, $document)->getAllowed()) {
+        if (! $accessController->areAllowed([Actions::RESTORE], $metadata, $document)->getAllowed()) {
             //stop restore
-            $this->getSoftDeleter()->softDelete($document);
+            $this->getSoftDeleter()->softDelete($document, $metadata);
 
-            $eventManager = $eventArgs->getDocumentManager()->getEventManager();
-            if ($eventManager->hasListeners(Events::RESTORE_DENIED)) {
-                $eventManager->dispatchEvent(
-                    Events::RESTORE_DENIED,
-                    $eventArgs
-                );
-            }
+            $eventArgs->setReject(true);
+
+            $eventArgs->getEventManager()->dispatchEvent(
+                Events::RESTORE_DENIED,
+                $eventArgs
+            );
         }
     }
 
@@ -91,6 +91,7 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
         if (! isset($this->softDeleter)) {
             $this->softDeleter = $this->serviceLocator->get('softDeleter');
         }
+
         return $this->softDeleter;
     }
 }

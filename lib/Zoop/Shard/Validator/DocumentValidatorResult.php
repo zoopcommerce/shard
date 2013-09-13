@@ -25,14 +25,15 @@ class DocumentValidatorResult extends Result
         return $this->classResults;
     }
 
-    public function setClassResults(array $classResults)
-    {
-        $this->classResults = $classResults;
-    }
-
     public function addClassResult(Result $result)
     {
         $this->classResults[] = $result;
+        foreach ($result->getMessages() as $message) {
+            $this->addMessage('document: ' . $message);
+        }
+        if (! $result->getValue()) {
+            $this->setValue(false);
+        }
     }
 
     public function getFieldResults()
@@ -40,13 +41,14 @@ class DocumentValidatorResult extends Result
         return $this->fieldResults;
     }
 
-    public function setFieldResults(array $fieldResults)
-    {
-        $this->fieldResults = $fieldResults;
-    }
-
     public function addFieldResult($field, Result $result)
     {
         $this->fieldResults[$field] = $result;
+        foreach ($result->getMessages() as $message) {
+            $this->addMessage($field . ': ' . $message);
+        }
+        if (! $result->getValue()) {
+            $this->setValue(false);
+        }
     }
 }

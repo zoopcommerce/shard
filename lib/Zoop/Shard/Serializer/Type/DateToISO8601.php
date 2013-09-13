@@ -16,12 +16,13 @@ class DateToISO8601 implements TypeSerializerInterface
 {
     public function serialize($value)
     {
-        switch (true){
+        switch (true) {
             case $value instanceof \MongoDate:
                 $value = new \DateTime("@$value->sec");
                 //deliberate fall through
             case $value instanceof \DateTime:
                 $value->setTimezone(new \DateTimeZone('UTC'));
+
                 return $value->format('c');
                 break;
         }

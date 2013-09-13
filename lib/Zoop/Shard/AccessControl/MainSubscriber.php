@@ -6,10 +6,12 @@
  */
 namespace Zoop\Shard\AccessControl;
 
-use Doctrine\ODM\MongoDB\Event\OnFlushEventArgs;
-use Doctrine\ODM\MongoDB\Events as ODMEvents;
-use Zoop\Shard\Events as ManifestEvents;
 use Zoop\Shard\AccessControl\Events as AccessControlEvents;
+use Zoop\Shard\Core\Events as CoreEvents;
+use Zoop\Shard\Core\CreateEventArgs;
+use Zoop\Shard\Core\DeleteEventArgs;
+use Zoop\Shard\Core\UpdateEventArgs;
+use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  *
@@ -25,113 +27,93 @@ class MainSubscriber extends AbstractAccessControlSubscriber
     public function getSubscribedEvents()
     {
         return [
-            ManifestEvents::ON_BOOTSTRAP,
-            // @codingStandardsIgnoreStart
-            ODMEvents::onFlush
-            // @codingStandardsIgnoreEnd
+            CoreEvents::BOOTSTRAPPED,
+            CoreEvents::CREATE,
+            CoreEvents::DELETE,
+            CoreEvents::UPDATE,
+            CoreEvents::METADATA_SLEEP,
         ];
     }
 
-    public function onBootstrap()
+    public function bootstrapped()
     {
         $this->getAccessController()->enableReadFilter();
     }
 
-    /**
-     *
-     * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
-     */
-    public function onFlush(OnFlushEventArgs $eventArgs)
+    public function create(CreateEventArgs $eventArgs)
     {
-        $documentManager = $eventArgs->getDocumentManager();
-        $unitOfWork = $documentManager->getUnitOfWork();
-        $eventManager = $documentManager->getEventManager();
-        $accessController = $this->getAccessController();
-
-        foreach ($unitOfWork->getScheduledDocumentInsertions() as $document) {
-
-            //Check create permissions
-            if (! $accessController->areAllowed([Actions::CREATE], null, $document)->getAllowed()) {
-
-                //stop creation
-                $metadata = $documentManager->getClassMetadata(get_class($document));
-
-                if ($metadata->isEmbeddedDocument) {
-                    list($mapping, $parent) = $unitOfWork->getParentAssociation($document);
-                    $parentMetadata = $documentManager->getClassMetadata(get_class($parent));
-                    if ($mapping['type'] == 'many') {
-                        $collection = $parentMetadata->reflFields[$mapping['fieldName']]->getValue($parent);
-                        $collection->removeElement($document);
-                        $unitOfWork->recomputeSingleDocumentChangeSet($parentMetadata, $parent);
-                    } else {
-                        $parentMetadata->reflFields[$mapping['fieldName']]->setValue($document, null);
-                    }
-                }
-                $unitOfWork->detach($document);
-
-                if ($eventManager->hasListeners(AccessControlEvents::CREATE_DENIED)) {
-                    $eventManager->dispatchEvent(
-                        AccessControlEvents::CREATE_DENIED,
-                        new EventArgs($document, $documentManager, Actions::CREATE)
-                    );
-                }
-            }
+        if ($eventArgs->getReject()) {
+            //don't do anything if the create has already been rejected
+            return;
         }
 
+        $document = $eventArgs->getDocument();
+
+        //Check create permissions
+        if ($this->getAccessController()
+                ->areAllowed([Actions::CREATE], $eventArgs->getMetadata(), $document)
+                ->getAllowed()
+        ) {
+            return;
+        }
+
+        $eventArgs->setReject(true);
+
+        $eventArgs->getEventManager()->dispatchEvent(
+            AccessControlEvents::CREATE_DENIED,
+            new EventArgs($document, Actions::CREATE)
+        );
+    }
+
+    public function update(UpdateEventArgs $eventArgs)
+    {
         //Check update permissions
-        foreach ($unitOfWork->getScheduledDocumentUpdates() as $document) {
+        $document = $eventArgs->getDocument();
+        $actions = [];
 
-            $actions = [];
-
-            //Assemble all the actions that require permission
-            $changeSet = $unitOfWork->getDocumentChangeSet($document);
-
-            if (count($changeSet) == 0) {
-                continue;
-            }
-
-            foreach ($changeSet as $field => $change) {
-                $actions[] = Actions::update($field);
-            }
-
-            if (! $accessController->areAllowed($actions, null, $document)->getAllowed()) {
-
-                $metadata = $documentManager->getClassMetadata(get_class($document));
-
-                //roll back changes
-                if (!isset($changeSet)) {
-                    $changeSet = $unitOfWork->getDocumentChangeSet($document);
-                }
-                foreach ($changeSet as $field => $change) {
-                    $metadata->reflFields[$field]->setValue($document, $change[0]);
-                }
-
-                //stop updates
-                $unitOfWork->clearDocumentChangeSet(spl_object_hash($document));
-
-                if ($eventManager->hasListeners(AccessControlEvents::UPDATE_DENIED)) {
-                    $eventManager->dispatchEvent(
-                        AccessControlEvents::UPDATE_DENIED,
-                        new EventArgs($document, $documentManager, 'update')
-                    );
-                }
-                continue;
-            }
+        foreach (array_keys($eventArgs->getChangeSet()) as $field) {
+            $actions[] = Actions::update($field);
         }
 
-        //Check delete permsisions
-        foreach ($unitOfWork->getScheduledDocumentDeletions() as $document) {
-            if (! $accessController->areAllowed([Actions::DELETE], null, $document)->getAllowed()) {
-                //stop delete
-                $documentManager->persist($document);
+        if ($this->getAccessController()->areAllowed($actions, $eventArgs->getMetadata(), $document)->getAllowed()) {
+            return;
+        }
 
-                if ($eventManager->hasListeners(AccessControlEvents::DELETE_DENIED)) {
-                    $eventManager->dispatchEvent(
-                        AccessControlEvents::DELETE_DENIED,
-                        new EventArgs($document, $documentManager, Actions::DELETE)
-                    );
-                }
-            }
+        $eventArgs->setReject(true);
+
+        $eventArgs->getEventManager()->dispatchEvent(
+            AccessControlEvents::UPDATE_DENIED,
+            new EventArgs($document, 'update')
+        );
+    }
+
+    public function delete(DeleteEventArgs $eventArgs)
+    {
+        //Check delete permsisions
+        $document = $eventArgs->getDocument();
+
+        if ($this->getAccessController()
+                ->areAllowed([Actions::DELETE], $eventArgs->getMetadata(), $document)
+                ->getAllowed()
+        ) {
+            return;
+        }
+
+        $eventArgs->setReject(true);
+
+        $eventArgs->getEventManager()->dispatchEvent(
+            AccessControlEvents::DELETE_DENIED,
+            new EventArgs($document, Actions::DELETE)
+        );
+    }
+
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
+    {
+        if (isset($eventArgs->getMetadata()->accessConrol)) {
+            $eventArgs->addSerialized('accessConrol');
+        }
+        if (isset($eventArgs->getMetadata()->permissions)) {
+            $eventArgs->addSerialized('permissions');
         }
     }
 }

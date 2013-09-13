@@ -12,6 +12,8 @@ use Zoop\Shard\Annotation\AnnotationEventArgs;
 use Zoop\Shard\Annotation\EventType;
 
 /**
+ * @SuppressWarnings(PHPMD.TooManyMethods)
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
@@ -48,27 +50,8 @@ class AnnotationSubscriber implements EventSubscriber
             Shard\Validator\String::EVENT,
             Shard\Validator::EVENT,
         ];
+
         return $events;
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationAlphaValidator(AnnotationEventArgs $eventArgs)
-    {
-        $annotation = $eventArgs->getAnnotation();
-        $this->setFieldValidator($eventArgs, ['class' => $annotation->class]);
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationBooleanValidator(AnnotationEventArgs $eventArgs)
-    {
-        $annotation = $eventArgs->getAnnotation();
-        $this->setFieldValidator($eventArgs, ['class' => $annotation->class]);
     }
 
     /**
@@ -78,6 +61,7 @@ class AnnotationSubscriber implements EventSubscriber
     public function annotationChainValidator(AnnotationEventArgs $eventArgs)
     {
         $annotation = $eventArgs->getAnnotation();
+
         $eventManager = $eventArgs->getEventManager();
         $type = $eventArgs->getEventType();
         $reflection = $eventArgs->getReflection();
@@ -95,96 +79,26 @@ class AnnotationSubscriber implements EventSubscriber
                 $validatorAnnotation::EVENT,
                 $validatorEventArgs
             );
-            switch ($type){
-                case EventType::DOCUMENT:
-                    if (isset($metadata->validator['document'])) {
-                        $validators[] = $metadata->validator['document'];
-                    }
-                    break;
-                case EventType::FIELD:
-                    if (isset($metadata->validator['fields'][$reflection->getName()])) {
-                        $validators[] = $metadata->validator['fields'][$reflection->getName()];
-                    }
-                    break;
+            if ($type == EventType::DOCUMENT && isset($metadata->validator['document'])) {
+                $validators[] = $metadata->validator['document'];
+            } elseif (isset($metadata->validator['fields'][$reflection->getName()])) {
+                 $validators[] = $metadata->validator['fields'][$reflection->getName()];
             }
         }
 
-        switch ($type){
-            case EventType::DOCUMENT:
-                if (count($validators) == 0) {
-                    $this->setDocumentValidator($eventArgs, null);
-                } elseif (count($validators) == 1) {
-                    $this->setDocumentValidator($eventArgs, $validators[0]);
-                } elseif (count($validators) > 1) {
-                    $this->setDocumentValidator(
-                        $eventArgs,
-                        ['class' => $annotation->class, 'options' => ['validators' => $validators]]
-                    );
-                }
-                break;
-            case EventType::FIELD:
-                if (count($validators) == 0) {
-                    $this->setFieldValidator($eventArgs, null);
-                } elseif (count($validators) == 1) {
-                    $this->setFieldValidator($eventArgs, $validators[0]);
-                } elseif (count($validators) > 1) {
-                    $this->setFieldValidator(
-                        $eventArgs,
-                        ['class' => $annotation->class, 'options' => ['validators' => $validators]]
-                    );
-                }
-                break;
+        if (count($validators) == 0) {
+            $validator = null;
+        } elseif (count($validators) == 1) {
+            $validator = $validators[0];
+        } elseif (count($validators) > 1) {
+            $validator = ['class' => $annotation->class, 'options' => ['validators' => $validators]];
         }
-    }
 
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationCreditCardValidator(AnnotationEventArgs $eventArgs)
-    {
-        $annotation = $eventArgs->getAnnotation();
-        $this->setFieldValidator($eventArgs, ['class' => $annotation->class]);
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationCreditCardExpiryValidator(AnnotationEventArgs $eventArgs)
-    {
-        $annotation = $eventArgs->getAnnotation();
-        $this->setFieldValidator($eventArgs, ['class' => $annotation->class]);
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationCvvValidator(AnnotationEventArgs $eventArgs)
-    {
-        $annotation = $eventArgs->getAnnotation();
-        $this->setFieldValidator($eventArgs, ['class' => $annotation->class]);
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationDateValidator(AnnotationEventArgs $eventArgs)
-    {
-        $annotation = $eventArgs->getAnnotation();
-        $this->setFieldValidator($eventArgs, ['class' => $annotation->class]);
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationEmailValidator(AnnotationEventArgs $eventArgs)
-    {
-        $annotation = $eventArgs->getAnnotation();
-        $this->setFieldValidator($eventArgs, ['class' => $annotation->class]);
+        if ($type == EventType::DOCUMENT) {
+            $this->setDocumentValidator($eventArgs, $validator);
+        } else {
+            $this->setFieldValidator($eventArgs, $validator);
+        }
     }
 
     /**
@@ -207,16 +121,6 @@ class AnnotationSubscriber implements EventSubscriber
                 'options' => $options
             ]
         );
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationFloatValidator(AnnotationEventArgs $eventArgs)
-    {
-        $annotation = $eventArgs->getAnnotation();
-        $this->setFieldValidator($eventArgs, ['class' => $annotation->class]);
     }
 
     /**
@@ -261,26 +165,6 @@ class AnnotationSubscriber implements EventSubscriber
                 'options' => $options
             ]
         );
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationHexColorValidator(AnnotationEventArgs $eventArgs)
-    {
-        $annotation = $eventArgs->getAnnotation();
-        $this->setFieldValidator($eventArgs, ['class' => $annotation->class]);
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationIntValidator(AnnotationEventArgs $eventArgs)
-    {
-        $annotation = $eventArgs->getAnnotation();
-        $this->setFieldValidator($eventArgs, ['class' => $annotation->class]);
     }
 
     /**
@@ -378,26 +262,6 @@ class AnnotationSubscriber implements EventSubscriber
      *
      * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
      */
-    public function annotationNotRequiredValidator(AnnotationEventArgs $eventArgs)
-    {
-        $annotation = $eventArgs->getAnnotation();
-        $this->setFieldValidator($eventArgs, ['class' => $annotation->class]);
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationPasswordValidator(AnnotationEventArgs $eventArgs)
-    {
-        $annotation = $eventArgs->getAnnotation();
-        $this->setFieldValidator($eventArgs, ['class' => $annotation->class]);
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
     public function annotationRegexValidator(AnnotationEventArgs $eventArgs)
     {
         $annotation = $eventArgs->getAnnotation();
@@ -420,60 +284,26 @@ class AnnotationSubscriber implements EventSubscriber
      *
      * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
      */
-    public function annotationRequiredValidator(AnnotationEventArgs $eventArgs)
-    {
-        $annotation = $eventArgs->getAnnotation();
-        $this->setFieldValidator($eventArgs, ['class' => $annotation->class]);
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationSlugValidator(AnnotationEventArgs $eventArgs)
-    {
-        $annotation = $eventArgs->getAnnotation();
-        $this->setFieldValidator($eventArgs, ['class' => $annotation->class]);
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationStringValidator(AnnotationEventArgs $eventArgs)
-    {
-        $annotation = $eventArgs->getAnnotation();
-        $this->setFieldValidator($eventArgs, ['class' => $annotation->class]);
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
     public function annotationValidator(AnnotationEventArgs $eventArgs)
     {
         $annotation = $eventArgs->getAnnotation();
 
-        switch ($eventArgs->getEventType()){
-            case EventType::DOCUMENT:
-                $this->setDocumentValidator(
-                    $eventArgs,
-                    [
-                        'class' => $annotation->class,
-                        'options' => $annotation->options
-                    ]
-                );
-                break;
-                break;
-            case EventType::FIELD:
-                $this->setFieldValidator(
-                    $eventArgs,
-                    [
-                        'class' => $annotation->class,
-                        'options' => $annotation->options
-                    ]
-                );
-                break;
+        if ($eventArgs->getEventType() == EventType::DOCUMENT) {
+            $this->setDocumentValidator(
+                $eventArgs,
+                [
+                    'class' => $annotation->class,
+                    'options' => $annotation->options
+                ]
+            );
+        } else {
+            $this->setFieldValidator(
+                $eventArgs,
+                [
+                    'class' => $annotation->class,
+                    'options' => $annotation->options
+                ]
+            );
         }
     }
 
@@ -493,5 +323,15 @@ class AnnotationSubscriber implements EventSubscriber
         } else {
             unset($eventArgs->getMetadata()->validator['document']);
         }
+    }
+
+    /**
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @param type $name
+     * @param type $arguments
+     */
+    public function __call($name, $arguments)
+    {
+        $this->setFieldValidator($arguments[0], ['class' => $arguments[0]->getAnnotation()->class]);
     }
 }

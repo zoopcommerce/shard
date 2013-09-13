@@ -19,7 +19,7 @@ class SerializerFactory implements FactoryInterface
 
     /**
      *
-     * @param \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator
+     * @param  \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator
      * @return object
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
@@ -27,7 +27,6 @@ class SerializerFactory implements FactoryInterface
         $extension = $serviceLocator->get('extension.serializer');
         $instance = new Serializer;
 
-        $instance->setClassNameField($extension->getClassNameField());
         $instance->setMaxNestingDepth($extension->getMaxNestingDepth());
         $instance->setTypeSerializers($extension->getTypeSerializers());
 
