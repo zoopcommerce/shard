@@ -79,7 +79,7 @@ class State extends BsonFilter
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Mapping\ClassMetadata $targetMetadata
+     * @param  \Doctrine\ODM\MongoDB\Mapping\ClassMetadata $targetMetadata
      * @return array
      */
     public function addFilterCriteria(ClassMetadata $targetMetadata)
@@ -88,10 +88,12 @@ class State extends BsonFilter
             count($this->parameters['states'])
         ) {
             $operator = $this->parameters['includeStateList'] ? '$in' : '$nin';
+
             return [
                 array_keys($targetMetadata->state)[0] => [$operator => $this->parameters['states']]
             ];
         }
+
         return array();
     }
 }

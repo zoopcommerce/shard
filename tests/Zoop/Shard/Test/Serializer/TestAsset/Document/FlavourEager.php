@@ -8,7 +8,6 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 
 /**
  * @ODM\Document
- * @Shard\Serializer\ClassName
  */
 class FlavourEager
 {

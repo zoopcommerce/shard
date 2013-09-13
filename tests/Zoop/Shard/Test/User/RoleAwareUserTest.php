@@ -17,6 +17,7 @@ class RoleAwareUserTest extends BaseTest
                         'user' => function () {
                             $user = new RoleAwareUser();
                             $user->setUsername('toby');
+
                             return $user;
                         }
                     ]

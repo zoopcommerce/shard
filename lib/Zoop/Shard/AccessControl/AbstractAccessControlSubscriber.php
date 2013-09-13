@@ -17,7 +17,6 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  */
 abstract class AbstractAccessControlSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 {
-
     use ServiceLocatorAwareTrait;
 
     protected $accessController;
@@ -29,6 +28,7 @@ abstract class AbstractAccessControlSubscriber implements EventSubscriber, Servi
                 $this->accessController = $this->serviceLocator->get('accessController');
             }
         }
+
         return $this->accessController;
     }
 }

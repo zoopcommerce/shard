@@ -4,15 +4,13 @@
  * @package    Zoop
  * @license    MIT
  */
-namespace Zoop\Shard;
-
-use Doctrine\Common\EventArgs as BaseEventArgs;
+namespace Zoop\Shard\Core;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class BootstrapEventArgs extends BaseEventArgs
+class UpdateEventArgs extends AbstractChangeEventArgs
 {
 }

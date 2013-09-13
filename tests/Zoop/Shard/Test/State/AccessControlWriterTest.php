@@ -22,16 +22,16 @@ class AccessControlWriterTest extends BaseTest
                 ],
                 'extension_configs' => [
                     'extension.state' => true,
-                    'extension.accessControl' => true
+                    'extension.accessControl' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
                 'service_manager_config' => [
                     'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
                         'user' => function () {
                             $user = new RoleAwareUser();
                             $user->setUsername('toby');
                             $user->addRole('writer');
+
                             return $user;
                         }
                     ]
@@ -39,7 +39,7 @@ class AccessControlWriterTest extends BaseTest
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
     }
 
     public function testCreateDeny()

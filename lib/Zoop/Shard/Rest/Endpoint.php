@@ -63,6 +63,7 @@ class Endpoint extends AbstractOptions
         if (! $this->cacheControl instanceof CacheControl) {
             $this->cacheControl = new CacheControl($this->cacheControl);
         }
+
         return $this->cacheControl;
     }
 

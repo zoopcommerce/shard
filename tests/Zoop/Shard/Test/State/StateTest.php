@@ -18,18 +18,13 @@ class StateTest extends BaseTest
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
-                    'extension.state' => true
+                    'extension.state' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
-                'service_manager_config' => [
-                    'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    ]
-                ]
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
     }
 
     public function testBasicFunction()
@@ -82,7 +77,6 @@ class StateTest extends BaseTest
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(array('lucy', 'miriam'), $docNames);
 
-
         $documentManager->flush();
         $documentManager->clear();
 
@@ -117,6 +111,7 @@ class StateTest extends BaseTest
             $returnNames[] = $testDoc->getName();
         }
         sort($returnNames);
+
         return array($returnDocs, $returnNames);
     }
 
@@ -139,7 +134,6 @@ class StateTest extends BaseTest
 
         $calls = $subscriber->getCalls();
         $this->assertFalse(isset($calls[Events::PRE_TRANSITION]));
-        $this->assertFalse(isset($calls[Events::ON_TRANSITION]));
         $this->assertFalse(isset($calls[Events::POST_TRANSITION]));
 
         $repository = $documentManager->getRepository(get_class($testDoc));
@@ -152,7 +146,6 @@ class StateTest extends BaseTest
 
         $calls = $subscriber->getCalls();
         $this->assertTrue(isset($calls[Events::PRE_TRANSITION]));
-        $this->assertTrue(isset($calls[Events::ON_TRANSITION]));
         $this->assertTrue(isset($calls[Events::POST_TRANSITION]));
 
         $documentManager->clear();
@@ -166,7 +159,6 @@ class StateTest extends BaseTest
 
         $calls = $subscriber->getCalls();
         $this->assertTrue(isset($calls[Events::PRE_TRANSITION]));
-        $this->assertFalse(isset($calls[Events::ON_TRANSITION]));
         $this->assertFalse(isset($calls[Events::POST_TRANSITION]));
 
         $this->assertEquals('state2', $testDoc->getState());

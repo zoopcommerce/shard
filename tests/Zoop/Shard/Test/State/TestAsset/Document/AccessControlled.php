@@ -13,7 +13,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  * @Shard\AccessControl({
  *     @Shard\Permission\State(
  *         roles="*",
- *         states="published", allow="read"
+ *         states="published",
+ *         allow="read"
  *     ),
  *     @Shard\Permission\State(
  *         roles="writer",

@@ -4,8 +4,9 @@
  * @package    Zoop
  * @license    MIT
  */
-namespace Zoop\Shard;
+namespace Zoop\Shard\ODMCore;
 
+use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadataFactory as DoctrineClassMetadataFactory;
 
 /**
@@ -16,15 +17,25 @@ use Doctrine\ODM\MongoDB\Mapping\ClassMetadataFactory as DoctrineClassMetadataFa
  */
 class ClassMetadataFactory extends DoctrineClassMetadataFactory
 {
+    private $documentManager;
+
+    public function setDocumentManager(DocumentManager $dm)
+    {
+        $this->documentManager = $dm;
+        parent::setDocumentManager($dm);
+    }
 
     /**
      * Creates a new ClassMetadata instance for the given class name.
      *
-     * @param string $className
+     * @param  string        $className
      * @return ClassMetadata
      */
     protected function newClassMetadataInstance($className)
     {
-        return new ClassMetadata($className);
+        $instance = new ClassMetadata($className);
+        $instance->setEventManager($this->documentManager->getEventManager());
+
+        return $instance;
     }
 }

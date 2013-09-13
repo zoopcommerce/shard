@@ -7,10 +7,11 @@
 namespace Zoop\Shard\Validator;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\ODM\MongoDB\Event\OnFlushEventArgs;
-use Doctrine\ODM\MongoDB\Events as ODMEvents;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zoop\Shard\Core\Events as CoreEvents;
+use Zoop\Shard\Core\AbstractChangeEventArgs;
+use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  *
@@ -34,63 +35,35 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     public function getSubscribedEvents()
     {
         $events = [
-            // @codingStandardsIgnoreStart
-            ODMEvents::onFlush
-            // @codingStandardsIgnoreEnd
+            CoreEvents::VALIDATE,
+            CoreEvents::METADATA_SLEEP,
         ];
+
         return $events;
     }
 
-    /**
-     *
-     * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
-     */
-    public function onFlush(OnFlushEventArgs $eventArgs)
+    public function validate(AbstractChangeEventArgs $eventArgs)
     {
-        $documentManager = $eventArgs->getDocumentManager();
-        $unitOfWork = $documentManager->getUnitOfWork();
+        $document = $eventArgs->getDocument();
         $documentValidator = $this->getDocumentValidator();
 
-        foreach ($unitOfWork->getScheduledDocumentUpdates() as $document) {
-            $metadata = $documentManager->getClassMetadata(get_class($document));
+        $result = $documentValidator->isValid($document, $eventArgs->getMetadata(), $eventArgs->getChangeSet());
+        if (! $result->getValue()) {
 
-            $result = $documentValidator->isValid($document, $metadata);
-            if (! $result->getValue()) {
+            // Raise INVALID_OBJECT
+            $eventArgs->getEventManager()->dispatchEvent(
+                Events::INVALID_OBJECT,
+                new EventArgs($document, $result)
+            );
 
-                // Updates to invalid documents are not allowed. Roll them back
-                $unitOfWork->detach($document);
-
-                $eventManager = $documentManager->getEventManager();
-
-                // Raise INVALID_UPDATE
-                if ($eventManager->hasListeners(Events::INVALID_UPDATE)) {
-                    $eventManager->dispatchEvent(
-                        Events::INVALID_UPDATE,
-                        new EventArgs($document, $documentManager, $result)
-                    );
-                }
-            }
+            $eventArgs->setReject(true);
         }
+    }
 
-        foreach ($unitOfWork->getScheduledDocumentInsertions() as $document) {
-            $metadata = $documentManager->getClassMetadata(get_class($document));
-
-            $result = $documentValidator->isValid($document, $metadata);
-            if (! $result->getValue()) {
-
-                //stop creation
-                $unitOfWork->detach($document);
-
-                $eventManager = $documentManager->getEventManager();
-
-                // Raise invalidCreate
-                if ($eventManager->hasListeners(Events::INVALID_CREATE)) {
-                    $eventManager->dispatchEvent(
-                        Events::INVALID_CREATE,
-                        new EventArgs($document, $documentManager, $result)
-                    );
-                }
-            }
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
+    {
+        if (isset($eventArgs->getMetadata()->validator)) {
+            $eventArgs->addSerialized('validator');
         }
     }
 
@@ -103,6 +76,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         if (! isset($this->documentValidator)) {
             $this->documentValidator = $this->serviceLocator->get('documentValidator');
         }
+
         return $this->documentValidator;
     }
 }

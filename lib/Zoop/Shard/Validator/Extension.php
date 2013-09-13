@@ -28,7 +28,7 @@ class Extension extends AbstractExtension
 
     protected $serviceManagerConfig = [
         'invokables' => [
-            'documentValidator' => 'Zoop\Shard\Validator\DocumentValidator',
+            'documentvalidator' => 'Zoop\Shard\Validator\DocumentValidator',
             'subscriber.validator.mainsubscriber' => 'Zoop\Shard\Validator\MainSubscriber',
             'subscriber.validator.annotationsubscriber' => 'Zoop\Shard\Validator\AnnotationSubscriber'
         ]

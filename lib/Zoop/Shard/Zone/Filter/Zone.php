@@ -84,7 +84,7 @@ class Zone extends BsonFilter
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Mapping\ClassMetadata $targetMetadata
+     * @param  \Doctrine\ODM\MongoDB\Mapping\ClassMetadata $targetMetadata
      * @return array
      */
     public function addFilterCriteria(ClassMetadata $targetMetadata)
@@ -93,10 +93,12 @@ class Zone extends BsonFilter
             count($this->parameters['zones'])
         ) {
             $operator = $this->parameters['includeZoneList'] ? '$in' : '$nin';
+
             return array(
                 $targetMetadata->zones => array($operator => $this->parameters['zones'])
             );
         }
+
         return array();
     }
 }

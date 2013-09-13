@@ -26,38 +26,13 @@ class AnnotationSubscriber implements EventSubscriber
     public function getSubscribedEvents()
     {
         return [
-            Shard\Serializer\ClassName::EVENT,
-            Shard\Serializer\Discriminator::EVENT,
             Shard\Serializer\Eager::EVENT,
             Shard\Serializer\Ignore::EVENT,
             Shard\Serializer\RefLazy::EVENT,
             Shard\Serializer\ReferenceSerializer::EVENT,
             Shard\Serializer\SimpleLazy::EVENT,
+            Shard\Unserializer\Ignore::EVENT,
         ];
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationSerializerClassName(AnnotationEventArgs $eventArgs)
-    {
-        $metadata = $eventArgs->getMetadata();
-        $annotation = $eventArgs->getAnnotation();
-        $this->createMetadata($metadata);
-        $metadata->serializer['className'] = (boolean) $annotation->value;
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationSerializerDiscriminator(AnnotationEventArgs $eventArgs)
-    {
-        $metadata = $eventArgs->getMetadata();
-        $annotation = $eventArgs->getAnnotation();
-        $this->createMetadata($metadata);
-        $metadata->serializer['discriminator'] = (boolean) $annotation->value;
     }
 
     /**
@@ -81,7 +56,20 @@ class AnnotationSubscriber implements EventSubscriber
         $metadata = $eventArgs->getMetadata();
         $annotation = $eventArgs->getAnnotation();
         $this->createMetadata($metadata);
-        $metadata->serializer['fields'][$eventArgs->getReflection()->getName()]['ignore'] =
+        $metadata->serializer['fields'][$eventArgs->getReflection()->getName()]['serializeIgnore'] =
+            $annotation->value;
+    }
+
+    /**
+     *
+     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
+     */
+    public function annotationUnserializerIgnore(AnnotationEventArgs $eventArgs)
+    {
+        $metadata = $eventArgs->getMetadata();
+        $annotation = $eventArgs->getAnnotation();
+        $this->createMetadata($metadata);
+        $metadata->serializer['fields'][$eventArgs->getReflection()->getName()]['unserializeIgnore'] =
             $annotation->value;
     }
 

@@ -55,17 +55,15 @@ class AnnotationSubscriber implements EventSubscriber
         );
 
         // Raise annotation event
-        if ($eventManager->hasListeners($permissionAnnotation::EVENT)) {
-            $eventManager->dispatchEvent(
-                $permissionAnnotation::EVENT,
-                new AnnotationEventArgs(
-                    $metadata,
-                    EventType::DOCUMENT,
-                    $permissionAnnotation,
-                    $metadata->getReflectionClass(),
-                    $eventManager
-                )
-            );
-        }
+        $eventManager->dispatchEvent(
+            $permissionAnnotation::EVENT,
+            new AnnotationEventArgs(
+                $metadata,
+                EventType::DOCUMENT,
+                $permissionAnnotation,
+                $metadata->getReflectionClass(),
+                $eventManager
+            )
+        );
     }
 }

@@ -7,13 +7,13 @@
 namespace Zoop\Shard\Crypt;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
-use Doctrine\ODM\MongoDB\Event\OnFlushEventArgs;
-use Doctrine\ODM\MongoDB\Events as ODMEvents;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Crypt\BlockCipher\BlockCipherServiceInterface;
 use Zoop\Shard\Crypt\Hash\HashServiceInterface;
+use Zoop\Shard\Core\Events as CoreEvents;
+use Zoop\Shard\Core\AbstractChangeEventArgs;
+use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  * Listener hashes fields marked with CryptHash annotation
@@ -36,10 +36,8 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     public function getSubscribedEvents()
     {
         return [
-            // @codingStandardsIgnoreStart
-            ODMEvents::prePersist,
-            ODMEvents::onFlush
-            // @codingStandardsIgnoreEnd
+            CoreEvents::CRYPT,
+            CoreEvents::METADATA_SLEEP,
         ];
     }
 
@@ -48,6 +46,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         if (! isset($this->hashHelper)) {
             $this->hashHelper = $this->serviceLocator->get('crypt.hashhelper');
         }
+
         return $this->hashHelper;
     }
 
@@ -56,76 +55,82 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         if (!isset($this->blockCipherHelper)) {
             $this->blockCipherHelper = $this->serviceLocator->get('crypt.blockcipherhelper');
         }
+
         return $this->blockCipherHelper;
     }
 
-    /**
-     *
-     * @param OnFlushEventArgs $eventArgs
-     */
-    public function onFlush(OnFlushEventArgs $eventArgs)
+    public function crypt(AbstractChangeEventArgs $eventArgs)
     {
-        $documentManager = $eventArgs->getDocumentManager();
-        $unitOfWork = $documentManager->getUnitOfWork();
+        $this->hashFields($eventArgs);
+        $this->blockCipherFields($eventArgs);
+    }
 
-        foreach ($unitOfWork->getScheduledDocumentUpdates() as $document) {
-            $changeSet = $unitOfWork->getDocumentChangeSet($document);
-            $metadata = $documentManager->getClassMetadata(get_class($document));
-            foreach ($changeSet as $field => $change) {
-                $old = $change[0];
-                $new = $change[1];
+    protected function hashFields(AbstractChangeEventArgs $eventArgs)
+    {
+        $metadata = $eventArgs->getMetadata();
 
-                // Check for change
-                if ($old == null || $old == $new) {
-                    continue;
+        if (! isset($metadata->crypt['hash'])) {
+            return;
+        }
+
+        $document = $eventArgs->getDocument();
+        $changeSet = $eventArgs->getChangeSet();
+
+        foreach ($metadata->crypt['hash'] as $field => $setting) {
+            if ($this->hasChanged($field, $changeSet)) {
+                $service = $this->serviceLocator->get($setting['service']);
+                if (! $service instanceof HashServiceInterface) {
+                    throw new \Zoop\Shard\Exception\InvalidArgumentException();
                 }
-
-                if (! isset($new) || $new == '') {
-                    continue;
-                }
-
-                $requireRecompute = false;
-
-                if (isset($metadata->crypt['hash']) &&
-                   isset($metadata->crypt['hash'][$field])
-                ) {
-                    $service = $this->serviceLocator->get($metadata->crypt['hash'][$field]['service']);
-                    if (! $service instanceof HashServiceInterface) {
-                        throw new \Zoop\Shard\Exception\InvalidArgumentException();
-                    }
-                    $service->hashField($field, $document, $metadata);
-                    $requireRecompute = true;
-
-                } elseif (isset($metadata->crypt['blockCipher']) &&
-                   isset($metadata->crypt['blockCipher'][$field])
-                ) {
-                    $service = $this->serviceLocator->get($metadata->crypt['blockCipher'][$field]['service']);
-                    if (! $service instanceof BlockCipherServiceInterface) {
-                        throw new \Zoop\Shard\Exception\InvalidArgumentException();
-                    }
-                    $service->encryptField($field, $document, $metadata);
-                    $requireRecompute = true;
-                }
-
-                if ($requireRecompute) {
-                    $unitOfWork->recomputeSingleDocumentChangeSet($metadata, $document);
-                }
+                $service->hashField($field, $document, $metadata);
+                $eventArgs->addRecompute($field);
             }
         }
     }
 
-    /**
-     *
-     * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
-     */
-    public function prePersist(LifecycleEventArgs $eventArgs)
+    protected function blockCipherFields(AbstractChangeEventArgs $eventArgs)
     {
+        $metadata = $eventArgs->getMetadata();
+
+        if (! isset($metadata->crypt['blockCipher'])) {
+            return;
+        }
+
         $document = $eventArgs->getDocument();
-        $documentManager = $eventArgs->getDocumentManager();
-        $metadata = $documentManager->getClassMetadata(get_class($document));
+        $changeSet = $eventArgs->getChangeSet();
 
-        $this->getHashHelper()->hashDocument($document, $metadata);
-        $this->getBlockCipherHelper()->encryptDocument($document, $metadata);
+        foreach ($metadata->crypt['blockCipher'] as $field => $setting) {
+            if ($this->hasChanged($field, $changeSet)) {
+                $service = $this->serviceLocator->get($setting['service']);
+                if (! $service instanceof BlockCipherServiceInterface) {
+                    throw new \Zoop\Shard\Exception\InvalidArgumentException();
+                }
+                $service->encryptField($field, $document, $metadata);
+                $eventArgs->addRecompute($field);
+            }
+        }
+    }
 
+    protected function hasChanged($field, $changeSet)
+    {
+        if (!isset($changeSet[$field])) {
+            return false;
+        }
+
+        list($old, $new) = $changeSet[$field];
+
+        // Check for change
+        if ($old == $new || (! isset($new) || $new == '')) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
+    {
+        if (isset($eventArgs->getMetadata()->crypt)) {
+            $eventArgs->addSerialized('crypt');
+        }
     }
 }

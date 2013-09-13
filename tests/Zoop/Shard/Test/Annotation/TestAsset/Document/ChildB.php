@@ -8,8 +8,6 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 
 /**
  * @ODM\Document
- * @Shard\Serializer\ClassName(false)
- * @Shard\Serializer\Discriminator(false)
  * @Shard\Validator\Chain({
  *     @Shard\Validator(class = "ParentValidator", value = false),
  *     @Shard\Validator(class = "ChildBValidator")
@@ -18,7 +16,7 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 class ChildB extends ParentClass
 {
     /**
-     * @Shard\Serializer\Ignore("none")
+     * @Shard\Serializer\Ignore(false)
      */
     protected $name;
 }

@@ -10,7 +10,6 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 
 /**
  * @ODM\Document
- * @Shard\Serializer\ClassName
  * @Shard\AccessControl({
  *     @Shard\Permission\Basic(roles="*", allow="*")
  * })
@@ -33,7 +32,6 @@ class CakeWithSecrets
      * @Shard\Serializer\Eager
      */
     protected $secretIngredients;
-
 
     public function __construct()
     {

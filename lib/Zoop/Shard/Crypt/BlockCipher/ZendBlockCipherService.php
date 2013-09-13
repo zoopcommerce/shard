@@ -31,6 +31,7 @@ class ZendBlockCipherService implements BlockCipherServiceInterface, ServiceLoca
             $cipher->setSalt(substr($salt, 0, $cipher->getCipher()->getSaltSize()));
         }
         $cipher->setKey($key);
+
         return $cipher->encrypt($plaintext);
     }
 
@@ -38,6 +39,7 @@ class ZendBlockCipherService implements BlockCipherServiceInterface, ServiceLoca
     {
         $cipher = BlockCipher::factory('mcrypt', array('algorithm' => 'aes'));
         $cipher->setKey($key);
+
         return $cipher->decrypt($encryptedText);
     }
 

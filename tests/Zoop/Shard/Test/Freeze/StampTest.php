@@ -17,15 +17,15 @@ class StampTest extends BaseTest
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
-                    'extension.freeze' => true
+                    'extension.freeze' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
                 'service_manager_config' => [
                     'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
                         'user' => function () {
                             $user = new User();
                             $user->setUsername('toby');
+
                             return $user;
                         }
                     ]
@@ -33,7 +33,7 @@ class StampTest extends BaseTest
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
         $this->freezer = $manifest->getServiceManager()->get('freezer');
     }
 
@@ -42,6 +42,8 @@ class StampTest extends BaseTest
         $documentManager = $this->documentManager;
         $testDoc = new Stamped();
         $testDoc->setName('version1');
+
+        $metadata = $documentManager->getClassMetadata(get_class($testDoc));
 
         $documentManager->persist($testDoc);
         $documentManager->flush();
@@ -57,7 +59,7 @@ class StampTest extends BaseTest
         $this->assertNull($testDoc->getThawedBy());
         $this->assertNull($testDoc->getThawedOn());
 
-        $this->freezer->freeze($testDoc);
+        $this->freezer->freeze($testDoc, $metadata);
 
         $documentManager->flush();
         $documentManager->clear();
@@ -70,7 +72,7 @@ class StampTest extends BaseTest
         $this->assertNull($testDoc->getThawedBy());
         $this->assertNull($testDoc->getThawedOn());
 
-        $this->freezer->thaw($testDoc);
+        $this->freezer->thaw($testDoc, $metadata);
 
         $documentManager->flush();
         $documentManager->clear();

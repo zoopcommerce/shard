@@ -6,20 +6,22 @@
  */
 namespace Zoop\Shard\Serializer\Reference;
 
-use Zoop\Shard\DocumentManagerAwareInterface;
-use Zoop\Shard\DocumentManagerAwareTrait;
+use Zoop\Shard\Core\ObjectManagerAwareInterface;
+use Zoop\Shard\Core\ObjectManagerAwareTrait;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class SimpleLazy implements ReferenceSerializerInterface, DocumentManagerAwareInterface
+class SimpleLazy implements ReferenceSerializerInterface, ObjectManagerAwareInterface
 {
-    use DocumentManagerAwareTrait;
+    use ObjectManagerAwareTrait;
 
-    public function serialize($id, array $mapping)
+    public function serialize($document)
     {
-        return $this->documentManager->getClassMetadata($mapping['targetDocument'])->collection . '/' . $id;
+        $metadata = $this->objectManager->getClassMetadata(get_class($document));
+
+        return $metadata->collection . '/' . $metadata->getFieldValue($document, $metadata->getIdentifier());
     }
 }

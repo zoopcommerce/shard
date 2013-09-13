@@ -6,10 +6,10 @@
  */
 namespace Zoop\Shard\Freeze\AccessControl;
 
-use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
 use Zoop\Shard\AccessControl\AbstractAccessControlSubscriber;
 use Zoop\Shard\AccessControl\EventArgs as AccessControlEventArgs;
 use Zoop\Shard\Freeze\Events;
+use Zoop\Shard\Freeze\FreezerEventArgs;
 
 /**
  *
@@ -37,7 +37,7 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
      *
      * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
      */
-    public function preFreeze(LifecycleEventArgs $eventArgs)
+    public function preFreeze(FreezerEventArgs $eventArgs)
     {
         if (! ($accessController = $this->getAccessController())) {
             //Access control is not enabled
@@ -45,18 +45,18 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
         }
 
         $document = $eventArgs->getDocument();
+        $metadata = $eventArgs->getMetadata();
 
-        if (! $accessController->areAllowed([Actions::FREEZE], null, $document)->getAllowed()) {
+        if (! $accessController->areAllowed([Actions::FREEZE], $metadata, $document)->getAllowed()) {
             //stop freeze
-            $this->getFreezer()->thaw($document);
+            $this->getFreezer()->thaw($document, $metadata);
 
-            $eventManager = $eventArgs->getDocumentManager()->getEventManager();
-            if ($eventManager->hasListeners(Events::FREEZE_DENIED)) {
-                $eventManager->dispatchEvent(
-                    Events::FREEZE_DENIED,
-                    new AccessControlEventArgs($document, $eventArgs->getDocumentManager(), Actions::FREEZE)
-                );
-            }
+            $eventArgs->setReject(true);
+
+            $eventArgs->getEventManager()->dispatchEvent(
+                Events::FREEZE_DENIED,
+                new AccessControlEventArgs($document, Actions::FREEZE)
+            );
         }
     }
 
@@ -64,7 +64,7 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
      *
      * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
      */
-    public function preThaw(LifecycleEventArgs $eventArgs)
+    public function preThaw(FreezerEventArgs $eventArgs)
     {
 
         if (! ($accessController = $this->getAccessController())) {
@@ -73,18 +73,18 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
         }
 
         $document = $eventArgs->getDocument();
+        $metadata = $eventArgs->getMetadata();
 
-        if (! $accessController->areAllowed([Actions::THAW], null, $document)->getAllowed()) {
+        if (! $accessController->areAllowed([Actions::THAW], $metadata, $document)->getAllowed()) {
             //stop thaw
-            $this->getFreezer()->freeze($document);
+            $this->getFreezer()->freeze($document, $metadata);
 
-            $eventManager = $eventArgs->getDocumentManager()->getEventManager();
-            if ($eventManager->hasListeners(Events::THAW_DENIED)) {
-                $eventManager->dispatchEvent(
-                    Events::THAW_DENIED,
-                    new AccessControlEventArgs($document, $eventArgs->getDocumentManager(), Actions::THAW)
-                );
-            }
+            $eventArgs->setReject(true);
+
+            $eventArgs->getEventManager()->dispatchEvent(
+                Events::THAW_DENIED,
+                new AccessControlEventArgs($document, Actions::THAW)
+            );
         }
     }
 
@@ -93,6 +93,7 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
         if (! isset($this->freezer)) {
             $this->freezer = $this->serviceLocator->get('freezer');
         }
+
         return $this->freezer;
     }
 }

@@ -4,7 +4,7 @@
  * @package    Zoop
  * @license    MIT
  */
-namespace Zoop\Shard;
+namespace Zoop\Shard\Core;
 
 use Doctrine\Common\EventSubscriber;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;

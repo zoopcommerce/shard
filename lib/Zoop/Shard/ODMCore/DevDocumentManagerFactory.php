@@ -3,12 +3,11 @@
  * @package    Zoop
  * @license    MIT
  */
-namespace Zoop\Shard\Test\TestAsset;
+namespace Zoop\Shard\ODMCore;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Cache\ArrayCache;
-use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\MongoDB\Connection;
 use Doctrine\ODM\MongoDB\Configuration;
@@ -16,6 +15,7 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
+use Zoop\Shard\Core\EventManager;
 
 /**
  *
@@ -23,29 +23,29 @@ use Zend\ServiceManager\ServiceLocatorInterface;
  * @version $Revision$
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class DocumentManagerFactory implements FactoryInterface
+class DevDocumentManagerFactory implements FactoryInterface
 {
-
-    const DEFAULT_DB = 'zoop_shard_tests';
-
     /**
      *
-     * @param \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator
+     * @param  \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator
      * @return object
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
         $manifest = $serviceLocator->get('manifest');
+        $extension = $serviceLocator->get('extension.odmcore');
 
         $config = new Configuration();
 
-        $config->setProxyDir(__DIR__ . '/../../../../Proxies');
+        $config->setProxyDir($extension->getProxyDir());
         $config->setProxyNamespace('Proxies');
 
-        $config->setHydratorDir(__DIR__ . '/../../../../Hydrators');
+        $config->setHydratorDir($extension->getHydratorDir());
         $config->setHydratorNamespace('Hydrators');
 
-        $config->setDefaultDB(self::DEFAULT_DB);
+        $config->setDefaultDB($extension->getDefaultDb());
+
+        $config->setClassMetadataFactoryName($extension->getClassMetadataFactory());
 
         $config->setMetadataCacheImpl(new ArrayCache);
 

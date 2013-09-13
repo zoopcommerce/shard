@@ -28,7 +28,8 @@ class Extension extends AbstractExtension
             'crypt.hashhelper' => 'Zoop\Shard\Crypt\HashHelper',
             'crypt.blockcipherhelper' => 'Zoop\Shard\Crypt\BlockCipherHelper',
             'crypt.hash.basichashservice' => 'Zoop\Shard\Crypt\Hash\BasicHashService',
-            'crypt.blockcipher.zendservice' => 'Zoop\Shard\Crypt\BlockCipher\ZendBlockCipherService'
+            'crypt.blockcipher.zendservice' => 'Zoop\Shard\Crypt\BlockCipher\ZendBlockCipherService',
+            'Zoop\Shard\Crypt\CryptValidator' => 'Zoop\Shard\Crypt\CryptValidator'
         ]
     ];
 
@@ -37,6 +38,6 @@ class Extension extends AbstractExtension
      * @var array
      */
     protected $dependencies = [
-        'extension.annotation' => true
+        'extension.annotation' => true,
     ];
 }

@@ -6,8 +6,8 @@
  */
 namespace Zoop\Shard\Freeze;
 
-use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
-use Zoop\Shard\Stamp\AbstractStampSubscriber;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Adds freeze and thaw stamps during persist
@@ -15,8 +15,9 @@ use Zoop\Shard\Stamp\AbstractStampSubscriber;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class StampSubscriber extends AbstractStampSubscriber
+class StampSubscriber implements ServiceLocatorAwareInterface
 {
+    use ServiceLocatorAwareTrait;
     /**
      *
      * @return array
@@ -31,47 +32,44 @@ class StampSubscriber extends AbstractStampSubscriber
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
+     * @param \Zoop\Shard\Freeze\FreezerEventArgs $eventArgs
      */
-    public function postFreeze(LifecycleEventArgs $eventArgs)
+    public function postFreeze(FreezerEventArgs $eventArgs)
     {
-        $recomputeChangeSet = false;
         $document = $eventArgs->getDocument();
-        $metadata = $eventArgs->getDocumentManager()->getClassMetadata(get_class($document));
+        $metadata = $eventArgs->getMetadata();
 
         if (isset($metadata->freeze['frozenBy'])) {
-            $metadata->reflFields[$metadata->freeze['frozenBy']]->setValue($document, $this->getUsername());
-            $recomputeChangeSet = true;
+            $metadata->setFieldValue($document, $metadata->freeze['frozenBy'], $this->getUsername());
         }
         if (isset($metadata->freeze['frozenOn'])) {
-            $metadata->reflFields[$metadata->freeze['frozenOn']]->setValue($document, time());
-            $recomputeChangeSet = true;
-        }
-        if ($recomputeChangeSet) {
-            $this->recomputeChangeset($eventArgs);
+            $metadata->setFieldValue($document, $metadata->freeze['frozenOn'], time());
         }
     }
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
+     * @param \Zoop\Shard\Freeze\FreezerEventArgs $eventArgs
      */
-    public function postThaw(LifecycleEventArgs $eventArgs)
+    public function postThaw(FreezerEventArgs $eventArgs)
     {
-        $recomputeChangeSet = false;
         $document = $eventArgs->getDocument();
-        $metadata = $eventArgs->getDocumentManager()->getClassMetadata(get_class($document));
+        $metadata = $eventArgs->getMetadata();
 
         if (isset($metadata->freeze['thawedBy'])) {
-            $metadata->reflFields[$metadata->freeze['thawedBy']]->setValue($document, $this->getUsername());
-            $recomputeChangeSet = true;
+            $metadata->setFieldValue($document, $metadata->freeze['thawedBy'], $this->getUsername());
         }
         if (isset($metadata->freeze['thawedOn'])) {
-            $metadata->reflFields[$metadata->freeze['thawedOn']]->setValue($document, time());
-            $recomputeChangeSet = true;
+            $metadata->setFieldValue($document, $metadata->freeze['thawedOn'], time());
         }
-        if ($recomputeChangeSet) {
-            $this->recomputeChangeset($eventArgs);
+    }
+
+    protected function getUsername()
+    {
+        if ($this->serviceLocator->has('user')) {
+            return $this->serviceLocator->get('user')->getUsername();
+        } else {
+            return null;
         }
     }
 }

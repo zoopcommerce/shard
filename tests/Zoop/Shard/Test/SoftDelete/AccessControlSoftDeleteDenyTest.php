@@ -20,18 +20,13 @@ class AccessControlSoftDeleteDenyTest extends BaseTest
                 ],
                 'extension_configs' => [
                     'extension.softDelete' => true,
-                    'extension.accessControl' => true
+                    'extension.accessControl' => true,
+                    'extension.odmcore' => true
                 ],
-                'document_manager' => 'testing.documentmanager',
-                'service_manager_config' => [
-                    'factories' => [
-                        'testing.documentmanager' => 'Zoop\Shard\Test\TestAsset\DocumentManagerFactory',
-                    ]
-                ]
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('testing.documentmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
         $this->softDeleter = $manifest->getServiceManager()->get('softDeleter');
     }
 
@@ -44,6 +39,7 @@ class AccessControlSoftDeleteDenyTest extends BaseTest
         $eventManager->addEventListener(Events::SOFT_DELETE_DENIED, $this);
 
         $testDoc = new AccessControlled();
+        $metadata = $documentManager->getClassMetadata(get_class($testDoc));
 
         $testDoc->setName('version 1');
 
@@ -55,13 +51,13 @@ class AccessControlSoftDeleteDenyTest extends BaseTest
         $repository = $documentManager->getRepository(get_class($testDoc));
         $testDoc = $repository->find($id);
 
-        $this->softDeleter->softDelete($testDoc);
+        $this->softDeleter->softDelete($testDoc, $metadata);
 
         $documentManager->flush();
         $documentManager->clear();
 
         $testDoc = $repository->find($id);
-        $this->assertFalse($this->softDeleter->isSoftDeleted($testDoc));
+        $this->assertFalse($this->softDeleter->isSoftDeleted($testDoc, $metadata));
         $this->assertTrue(isset($this->calls[Events::SOFT_DELETE_DENIED]));
     }
 
