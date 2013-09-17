@@ -17,7 +17,7 @@ class FreezeTest extends BaseTest implements EventSubscriber
     {
         $manifest = new Manifest(
             [
-                'documents' => [
+                'object_map' => [
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [

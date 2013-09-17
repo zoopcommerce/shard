@@ -147,7 +147,7 @@ class Manifest extends AbstractExtension
         //merge all the configs
         $config = [
             'service_manager_config' => [],
-            'documents' => []
+            'object_map' => []
         ];
         foreach ($this->extensionConfigs as $extensionConfig) {
             $config = ArrayUtils::merge(
@@ -159,7 +159,7 @@ class Manifest extends AbstractExtension
             );
         }
         $this->serviceManagerConfig = ArrayUtils::merge($config['service_manager_config'], $this->serviceManagerConfig);
-        $this->documents = ArrayUtils::merge($config['documents'], $this->documents);
+        $this->objectMap = ArrayUtils::merge($config['object_map'], $this->objectMap);
 
         //Apply service manager config
         $serviceManagerConfig = new Config($this->serviceManagerConfig);
