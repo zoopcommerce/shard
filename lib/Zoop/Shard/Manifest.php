@@ -15,7 +15,7 @@ use Zoop\Shard\Core\ObjectManagerAwareInterface;
 
 /**
  * Pass this class a configuration array with extension namespaces, and then retrieve the
- * required filters, subscribers, and document locations
+ * required subscribers, and document locations
  *
  * @SuppressWarnings(PHPMD.LongVariable)
  *
@@ -147,7 +147,6 @@ class Manifest extends AbstractExtension
         //merge all the configs
         $config = [
             'service_manager_config' => [],
-            'filters' => [],
             'documents' => []
         ];
         foreach ($this->extensionConfigs as $extensionConfig) {
@@ -160,7 +159,6 @@ class Manifest extends AbstractExtension
             );
         }
         $this->serviceManagerConfig = ArrayUtils::merge($config['service_manager_config'], $this->serviceManagerConfig);
-        $this->filters = ArrayUtils::merge($config['filters'], $this->filters);
         $this->documents = ArrayUtils::merge($config['documents'], $this->documents);
 
         //Apply service manager config

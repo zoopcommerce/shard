@@ -18,8 +18,6 @@ abstract class AbstractExtension extends AbstractOptions
 {
     protected $documents = [];
 
-    protected $filters = [];
-
     protected $subscribers = [];
 
     protected $serviceManagerConfig = [];
@@ -50,16 +48,6 @@ abstract class AbstractExtension extends AbstractOptions
     public function setDocuments($documents)
     {
         $this->documents = $documents;
-    }
-
-    public function getFilters()
-    {
-        return $this->filters;
-    }
-
-    public function setFilters($filters)
-    {
-        $this->filters = $filters;
     }
 
     public function getSubscribers()

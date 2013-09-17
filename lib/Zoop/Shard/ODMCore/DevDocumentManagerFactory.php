@@ -59,7 +59,7 @@ class DevDocumentManagerFactory implements FactoryInterface
         $config->setMetadataDriverImpl($chain);
 
         //register filters
-        foreach ($manifest->getFilters() as $name => $class) {
+        foreach ($extension->getFilters() as $name => $class) {
             $config->addFilter($name, $class);
         }
 
