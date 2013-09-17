@@ -9,7 +9,7 @@ namespace Zoop\Shard\Annotation;
 use Doctrine\Common\Annotations\Annotation;
 use Doctrine\Common\EventArgs as BaseEventArgs;
 use Doctrine\Common\EventManager;
-use Doctrine\ODM\MongoDB\Mapping\ClassMetadataInfo;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 
 /**
  * Arguments for annotation events
@@ -31,13 +31,14 @@ class AnnotationEventArgs extends BaseEventArgs
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Mapping\ClassMetadataInfo $metadata
-     * @param string                                          $eventType
-     * @param \Doctrine\Common\Annotations\Annotation         $annotation
-     * @param mixed                                           $reflection
+     * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $metadata
+     * @param type $eventType
+     * @param \Doctrine\Common\Annotations\Annotation $annotation
+     * @param type $reflection
+     * @param \Doctrine\Common\EventManager $eventManager
      */
     public function __construct(
-        ClassMetadataInfo $metadata,
+        ClassMetadata $metadata,
         $eventType,
         Annotation $annotation,
         $reflection,

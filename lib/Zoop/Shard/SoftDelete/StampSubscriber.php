@@ -33,7 +33,7 @@ class StampSubscriber implements ServiceLocatorAwareInterface
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
+     * @param \Zoop\Shard\SoftDelete\SoftDeleteEventArgs $eventArgs
      */
     public function postSoftDelete(SoftDeleteEventArgs $eventArgs)
     {
@@ -50,7 +50,7 @@ class StampSubscriber implements ServiceLocatorAwareInterface
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs $eventArgs
+     * @param \Zoop\Shard\SoftDelete\SoftDeleteEventArgs $eventArgs
      */
     public function postRestore(SoftDeleteEventArgs $eventArgs)
     {

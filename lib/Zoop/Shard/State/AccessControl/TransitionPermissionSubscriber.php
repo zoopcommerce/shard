@@ -80,7 +80,8 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
+     * @param \Zoop\Shard\State\TransitionEventArgs $eventArgs
+     * @return type
      */
     public function preTransition(TransitionEventArgs $eventArgs)
     {

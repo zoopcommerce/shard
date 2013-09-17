@@ -8,7 +8,6 @@ namespace Zoop\Shard\Serializer;
 
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\Proxy;
-use Doctrine\ODM\MongoDB\DocumentNotFoundException;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Core\ObjectManagerAwareInterface;
@@ -116,7 +115,7 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
         if ($document instanceof Proxy) {
             try {
                 $document->__load();
-            } catch (DocumentNotFoundException $ex) {
+            } catch (\Exception $ex) {
                 //Document may not be found due to access control
                 return;
             }

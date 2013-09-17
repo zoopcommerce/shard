@@ -22,10 +22,6 @@ abstract class AbstractExtension extends AbstractOptions
 
     protected $subscribers = [];
 
-    protected $cliCommands = [];
-
-    protected $cliHelpers = [];
-
     protected $serviceManagerConfig = [];
 
     /**
@@ -74,26 +70,6 @@ abstract class AbstractExtension extends AbstractOptions
     public function setSubscribers($subscribers)
     {
         $this->subscribers = $subscribers;
-    }
-
-    public function getCliCommands()
-    {
-        return $this->cliCommands;
-    }
-
-    public function setCliCommands($cliCommands)
-    {
-        $this->cliCommands = $cliCommands;
-    }
-
-    public function getCliHelpers()
-    {
-        return $this->cliHelpers;
-    }
-
-    public function setCliHelpers($cliHelpers)
-    {
-        $this->cliHelpers = $cliHelpers;
     }
 
     /**

@@ -65,7 +65,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 
     /**
      *
-     * @param  \Zoop\Shard\ODMCore\UpdateEventArgs $eventArgs
+     * @param \Zoop\Shard\Core\UpdateEventArgs $eventArgs
      * @return type
      */
     public function update(UpdateEventArgs $eventArgs)

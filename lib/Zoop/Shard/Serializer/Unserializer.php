@@ -58,10 +58,11 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
     /**
      * This will create a document from the supplied array.
      *
-     * @param  array                                 $data
-     * @param  \Doctrine\ODM\MongoDB\DocumentManager $documentManager
-     * @param  string                                $className
-     * @return object
+     * @param array $data
+     * @param type $class
+     * @param type $document
+     * @param type $mode
+     * @return type
      */
     public function fromArray(
         array $data,
@@ -73,13 +74,12 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
     }
 
     /**
-     * This will create a document from the supplied json string.
-     * WARNING: the constructor of the document will not be called.
      *
-     * @param  string                                $data
-     * @param  \Doctrine\ODM\MongoDB\DocumentManager $documentManager
-     * @param  string                                $className
-     * @return object
+     * @param type $data
+     * @param type $class
+     * @param type $document
+     * @param type $mode
+     * @return type
      */
     public function fromJson(
         $data,

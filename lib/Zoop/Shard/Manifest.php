@@ -148,9 +148,7 @@ class Manifest extends AbstractExtension
         $config = [
             'service_manager_config' => [],
             'filters' => [],
-            'documents' => [],
-            'cli_commands' => [],
-            'cli_helpers' => []
+            'documents' => []
         ];
         foreach ($this->extensionConfigs as $extensionConfig) {
             $config = ArrayUtils::merge(
@@ -164,8 +162,6 @@ class Manifest extends AbstractExtension
         $this->serviceManagerConfig = ArrayUtils::merge($config['service_manager_config'], $this->serviceManagerConfig);
         $this->filters = ArrayUtils::merge($config['filters'], $this->filters);
         $this->documents = ArrayUtils::merge($config['documents'], $this->documents);
-        $this->cliCommands = ArrayUtils::merge($config['cli_commands'], $this->cliCommands);
-        $this->cliHelpers = ArrayUtils::merge($config['cli_helpers'], $this->cliHelpers);
 
         //Apply service manager config
         $serviceManagerConfig = new Config($this->serviceManagerConfig);
