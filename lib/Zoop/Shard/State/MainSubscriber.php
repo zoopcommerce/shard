@@ -7,10 +7,13 @@
 namespace Zoop\Shard\State;
 
 use Doctrine\Common\EventSubscriber;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Common\State\Transition;
 use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Core\UpdateEventArgs;
 use Zoop\Shard\Core\CreateEventArgs;
+use Zoop\Shard\Core\ReadEventArgs;
 use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
@@ -19,8 +22,9 @@ use Zoop\Shard\Core\MetadataSleepEventArgs;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class MainSubscriber implements EventSubscriber
+class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 {
+    use ServiceLocatorAwareTrait;
 
     /**
      *
@@ -29,10 +33,40 @@ class MainSubscriber implements EventSubscriber
     public function getSubscribedEvents()
     {
         return [
+            CoreEvents::READ,
             CoreEvents::CREATE,
             CoreEvents::UPDATE,
             CoreEvents::METADATA_SLEEP,
         ];
+    }
+
+    public function read(ReadEventArgs $eventArgs)
+    {
+        $metadata = $eventArgs->getMetadata();
+
+        if (!isset($metadata->state)) {
+            return;
+        }
+
+        $extension = $this->serviceLocator->get('extension.state');
+        $include = $extension->getReadFilterInclude();
+        $exclude = $extension->getReadFilterExclude();
+        $field = array_keys($metadata->state)[0];
+        $criteria = [];
+
+        if (count($include) > 0) {
+            $criteria[$field] = ['$in' => $include];
+        }
+
+        if (count($exclude) > 0) {
+            $criteria[$field] = ['$nin' => $exclude];
+        }
+
+        if (count($criteria) == 0) {
+            return;
+        }
+
+        $eventArgs->addCriteria($criteria);
     }
 
     public function update(UpdateEventArgs $eventArgs)

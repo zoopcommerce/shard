@@ -21,6 +21,10 @@ class Extension extends AbstractExtension
         'subscriber.odmcore.mainsubscriber'
     ];
 
+    protected $filters = [
+        'odmfilter' => 'Zoop\Shard\ODMCore\Filter'
+    ];
+
     protected $serviceManagerConfig = [
         'invokables' => [
             'subscriber.odmcore.mainsubscriber' =>

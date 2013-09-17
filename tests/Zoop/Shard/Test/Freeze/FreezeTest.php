@@ -3,6 +3,7 @@
 namespace Zoop\Shard\Test\Freeze;
 
 use Doctrine\Common\EventSubscriber;
+use Zoop\Shard\Freeze\Extension;
 use Zoop\Shard\Freeze\Events;
 use Zoop\Shard\Manifest;
 use Zoop\Shard\Test\BaseTest;
@@ -38,6 +39,7 @@ class FreezeTest extends BaseTest implements EventSubscriber
 
         $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
         $this->freezer = $manifest->getServiceManager()->get('freezer');
+        $this->extension = $manifest->getServiceManager()->get('extension.freeze');
     }
 
     public function testBasicFunction()
@@ -95,11 +97,14 @@ class FreezeTest extends BaseTest implements EventSubscriber
         $this->assertFalse($this->freezer->isFrozen($testDoc, $metadata));
     }
 
-    public function testFilter()
+    public function testReadFilter()
     {
         $documentManager = $this->documentManager;
-        $documentManager->getFilterCollection()->enable('freeze');
 
+        $extension = $this->extension;
+        $extension->setReadFilter(Extension::READ_ONLY_NOT_FROZEN);
+
+        //create some simple, not frozen, documents
         $testDocA = new Simple();
         $testDocA->setName('miriam');
 
@@ -114,9 +119,11 @@ class FreezeTest extends BaseTest implements EventSubscriber
         $ids = array($testDocA->getId(), $testDocB->getId());
         $documentManager->clear();
 
+        //both documents should return, because neither is frozen
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(array('lucy', 'miriam'), $docNames);
 
+        //freeze one of the two documents
         if ($testDocs[0]->getName() == 'lucy') {
             $this->freezer->freeze($testDocs[0], $metadata);
         } else {
@@ -126,23 +133,23 @@ class FreezeTest extends BaseTest implements EventSubscriber
         $documentManager->flush();
         $documentManager->clear();
 
+        //only one doc returned, because the other is frozen
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(array('miriam'), $docNames);
 
-        $filter = $documentManager->getFilterCollection()->getFilter('freeze');
-        $filter->onlyFrozen();
+        $extension->setReadFilter(Extension::READ_ONLY_FROZEN);
         $documentManager->clear();
 
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(array('lucy'), $docNames);
 
-        $filter->onlyNotFrozen();
+        $extension->setReadFilter(Extension::READ_ONLY_NOT_FROZEN);
         $documentManager->clear();
 
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(array('miriam'), $docNames);
 
-        $documentManager->getFilterCollection()->disable('freeze');
+        $extension->setReadFilter(Extension::READ_ALL);
 
         $documentManager->flush();
         $documentManager->clear();
@@ -156,7 +163,7 @@ class FreezeTest extends BaseTest implements EventSubscriber
             $this->freezer->thaw($testDocs[1], $metadata);
         }
 
-        $documentManager->getFilterCollection()->enable('freeze');
+        $extension->setReadFilter(Extension::READ_ONLY_NOT_FROZEN);
 
         $documentManager->flush();
         $documentManager->clear();

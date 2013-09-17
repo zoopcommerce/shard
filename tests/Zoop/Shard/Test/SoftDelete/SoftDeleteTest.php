@@ -5,6 +5,7 @@ namespace Zoop\Shard\Test\SoftDelete;
 use Doctrine\Common\EventSubscriber;
 use Zoop\Shard\Manifest;
 use Zoop\Shard\SoftDelete\Events;
+use Zoop\Shard\SoftDelete\Extension;
 use Zoop\Shard\SoftDelete\SoftDeleteEventArgs;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\TestAsset\User;
@@ -38,6 +39,7 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
 
         $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
         $this->softDeleter = $manifest->getServiceManager()->get('softDeleter');
+        $this->extension = $manifest->getServiceManager()->get('extension.softdelete');
     }
 
     public function testBasicFunction()
@@ -90,7 +92,9 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
     public function testFilter()
     {
         $documentManager = $this->documentManager;
-        $documentManager->getFilterCollection()->enable('softDelete');
+
+        $extension = $this->extension;
+        $extension->setReadFilter(Extension::READ_ONLY_NOT_SOFT_DELETED);
 
         $testDocA = new Simple();
         $testDocA->setName('miriam');
@@ -121,20 +125,21 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(array('miriam'), $docNames);
 
-        $filter = $documentManager->getFilterCollection()->getFilter('softDelete');
-        $filter->onlySoftDeleted();
+        $extension->setReadFilter(Extension::READ_ONLY_SOFT_DELETED);
+
         $documentManager->clear();
 
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(array('lucy'), $docNames);
 
-        $filter->onlyNotSoftDeleted();
+        $extension->setReadFilter(Extension::READ_ONLY_NOT_SOFT_DELETED);
+
         $documentManager->clear();
 
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(array('miriam'), $docNames);
 
-        $documentManager->getFilterCollection()->disable('softDelete');
+        $extension->setReadFilter(Extension::READ_ALL);
 
         $documentManager->flush();
         $documentManager->clear();
@@ -148,7 +153,7 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
             $this->softDeleter->restore($testDocs[1], $metadata);
         }
 
-        $documentManager->getFilterCollection()->enable('softDelete');
+        $extension->setReadFilter(Extension::READ_ONLY_NOT_SOFT_DELETED);
 
         $documentManager->flush();
         $documentManager->clear();

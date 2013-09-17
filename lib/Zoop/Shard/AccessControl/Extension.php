@@ -24,9 +24,9 @@ class Extension extends AbstractExtension
         'subscriber.accesscontrol.rolesSubscriber'
     ];
 
-    protected $filters = [
-        'readAccessControl' => 'Zoop\Shard\AccessControl\Filter\ReadAccessControl'
-    ];
+//    protected $filters = [
+//        'readAccessControl' => 'Zoop\Shard\AccessControl\Filter\ReadAccessControl'
+//    ];
 
     protected $serviceManagerConfig = [
         'invokables' => [

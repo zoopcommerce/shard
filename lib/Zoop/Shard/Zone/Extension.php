@@ -29,11 +29,27 @@ class Extension extends AbstractExtension
         ]
     ];
 
-    protected $filters = [
-        'zone' => 'Zoop\Shard\Zone\Filter\Zone'
-    ];
-
     protected $dependencies = [
         'extension.annotation' => true,
     ];
+
+    protected $readFilterInclude = [];
+
+    protected $readFilterExclude = [];
+
+    public function getReadFilterInclude() {
+        return $this->readFilterInclude;
+    }
+
+    public function setReadFilterInclude(array $readFilterInclude = []) {
+        $this->readFilterInclude = $readFilterInclude;
+    }
+
+    public function getReadFilterExclude() {
+        return $this->readFilterExclude;
+    }
+
+    public function setReadFilterExclude(array $readFilterExclude = []) {
+        $this->readFilterExclude = $readFilterExclude;
+    }
 }

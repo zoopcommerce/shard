@@ -33,7 +33,7 @@ class ObjectManagerDelegatorFactory implements DelegatorFactoryInterface
             return $this->objectManager;
         } else {
             $this->objectManager = call_user_func($callback);
-            $this->objectManager->getEventManager()->dispatchEvent(Events::BOOTSTRAPPED, new BootstrappedEventArgs);
+            $this->objectManager->getEventManager()->dispatchEvent(Events::BOOTSTRAPPED, new BootstrappedEventArgs($this->objectManager, $this->objectManager->getEventManager()));
         }
 
         return $this->objectManager;

@@ -25,12 +25,6 @@ class AccessController implements ServiceLocatorAwareInterface, ObjectManagerAwa
 
     protected $permissions = [];
 
-    public function enableReadFilter()
-    {
-        $filter = $this->objectManager->getFilterCollection()->enable('readAccessControl');
-        $filter->setAccessController($this);
-    }
-
     /**
      * Determines if an action can be done by the current User
      *
@@ -100,11 +94,12 @@ class AccessController implements ServiceLocatorAwareInterface, ObjectManagerAwa
 
     protected function testCriteriaAgainstValue($documentValue, $testValue)
     {
-        if (($testValue instanceof \MongoRegex && !preg_match("/$testValue->regex/", $documentValue)) ||
+        if ((isset($testValue['$regex']) && !preg_match($testValue['$regex'], $documentValue)) ||
             (is_string($testValue) && $documentValue != $testValue)
         ) {
             return false;
         }
+
         if (is_array($testValue) && array_key_exists('$or', $testValue)) {
             foreach ($testValue['$or'] as $option) {
                 if ($this->testCriteriaAgainstValue($documentValue, $option)) {
