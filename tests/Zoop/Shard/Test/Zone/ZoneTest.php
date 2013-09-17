@@ -13,7 +13,7 @@ class ZoneTest extends BaseTest
 
         $manifest = new Manifest(
             [
-                'object_map' => [
+                'model_map' => [
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
@@ -23,7 +23,7 @@ class ZoneTest extends BaseTest
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
         $this->extension = $manifest->getServiceManager()->get('extension.zone');
     }
 

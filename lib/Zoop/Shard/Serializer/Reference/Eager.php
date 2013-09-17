@@ -8,18 +8,15 @@ namespace Zoop\Shard\Serializer\Reference;
 
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
-use Zoop\Shard\Core\ObjectManagerAwareInterface;
-use Zoop\Shard\Core\ObjectManagerAwareTrait;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Eager implements ReferenceSerializerInterface, ServiceLocatorAwareInterface, ObjectManagerAwareInterface
+class Eager implements ReferenceSerializerInterface, ServiceLocatorAwareInterface
 {
     use ServiceLocatorAwareTrait;
-    use ObjectManagerAwareTrait;
 
     protected $serializer;
 

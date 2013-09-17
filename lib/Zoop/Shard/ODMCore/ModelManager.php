@@ -10,7 +10,7 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Configuration;
 use Doctrine\MongoDB\Connection;
 use Doctrine\Common\EventManager;
-use Zoop\Shard\Core\ObjectManager as CoreObjectManager;
+use Zoop\Shard\Core\ModelManager as CoreModelManager;
 
 /**
  * Extends ClassMetadata to support Shard metadata
@@ -18,7 +18,7 @@ use Zoop\Shard\Core\ObjectManager as CoreObjectManager;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class ObjectManager extends DocumentManager implements CoreObjectManager
+class ModelManager extends DocumentManager implements CoreModelManager
 {
     /**
      * Creates a new Document that operates on the given Mongo connection
@@ -32,6 +32,6 @@ class ObjectManager extends DocumentManager implements CoreObjectManager
      */
     public static function create(Connection $conn = null, Configuration $config = null, EventManager $eventManager = null)
     {
-        return new ObjectManager($conn, $config, $eventManager);
+        return new ModelManager($conn, $config, $eventManager);
     }
 }

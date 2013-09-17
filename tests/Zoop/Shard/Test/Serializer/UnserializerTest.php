@@ -12,7 +12,7 @@ class UnserializerTest extends BaseTest
     {
         $manifest = new Manifest(
             [
-                'object_map' => [
+                'model_map' => [
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
@@ -22,7 +22,7 @@ class UnserializerTest extends BaseTest
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
         $this->unserializer = $manifest->getServiceManager()->get('unserializer');
     }
 

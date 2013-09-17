@@ -6,21 +6,21 @@
  */
 namespace Zoop\Shard\Serializer\Reference;
 
-use Zoop\Shard\Core\ObjectManagerAwareInterface;
-use Zoop\Shard\Core\ObjectManagerAwareTrait;
+use Zoop\Shard\Core\ModelManagerAwareInterface;
+use Zoop\Shard\Core\ModelManagerAwareTrait;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class SimpleLazy implements ReferenceSerializerInterface, ObjectManagerAwareInterface
+class SimpleLazy implements ReferenceSerializerInterface, ModelManagerAwareInterface
 {
-    use ObjectManagerAwareTrait;
+    use ModelManagerAwareTrait;
 
     public function serialize($document)
     {
-        $metadata = $this->objectManager->getClassMetadata(get_class($document));
+        $metadata = $this->modelManager->getClassMetadata(get_class($document));
 
         return $metadata->collection . '/' . $metadata->getFieldValue($document, $metadata->getIdentifier());
     }

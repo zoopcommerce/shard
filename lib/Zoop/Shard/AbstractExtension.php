@@ -16,7 +16,7 @@ use Zend\Stdlib\AbstractOptions;
  */
 abstract class AbstractExtension extends AbstractOptions
 {
-    protected $objectMap = [];
+    protected $modelMap = [];
 
     protected $subscribers = [];
 
@@ -40,12 +40,12 @@ abstract class AbstractExtension extends AbstractOptions
         $this->serviceManagerConfig = $serviceManagerConfig;
     }
 
-    public function getObjectMap() {
-        return $this->objectMap;
+    public function getModelMap() {
+        return $this->modelMap;
     }
 
-    public function setObjectMap($objectMap) {
-        $this->objectMap = $objectMap;
+    public function setModelMap($modelMap) {
+        $this->modelMap = $modelMap;
     }
 
     public function getSubscribers()

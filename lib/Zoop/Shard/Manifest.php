@@ -11,7 +11,7 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\ServiceManager\ServiceManager;
 use Zend\Stdlib\ArrayUtils;
-use Zoop\Shard\Core\ObjectManagerAwareInterface;
+use Zoop\Shard\Core\ModelManagerAwareInterface;
 
 /**
  * Pass this class a configuration array with extension namespaces, and then retrieve the
@@ -26,7 +26,7 @@ class Manifest extends AbstractExtension
 {
     protected $defaultServiceManagerConfig = [
         'invokables' => [
-            'objectmanager.delegator.factory' => 'Zoop\Shard\Core\ObjectManagerDelegatorFactory',
+            'modelmanager.delegator.factory' => 'Zoop\Shard\Core\ModelManagerDelegatorFactory',
             'eventmanager'                    => 'Zoop\Shard\Core\EventManager'
         ],
         'factories' => [
@@ -49,7 +49,7 @@ class Manifest extends AbstractExtension
             'subscriber.lazysubscriber' => 'Zoop\Shard\Core\LazySubscriberFactory',
         ],
         'delegators' => [
-            'objectmanager' => ['objectmanager.delegator.factory']
+            'modelmanager' => ['modelmanager.delegator.factory']
         ]
     ];
 
@@ -63,7 +63,7 @@ class Manifest extends AbstractExtension
 
     protected $lazySubscriberConfig;
 
-    protected $objectManager;
+    protected $modelManager;
 
     protected $serviceManager;
 
@@ -89,14 +89,14 @@ class Manifest extends AbstractExtension
         $this->lazySubscriberConfig = $lazySubscriberConfig;
     }
 
-    public function getObjectManager()
+    public function getModelManager()
     {
-        return $this->objectManager;
+        return $this->modelManager;
     }
 
-    public function setObjectManager($objectManager)
+    public function setModelManager($modelManager)
     {
-        $this->objectManager = $objectManager;
+        $this->modelManager = $modelManager;
     }
 
     public function setServiceManager($serviceManager)
@@ -148,7 +148,7 @@ class Manifest extends AbstractExtension
         //merge all the configs
         $config = [
             'service_manager_config' => [],
-            'object_map' => []
+            'model_map' => []
         ];
         foreach ($this->extensionConfigs as $extensionConfig) {
             $config = ArrayUtils::merge(
@@ -160,7 +160,7 @@ class Manifest extends AbstractExtension
             );
         }
         $this->serviceManagerConfig = ArrayUtils::merge($config['service_manager_config'], $this->serviceManagerConfig);
-        $this->objectMap = ArrayUtils::merge($config['object_map'], $this->objectMap);
+        $this->modelMap = ArrayUtils::merge($config['model_map'], $this->modelMap);
 
         //Apply service manager config
         $serviceManagerConfig = new Config($this->serviceManagerConfig);
@@ -231,8 +231,8 @@ class Manifest extends AbstractExtension
 
         $serviceManager->addInitializer(
             function ($instance, ServiceLocatorInterface $serviceLocator) {
-                if ($instance instanceof ObjectManagerAwareInterface) {
-                    $instance->setObjectManager($serviceLocator->get('objectmanager'));
+                if ($instance instanceof ModelManagerAwareInterface) {
+                    $instance->setModelManager($serviceLocator->get('modelmanager'));
                 }
             }
         );

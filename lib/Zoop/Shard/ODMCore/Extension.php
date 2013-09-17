@@ -27,7 +27,7 @@ class Extension extends AbstractExtension
                 'Zoop\Shard\ODMCore\MainSubscriber'
         ],
         'factories' => [
-            'objectmanager' => 'Zoop\Shard\ODMCore\DevDocumentManagerFactory'
+            'modelmanager' => 'Zoop\Shard\ODMCore\DevDocumentManagerFactory'
         ]
     ];
 

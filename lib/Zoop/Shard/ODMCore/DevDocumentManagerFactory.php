@@ -50,7 +50,7 @@ class DevDocumentManagerFactory implements FactoryInterface
         //create driver chain
         $chain  = new MappingDriverChain;
 
-        foreach ($manifest->getObjectMap() as $namespace => $path) {
+        foreach ($manifest->getModelMap() as $namespace => $path) {
             $driver = new AnnotationDriver(new AnnotationReader, $path);
             $chain->addDriver($driver, $namespace);
         }
@@ -76,6 +76,6 @@ class DevDocumentManagerFactory implements FactoryInterface
 
         $conn = new Connection(null, array(), $config);
 
-        return ObjectManager::create($conn, $config, $eventManager);
+        return ModelManager::create($conn, $config, $eventManager);
     }
 }

@@ -50,7 +50,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 
     public function bootstrapped(BootstrappedEventArgs $eventArgs)
     {
-        $filter = $eventArgs->getObjectManager()->getFilterCollection()->enable('odmfilter');
+        $filter = $eventArgs->getModelManager()->getFilterCollection()->enable('odmfilter');
         $filter->setEventManager($eventArgs->getEventManager());
         $filter->setCriteriaMerger(new CriteriaMerger);
     }

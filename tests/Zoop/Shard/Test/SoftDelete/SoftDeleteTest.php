@@ -17,7 +17,7 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
     {
         $manifest = new Manifest(
             [
-                'object_map' => [
+                'model_map' => [
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
@@ -37,7 +37,7 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
         $this->softDeleter = $manifest->getServiceManager()->get('softDeleter');
         $this->extension = $manifest->getServiceManager()->get('extension.softdelete');
     }

@@ -16,7 +16,7 @@ class AccessControlAllowTest extends BaseTest
     {
         $manifest = new Manifest(
             [
-                'object_map' => [
+                'model_map' => [
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
@@ -38,7 +38,7 @@ class AccessControlAllowTest extends BaseTest
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
         $this->freezer = $manifest->getServiceManager()->get('freezer');
     }
 

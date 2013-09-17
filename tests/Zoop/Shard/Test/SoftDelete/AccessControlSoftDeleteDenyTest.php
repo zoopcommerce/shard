@@ -15,7 +15,7 @@ class AccessControlSoftDeleteDenyTest extends BaseTest
     {
         $manifest = new Manifest(
             [
-                'object_map' => [
+                'model_map' => [
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
@@ -26,7 +26,7 @@ class AccessControlSoftDeleteDenyTest extends BaseTest
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
         $this->softDeleter = $manifest->getServiceManager()->get('softDeleter');
     }
 

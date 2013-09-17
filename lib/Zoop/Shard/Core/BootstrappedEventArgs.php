@@ -16,21 +16,21 @@ use Doctrine\Common\EventManager as BaseEventManager;
  */
 class BootstrappedEventArgs extends BaseEventArgs
 {
-    protected $objectManager;
+    protected $modelManager;
 
     protected $eventManager;
 
-    public function getObjectManager() {
-        return $this->objectManager;
+    public function getModelManager() {
+        return $this->modelManager;
     }
 
     public function getEventManager() {
         return $this->eventManager;
     }
 
-    public function __construct(ObjectManager $objectManager, BaseEventManager $eventManager)
+    public function __construct(ModelManager $modelManager, BaseEventManager $eventManager)
     {
-        $this->objectManager = $objectManager;
+        $this->modelManager = $modelManager;
         $this->eventManager = $eventManager;
     }
 }

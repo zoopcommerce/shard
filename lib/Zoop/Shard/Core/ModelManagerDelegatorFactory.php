@@ -15,13 +15,13 @@ use Zend\ServiceManager\ServiceLocatorInterface;
  * @version $Revision$
  * @author  Tim Roediger <superdweebie@gmail.com>
  *
- * This factory triggers the ON_BOOTSTRAP event just after an object manager
+ * This factory triggers the ON_BOOTSTRAP event just after an model manager
  * is first created
  */
-class ObjectManagerDelegatorFactory implements DelegatorFactoryInterface
+class ModelManagerDelegatorFactory implements DelegatorFactoryInterface
 {
 
-    protected $objectManager;
+    protected $modelManager;
 
     /**
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
@@ -29,13 +29,13 @@ class ObjectManagerDelegatorFactory implements DelegatorFactoryInterface
     public function createDelegatorWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName, $callback)
     {
 
-        if (isset($this->objectManager)) {
-            return $this->objectManager;
+        if (isset($this->modelManager)) {
+            return $this->modelManager;
         } else {
-            $this->objectManager = call_user_func($callback);
-            $this->objectManager->getEventManager()->dispatchEvent(Events::BOOTSTRAPPED, new BootstrappedEventArgs($this->objectManager, $this->objectManager->getEventManager()));
+            $this->modelManager = call_user_func($callback);
+            $this->modelManager->getEventManager()->dispatchEvent(Events::BOOTSTRAPPED, new BootstrappedEventArgs($this->modelManager, $this->modelManager->getEventManager()));
         }
 
-        return $this->objectManager;
+        return $this->modelManager;
     }
 }

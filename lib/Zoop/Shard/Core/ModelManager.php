@@ -3,11 +3,11 @@
 namespace Zoop\Shard\Core;
 
 /**
- * Contract for a Shard persistence layer ObjectManager class to implement.
+ * Contract for a Shard persistence layer ModelManager class to implement.
  * This is a subset of Doctrine\Common\Persistence\ObjectManager
  *
  */
-interface ObjectManager
+interface ModelManager
 {
     /**
      * Finds a object by its identifier.

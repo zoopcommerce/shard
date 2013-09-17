@@ -17,7 +17,7 @@ class ValidatorTest extends BaseTest
 
         $manifest = new Manifest(
             [
-                'object_map' => [
+                'model_map' => [
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
@@ -27,7 +27,7 @@ class ValidatorTest extends BaseTest
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
 
         $eventManager = $this->documentManager->getEventManager();
         $eventManager->addEventListener(Events::INVALID_OBJECT, $this);
