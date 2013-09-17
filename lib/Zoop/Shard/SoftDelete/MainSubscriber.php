@@ -77,17 +77,17 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         array_walk(
             $metadata->softDelete,
             function ($item) use ($changeSet, &$count) {
-                if (array_key_exists($item, $changeSet)) {
+                if ($changeSet->hasField($item)) {
                     ++$count;
                 }
             }
         );
 
-        if (count($changeSet) == $count) {
+        if (count($changeSet->getFieldNames()) == $count) {
             return;
         }
 
-        // Updates to softDeleted documents are not allowed. Roll them back
+        // Updates to softDeleted objects are not allowed. Roll them back
         $eventArgs->setReject(true);
 
         // Raise frozenUpdateDenied

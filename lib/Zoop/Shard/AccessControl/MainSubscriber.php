@@ -97,7 +97,7 @@ class MainSubscriber extends AbstractAccessControlSubscriber
         $document = $eventArgs->getDocument();
         $actions = [];
 
-        foreach (array_keys($eventArgs->getChangeSet()) as $field) {
+        foreach ($eventArgs->getChangeSet()->getFieldNames() as $field) {
             $actions[] = Actions::update($field);
         }
 

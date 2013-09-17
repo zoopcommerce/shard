@@ -6,8 +6,6 @@
  */
 namespace Zoop\Shard\Core;
 
-use Doctrine\Common\Persistence\ObjectManager;
-
 trait ObjectManagerAwareTrait
 {
 

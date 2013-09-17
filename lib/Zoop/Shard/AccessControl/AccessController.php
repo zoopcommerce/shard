@@ -7,10 +7,10 @@
 namespace Zoop\Shard\AccessControl;
 
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-use Zoop\Shard\Core\ObjectManagerAwareInterface;
-use Zoop\Shard\Core\ObjectManagerAwareTrait;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zoop\Shard\Core\ChangeSet;
+use Zoop\Shard\Core\EventManagerTrait;
 
 /**
  * Defines methods for a manager object to check permssions
@@ -18,10 +18,10 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class AccessController implements ServiceLocatorAwareInterface, ObjectManagerAwareInterface
+class AccessController implements ServiceLocatorAwareInterface
 {
     use ServiceLocatorAwareTrait;
-    use ObjectManagerAwareTrait;
+    use EventManagerTrait;
 
     protected $permissions = [];
 
@@ -33,7 +33,7 @@ class AccessController implements ServiceLocatorAwareInterface, ObjectManagerAwa
      * @param  type                                               $document
      * @return \Zoop\Shard\AccessControl\IsAllowedResult
      */
-    public function areAllowed(array $actions, ClassMetadata $metadata, $document = null)
+    public function areAllowed(array $actions, ClassMetadata $metadata, $document = null, ChangeSet $changeSet = null)
     {
         $result = new AllowedResult(false);
 
@@ -58,13 +58,13 @@ class AccessController implements ServiceLocatorAwareInterface, ObjectManagerAwa
         }
 
         if (isset($document)) {
-            return $this->testCritieraAgainstDocument($metadata, $document, $result);
+            return $this->testCritieraAgainstDocument($metadata, $document, $changeSet, $result);
         }
 
         return $result;
     }
 
-    protected function testCritieraAgainstDocument($metadata, $document, $result)
+    protected function testCritieraAgainstDocument($metadata, $document, $changeSet, $result)
     {
         if (count($result->getNew()) > 0) {
             foreach ($result->getNew() as $field => $value) {
@@ -78,9 +78,8 @@ class AccessController implements ServiceLocatorAwareInterface, ObjectManagerAwa
         }
 
         if (count($result->getOld()) > 0) {
-            $changeSet = $this->objectManager->getUnitOfWork()->getDocumentChangeSet($document);
             foreach ($result->getOld() as $field => $value) {
-                $oldValue = $changeSet[$field][0];
+                $oldValue = $changeSet->getField($field)[0];
                 if (! $this->testCriteriaAgainstValue($oldValue, $value)) {
                     $result->setAllowed(false);
 
@@ -133,13 +132,10 @@ class AccessController implements ServiceLocatorAwareInterface, ObjectManagerAwa
 
     protected function getRoles($metadata, $document)
     {
-        $eventManager = $this->objectManager->getEventManager();
+        $eventManager = $this->getEventManager();
 
         $event = new GetRolesEventArgs($metadata, $document, $this->getUser());
-        $eventManager->dispatchEvent(
-            Events::GET_ROLES,
-            $event
-        );
+        $eventManager->dispatchEvent(Events::GET_ROLES, $event);
 
         return $event->getRoles();
     }

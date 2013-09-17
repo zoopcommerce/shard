@@ -8,7 +8,6 @@ namespace Zoop\Shard\Core;
 
 use Doctrine\Common\EventArgs as BaseEventArgs;
 use Doctrine\Common\EventManager as BaseEventManager;
-use Doctrine\Common\Persistence\ObjectManager;
 
 /**
  *

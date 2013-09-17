@@ -14,7 +14,7 @@ use Zoop\Shard\Core\ObjectManagerAwareInterface;
 use Zoop\Shard\Core\ObjectManagerAwareTrait;
 
 /**
- * Provides methods for serializing documents
+ * Provides methods for serializing objects
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>

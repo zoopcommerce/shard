@@ -83,17 +83,17 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         array_walk(
             $metadata->freeze,
             function ($item) use ($changeSet, &$count) {
-                if (array_key_exists($item, $changeSet)) {
+                if ($changeSet->hasField($item)) {
                     ++$count;
                 }
             }
         );
 
-        if (count($changeSet) == $count) {
+        if (count($changeSet->getFieldNames()) == $count) {
             return;
         }
 
-        // Updates to frozen documents are not allowed. Roll them back
+        // Updates to frozen objects are not allowed. Roll them back
         $eventArgs->setReject(true);
 
         // Raise frozenUpdateDenied
@@ -113,7 +113,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             return;
         }
 
-        // Deletions of frozen documents are not allowed. Roll them back
+        // Deletions of frozen objects are not allowed. Roll them back
         $eventArgs->setReject(true);
 
         // Raise frozenDeleteDenied

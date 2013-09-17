@@ -85,8 +85,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         $changeSet = $eventArgs->getChangeSet();
         $field = array_keys($metadata->state)[0];
 
-        $fromState = $changeSet[$field][0];
-        $toState = $changeSet[$field][1];
+        list($fromState, $toState) = $changeSet->getField($field);
 
         //stop state change if the new state is not on the defined state list
         if (count($metadata->state[$field]) > 0 && ! in_array($toState, $metadata->state[$field])) {
@@ -102,6 +101,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             $document,
             $metadata,
             new Transition($fromState, $toState),
+            $changeSet,
             $eventManager
         );
         $eventManager->dispatchEvent(Events::PRE_TRANSITION, $transitionEventArgs);

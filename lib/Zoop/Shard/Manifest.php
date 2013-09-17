@@ -26,7 +26,8 @@ class Manifest extends AbstractExtension
 {
     protected $defaultServiceManagerConfig = [
         'invokables' => [
-            'objectmanager.delegator.factory' => 'Zoop\Shard\Core\ObjectManagerDelegatorFactory'
+            'objectmanager.delegator.factory' => 'Zoop\Shard\Core\ObjectManagerDelegatorFactory',
+            'eventmanager'                    => 'Zoop\Shard\Core\EventManager'
         ],
         'factories' => [
             'extension.accesscontrol'   => 'Zoop\Shard\AccessControl\ExtensionFactory',

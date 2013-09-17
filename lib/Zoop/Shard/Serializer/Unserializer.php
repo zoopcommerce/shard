@@ -15,7 +15,7 @@ use Zoop\Shard\Core\ObjectManagerAwareInterface;
 use Zoop\Shard\Core\ObjectManagerAwareTrait;
 
 /**
- * Provides methods for unserializing documents
+ * Provides methods for unserializing objects
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>

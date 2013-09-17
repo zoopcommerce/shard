@@ -95,7 +95,7 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber
         $action = $eventArgs->getTransition()->getAction();
         $metadata = $eventArgs->getMetadata();
 
-        if (! $accessController->areAllowed([$action], $metadata, $document)->getAllowed()) {
+        if (! $accessController->areAllowed([$action], $metadata, $document, $eventArgs->getChangeSet())->getAllowed()) {
             //stop transition
             $metadata
                 ->reflFields[array_keys($metadata->state)[0]]

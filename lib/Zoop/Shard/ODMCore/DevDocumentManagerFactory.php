@@ -11,11 +11,9 @@ use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\MongoDB\Connection;
 use Doctrine\ODM\MongoDB\Configuration;
-use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
-use Zoop\Shard\Core\EventManager;
 
 /**
  *
@@ -64,7 +62,7 @@ class DevDocumentManagerFactory implements FactoryInterface
         }
 
         //create event manager
-        $eventManager = new EventManager();
+        $eventManager = $serviceLocator->get('eventmanager');
         foreach ($manifest->getSubscribers() as $subscriber) {
             $eventManager->addEventSubscriber($serviceLocator->get($subscriber));
         }
@@ -78,6 +76,6 @@ class DevDocumentManagerFactory implements FactoryInterface
 
         $conn = new Connection(null, array(), $config);
 
-        return DocumentManager::create($conn, $config, $eventManager);
+        return ObjectManager::create($conn, $config, $eventManager);
     }
 }
