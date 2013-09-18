@@ -87,7 +87,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             return;
         }
 
-        // Updates to softDeleted objects are not allowed. Roll them back
+        // Updates to softDeleted models are not allowed. Roll them back
         $eventArgs->setReject(true);
 
         // Raise frozenUpdateDenied

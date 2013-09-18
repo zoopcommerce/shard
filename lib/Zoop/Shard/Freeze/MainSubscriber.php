@@ -93,7 +93,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             return;
         }
 
-        // Updates to frozen objects are not allowed. Roll them back
+        // Updates to frozen models are not allowed. Roll them back
         $eventArgs->setReject(true);
 
         // Raise frozenUpdateDenied
@@ -113,7 +113,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             return;
         }
 
-        // Deletions of frozen objects are not allowed. Roll them back
+        // Deletions of frozen models are not allowed. Roll them back
         $eventArgs->setReject(true);
 
         // Raise frozenDeleteDenied

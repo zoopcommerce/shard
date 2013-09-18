@@ -17,7 +17,7 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
     {
         $manifest = new Manifest(
             [
-                'model_map' => [
+                'models' => [
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [

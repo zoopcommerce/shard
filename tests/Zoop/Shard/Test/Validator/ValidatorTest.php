@@ -17,7 +17,7 @@ class ValidatorTest extends BaseTest
 
         $manifest = new Manifest(
             [
-                'model_map' => [
+                'models' => [
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
@@ -30,7 +30,7 @@ class ValidatorTest extends BaseTest
         $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
 
         $eventManager = $this->documentManager->getEventManager();
-        $eventManager->addEventListener(Events::INVALID_OBJECT, $this);
+        $eventManager->addEventListener(Events::INVALID_MODEL, $this);
 
         $this->calls = [];
     }
@@ -44,10 +44,10 @@ class ValidatorTest extends BaseTest
         $documentManager->persist($testDoc);
         $documentManager->flush();
 
-        $this->assertTrue(isset($this->calls[Events::INVALID_OBJECT]));
+        $this->assertTrue(isset($this->calls[Events::INVALID_MODEL]));
         $this->assertCount(
             1,
-            $this->calls[Events::INVALID_OBJECT][0]->getResult()->getFieldResults()['name']->getMessages()
+            $this->calls[Events::INVALID_MODEL][0]->getResult()->getFieldResults()['name']->getMessages()
         );
 
         $id = $testDoc->getId();
@@ -69,10 +69,10 @@ class ValidatorTest extends BaseTest
         $documentManager->persist($testDoc);
         $documentManager->flush();
 
-        $this->assertTrue(isset($this->calls[Events::INVALID_OBJECT]));
+        $this->assertTrue(isset($this->calls[Events::INVALID_MODEL]));
         $this->assertCount(
             2,
-            $this->calls[Events::INVALID_OBJECT][0]->getResult()->getFieldResults()['name']->getMessages()
+            $this->calls[Events::INVALID_MODEL][0]->getResult()->getFieldResults()['name']->getMessages()
         );
 
         $id = $testDoc->getId();
@@ -94,7 +94,7 @@ class ValidatorTest extends BaseTest
         $documentManager->persist($testDoc);
         $documentManager->flush();
 
-        $this->assertFalse(isset($this->calls[Events::INVALID_OBJECT]));
+        $this->assertFalse(isset($this->calls[Events::INVALID_MODEL]));
 
         $id = $testDoc->getId();
         $documentManager->clear();
@@ -123,10 +123,10 @@ class ValidatorTest extends BaseTest
         $testDoc->setName('invalid');
         $documentManager->flush();
 
-        $this->assertTrue(isset($this->calls[Events::INVALID_OBJECT]));
+        $this->assertTrue(isset($this->calls[Events::INVALID_MODEL]));
         $this->assertCount(
             2,
-            $this->calls[Events::INVALID_OBJECT][0]->getResult()->getFieldResults()['name']->getMessages()
+            $this->calls[Events::INVALID_MODEL][0]->getResult()->getFieldResults()['name']->getMessages()
         );
 
         $documentManager->clear();
@@ -153,7 +153,7 @@ class ValidatorTest extends BaseTest
         $testDoc->setName('alsoValid');
         $documentManager->flush();
 
-        $this->assertFalse(isset($this->calls[Events::INVALID_OBJECT]));
+        $this->assertFalse(isset($this->calls[Events::INVALID_MODEL]));
 
         $documentManager->clear();
         $testDoc = $repository->find($id);

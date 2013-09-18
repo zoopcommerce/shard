@@ -13,7 +13,7 @@ class CryptValidatorTest extends BaseTest
     {
         $manifest = new Manifest(
             [
-                'model_map' => [
+                'models' => [
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
@@ -33,7 +33,7 @@ class CryptValidatorTest extends BaseTest
         $this->blockCipherHelper = $manifest->getServiceManager()->get('crypt.blockcipherhelper');
 
         $eventManager = $this->documentManager->getEventManager();
-        $eventManager->addEventListener(Events::INVALID_OBJECT, $this);
+        $eventManager->addEventListener(Events::INVALID_MODEL, $this);
 
         $this->calls = [];
     }

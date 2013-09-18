@@ -7,7 +7,7 @@
 namespace Zoop\Shard\AccessControl;
 
 /**
- * Inteface to define a permission on an ControlledObject
+ * Inteface to define a permission on an access controlled model
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>

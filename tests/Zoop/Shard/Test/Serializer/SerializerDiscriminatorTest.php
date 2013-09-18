@@ -18,7 +18,7 @@ class SerializerDiscriminatorTest extends BaseTest
     {
         $manifest = new Manifest(
             [
-                'model_map' => [
+                'models' => [
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [

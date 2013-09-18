@@ -20,7 +20,7 @@ class Endpoint extends AbstractOptions
 
     protected $class;
 
-    protected $property = 'id';
+    protected $property;
 
     protected $cacheControl;
 

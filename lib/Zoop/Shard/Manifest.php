@@ -69,6 +69,8 @@ class Manifest extends AbstractExtension
 
     protected $initalized = false;
 
+    protected $name;
+
     public function getExtensionConfigs()
     {
         return $this->extensionConfigs;
@@ -121,6 +123,14 @@ class Manifest extends AbstractExtension
         $this->initalized = $initalized;
     }
 
+    public function getName() {
+        return $this->name;
+    }
+
+    public function setName($name) {
+        $this->name = $name;
+    }
+
     protected function initalize()
     {
         if ($this->initalized) {
@@ -148,7 +158,7 @@ class Manifest extends AbstractExtension
         //merge all the configs
         $config = [
             'service_manager_config' => [],
-            'model_map' => []
+            'models' => []
         ];
         foreach ($this->extensionConfigs as $extensionConfig) {
             $config = ArrayUtils::merge(
@@ -160,7 +170,7 @@ class Manifest extends AbstractExtension
             );
         }
         $this->serviceManagerConfig = ArrayUtils::merge($config['service_manager_config'], $this->serviceManagerConfig);
-        $this->modelMap = ArrayUtils::merge($config['model_map'], $this->modelMap);
+        $this->models = ArrayUtils::merge($config['models'], $this->models);
 
         //Apply service manager config
         $serviceManagerConfig = new Config($this->serviceManagerConfig);
