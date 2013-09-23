@@ -9,6 +9,7 @@ namespace Zoop\Shard\AccessControl;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zoop\Common\User\RoleAwareUserInterface;
 use Zoop\Shard\Core\ChangeSet;
 use Zoop\Shard\Core\EventManagerTrait;
 
@@ -134,10 +135,15 @@ class AccessController implements ServiceLocatorAwareInterface
     {
         $eventManager = $this->getEventManager();
 
-        $event = new GetRolesEventArgs($metadata, $document, $this->getUser());
+        $user = $this->getUser();
+        $event = new GetRolesEventArgs($metadata, $document, $user);
         $eventManager->dispatchEvent(Events::GET_ROLES, $event);
 
-        return $event->getRoles();
+        if ($user instanceof RoleAwareUserInterface) {
+            return array_merge($user->getRoles(), $event->getRoles());
+        } else {
+            return $event->getRoles();
+        }
     }
 
     protected function getUser()
