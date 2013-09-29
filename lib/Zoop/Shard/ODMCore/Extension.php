@@ -27,7 +27,7 @@ class Extension extends AbstractExtension
                 'Zoop\Shard\ODMCore\MainSubscriber'
         ],
         'factories' => [
-            'objectmanager' => 'Zoop\Shard\ODMCore\DevDocumentManagerFactory'
+            'modelmanager' => 'Zoop\Shard\ODMCore\DevDocumentManagerFactory'
         ]
     ];
 
@@ -38,6 +38,10 @@ class Extension extends AbstractExtension
     protected $hydratorDir;
 
     protected $classMetadataFactory = 'Zoop\Shard\ODMCore\ClassMetadataFactory';
+
+    protected $filters = [
+        'odmfilter' => 'Zoop\Shard\ODMCore\Filter'
+    ];
 
     public function getDefaultDb()
     {
@@ -77,6 +81,14 @@ class Extension extends AbstractExtension
     public function setClassMetadataFactory($classMetadataFactory)
     {
         $this->classMetadataFactory = $classMetadataFactory;
+    }
+
+    public function getFilters() {
+        return $this->filters;
+    }
+
+    public function setFilters($filters) {
+        $this->filters = $filters;
     }
 
     public function __construct()

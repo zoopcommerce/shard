@@ -6,21 +6,19 @@
  */
 namespace Zoop\Shard\Core;
 
-use Doctrine\Common\Persistence\ObjectManager;
-
-interface ObjectManagerAwareInterface
+interface ModelManagerAwareInterface
 {
     /**
      * Set service locator
      *
      * @param ServiceLocatorInterface $serviceLocator
      */
-    public function setObjectManager(ObjectManager $objectManager);
+    public function setModelManager(ModelManager $modelManager);
 
     /**
      * Get service locator
      *
      * @return ServiceLocatorInterface
      */
-    public function getObjectManager();
+    public function getModelManager();
 }

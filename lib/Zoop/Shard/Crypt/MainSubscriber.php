@@ -113,11 +113,11 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 
     protected function hasChanged($field, $changeSet)
     {
-        if (!isset($changeSet[$field])) {
+        if (!$changeSet->hasField($field)) {
             return false;
         }
 
-        list($old, $new) = $changeSet[$field];
+        list($old, $new) = $changeSet->getField($field);
 
         // Check for change
         if ($old == $new || (! isset($new) || $new == '')) {

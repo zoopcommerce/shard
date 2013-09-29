@@ -8,6 +8,7 @@ namespace Zoop\Shard\Validator;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zoop\Shard\Core\ChangeSet;
 use Zoop\Mystique\Result;
 
 /**
@@ -26,7 +27,7 @@ class DocumentValidator implements DocumentValidatorInterface, ServiceLocatorAwa
      * @param  object  $document
      * @return boolean
      */
-    public function isValid($document, ClassMetadata $metadata, array $changeSet = null)
+    public function isValid($document, ClassMetadata $metadata, ChangeSet $changeSet = null)
     {
         $result = new DocumentValidatorResult(['value' => true]);
 
@@ -39,7 +40,7 @@ class DocumentValidator implements DocumentValidatorInterface, ServiceLocatorAwa
             foreach ($metadata->validator['fields'] as $field => $validatorDefinition) {
 
                 //if a change set is provided, only validate fields that have changed
-                if (isset($changeSet) && ! isset($changeSet[$field])) {
+                if (isset($changeSet) && !$changeSet->hasField($field)) {
                     continue;
                 }
 

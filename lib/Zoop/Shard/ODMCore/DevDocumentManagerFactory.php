@@ -11,11 +11,9 @@ use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\MongoDB\Connection;
 use Doctrine\ODM\MongoDB\Configuration;
-use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
-use Zoop\Shard\Core\EventManager;
 
 /**
  *
@@ -52,19 +50,19 @@ class DevDocumentManagerFactory implements FactoryInterface
         //create driver chain
         $chain  = new MappingDriverChain;
 
-        foreach ($manifest->getDocuments() as $namespace => $path) {
+        foreach ($manifest->getModels() as $namespace => $path) {
             $driver = new AnnotationDriver(new AnnotationReader, $path);
             $chain->addDriver($driver, $namespace);
         }
         $config->setMetadataDriverImpl($chain);
 
         //register filters
-        foreach ($manifest->getFilters() as $name => $class) {
+        foreach ($extension->getFilters() as $name => $class) {
             $config->addFilter($name, $class);
         }
 
         //create event manager
-        $eventManager = new EventManager();
+        $eventManager = $serviceLocator->get('eventmanager');
         foreach ($manifest->getSubscribers() as $subscriber) {
             $eventManager->addEventSubscriber($serviceLocator->get($subscriber));
         }
@@ -78,6 +76,6 @@ class DevDocumentManagerFactory implements FactoryInterface
 
         $conn = new Connection(null, array(), $config);
 
-        return DocumentManager::create($conn, $config, $eventManager);
+        return ModelManager::create($conn, $config, $eventManager);
     }
 }

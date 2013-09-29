@@ -34,7 +34,8 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
+     * @param \Zoop\Shard\SoftDelete\SoftDeleteEventArgs $eventArgs
+     * @return type
      */
     public function preSoftDelete(SoftDeleteEventArgs $eventArgs)
     {
@@ -61,7 +62,8 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
+     * @param \Zoop\Shard\SoftDelete\SoftDeleteEventArgs $eventArgs
+     * @return type
      */
     public function preRestore(SoftDeleteEventArgs $eventArgs)
     {

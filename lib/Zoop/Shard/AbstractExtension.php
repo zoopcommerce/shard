@@ -16,15 +16,9 @@ use Zend\Stdlib\AbstractOptions;
  */
 abstract class AbstractExtension extends AbstractOptions
 {
-    protected $documents = [];
-
-    protected $filters = [];
+    protected $models = [];
 
     protected $subscribers = [];
-
-    protected $cliCommands = [];
-
-    protected $cliHelpers = [];
 
     protected $serviceManagerConfig = [];
 
@@ -46,24 +40,12 @@ abstract class AbstractExtension extends AbstractOptions
         $this->serviceManagerConfig = $serviceManagerConfig;
     }
 
-    public function getDocuments()
-    {
-        return $this->documents;
+    public function getModels() {
+        return $this->models;
     }
 
-    public function setDocuments($documents)
-    {
-        $this->documents = $documents;
-    }
-
-    public function getFilters()
-    {
-        return $this->filters;
-    }
-
-    public function setFilters($filters)
-    {
-        $this->filters = $filters;
+    public function setModels($models) {
+        $this->models = $models;
     }
 
     public function getSubscribers()
@@ -74,26 +56,6 @@ abstract class AbstractExtension extends AbstractOptions
     public function setSubscribers($subscribers)
     {
         $this->subscribers = $subscribers;
-    }
-
-    public function getCliCommands()
-    {
-        return $this->cliCommands;
-    }
-
-    public function setCliCommands($cliCommands)
-    {
-        $this->cliCommands = $cliCommands;
-    }
-
-    public function getCliHelpers()
-    {
-        return $this->cliHelpers;
-    }
-
-    public function setCliHelpers($cliHelpers)
-    {
-        $this->cliHelpers = $cliHelpers;
     }
 
     /**

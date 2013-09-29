@@ -80,7 +80,8 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
+     * @param \Zoop\Shard\State\TransitionEventArgs $eventArgs
+     * @return type
      */
     public function preTransition(TransitionEventArgs $eventArgs)
     {
@@ -94,7 +95,7 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber
         $action = $eventArgs->getTransition()->getAction();
         $metadata = $eventArgs->getMetadata();
 
-        if (! $accessController->areAllowed([$action], $metadata, $document)->getAllowed()) {
+        if (! $accessController->areAllowed([$action], $metadata, $document, $eventArgs->getChangeSet())->getAllowed()) {
             //stop transition
             $metadata
                 ->reflFields[array_keys($metadata->state)[0]]

@@ -6,18 +6,18 @@
  */
 namespace Zoop\Shard\Reference;
 
-use Zoop\Shard\Core\ObjectManagerAwareInterface;
-use Zoop\Shard\Core\ObjectManagerAwareTrait;
+use Zoop\Shard\Core\ModelManagerAwareInterface;
+use Zoop\Shard\Core\ModelManagerAwareTrait;
 
 /**
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class ReferenceMap implements ObjectManagerAwareInterface
+class ReferenceMap implements ModelManagerAwareInterface
 {
 
-    use ObjectManagerAwareTrait;
+    use ModelManagerAwareTrait;
 
     protected $cacheId = 'Zoop\Shard\Reference\ReferenceMap';
 
@@ -49,13 +49,13 @@ class ReferenceMap implements ObjectManagerAwareInterface
             return $this->map;
         }
 
-        $cacheDriver = $this->objectManager->getConfiguration()->getMetadataCacheImpl();
+        $cacheDriver = $this->modelManager->getConfiguration()->getMetadataCacheImpl();
 
         if ($cacheDriver->contains($this->cacheId)) {
             $this->map = $cacheDriver->fetch($this->cacheId);
         } else {
             $this->map = [];
-            foreach ($this->objectManager->getMetadataFactory()->getAllMetadata() as $metadata) {
+            foreach ($this->modelManager->getMetadataFactory()->getAllMetadata() as $metadata) {
                 foreach ($metadata->associationMappings as $mapping) {
                     if (isset($mapping['reference']) && $mapping['reference'] && $mapping['isOwningSide']) {
                         $this->map[$mapping['targetDocument']][] = [

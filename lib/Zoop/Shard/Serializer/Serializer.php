@@ -8,22 +8,21 @@ namespace Zoop\Shard\Serializer;
 
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\Proxy;
-use Doctrine\ODM\MongoDB\DocumentNotFoundException;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
-use Zoop\Shard\Core\ObjectManagerAwareInterface;
-use Zoop\Shard\Core\ObjectManagerAwareTrait;
+use Zoop\Shard\Core\ModelManagerAwareInterface;
+use Zoop\Shard\Core\ModelManagerAwareTrait;
 
 /**
- * Provides methods for serializing documents
+ * Provides methods for serializing models
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInterface
+class Serializer implements ServiceLocatorAwareInterface, ModelManagerAwareInterface
 {
     use ServiceLocatorAwareTrait;
-    use ObjectManagerAwareTrait;
+    use ModelManagerAwareTrait;
 
     /** @var array */
     protected $typeSerializers = [];
@@ -107,7 +106,7 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
     {
         $return = [];
 
-        $metadata = $this->objectManager->getClassMetadata(get_class($document));
+        $metadata = $this->modelManager->getClassMetadata(get_class($document));
 
         if ($metadata->hasDiscriminator()) {
             $return[$metadata->discriminatorField['name']] = $metadata->discriminatorValue;
@@ -116,7 +115,7 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
         if ($document instanceof Proxy) {
             try {
                 $document->__load();
-            } catch (DocumentNotFoundException $ex) {
+            } catch (\Exception $ex) {
                 //Document may not be found due to access control
                 return;
             }
@@ -144,7 +143,7 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
         if ($metadata->hasAssociation($field) &&
             $metadata->isSingleValuedAssociation($field)
         ) {
-            return $this->serializeSingleObject($metadata, $value, $field);
+            return $this->serializeSingleModel($metadata, $value, $field);
         } elseif ($metadata->hasAssociation($field)) {
             return $this->serializeCollection($metadata, $value, $field);
         } else {
@@ -152,7 +151,7 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
         }
     }
 
-    protected function serializeSingleObject(ClassMetadata $metadata, $value, $field)
+    protected function serializeSingleModel(ClassMetadata $metadata, $value, $field)
     {
         $mapping = $metadata->fieldMappings[$field];
 
@@ -222,7 +221,7 @@ class Serializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInte
                 array_search(get_class($document), $mapping['discriminatorMap']);
         }
         if ($mapping['strategy'] == 'set') {
-            $targetMetadata = $this->objectManager->getClassMetadata(get_class($document));
+            $targetMetadata = $this->modelManager->getClassMetadata(get_class($document));
             if (isset($serializedDocument[$targetMetadata->getIdentifier()])) {
                 $key = $serializedDocument[$targetMetadata->getIdentifier()];
                 unset($serializedDocument[$targetMetadata->getIdentifier()]);

@@ -13,6 +13,10 @@ namespace Zoop\Shard\Core;
  */
 final class Events
 {
+    /**
+     * Triggered by an attempt to fetch an object
+     */
+    const READ = 'read';
 
     /**
      * Triggered by object creation

@@ -14,7 +14,7 @@ class AnnotationInheritaceTest extends BaseTest
     {
         $manifest = new Manifest(
             [
-                'documents' => [
+                'models' => [
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
@@ -34,7 +34,7 @@ class AnnotationInheritaceTest extends BaseTest
            ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
     }
 
     public function testAnnotationInheritance()

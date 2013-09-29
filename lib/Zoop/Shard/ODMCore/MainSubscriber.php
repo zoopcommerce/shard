@@ -12,11 +12,14 @@ use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\ODM\MongoDB\Event\LoadClassMetadataEventArgs;
 use Doctrine\ODM\MongoDB\Event\OnFlushEventArgs;
 use Doctrine\ODM\MongoDB\Events as ODMEvents;
+use Doctrine\ODM\MongoDB\Query\CriteriaMerger;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Core\AbstractChangeEventArgs;
 use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Core\LoadMetadataEventArgs;
+use Zoop\Shard\Core\BootstrappedEventArgs;
+use Zoop\Shard\Core\ChangeSet;
 use Zoop\Shard\Core\CreateEventArgs;
 use Zoop\Shard\Core\DeleteEventArgs;
 use Zoop\Shard\Core\UpdateEventArgs;
@@ -41,7 +44,15 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             ODMEvents::loadClassMetadata,
             ODMEvents::onFlush,
             // @codingStandardsIgnoreEnd
+            CoreEvents::BOOTSTRAPPED,
         ];
+    }
+
+    public function bootstrapped(BootstrappedEventArgs $eventArgs)
+    {
+        $filter = $eventArgs->getModelManager()->getFilterCollection()->enable('odmfilter');
+        $filter->setEventManager($eventArgs->getEventManager());
+        $filter->setCriteriaMerger(new CriteriaMerger);
     }
 
     /**
@@ -106,7 +117,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         $createEventArgs = new CreateEventArgs(
             $document,
             $metadata,
-            $documentManager->getUnitOfWork()->getDocumentChangeSet($document),
+            new ChangeSet($documentManager->getUnitOfWork()->getDocumentChangeSet($document)),
             $eventManager
         );
 
@@ -128,7 +139,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                 $createEventArgs = new CreateEventArgs(
                     $document,
                     $metadata,
-                    $documentManager->getUnitOfWork()->getDocumentChangeSet($document),
+                    new ChangeSet($documentManager->getUnitOfWork()->getDocumentChangeSet($document)),
                     $eventManager
                 );
             }
@@ -143,10 +154,11 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         if (count($changeSet) == 0) {
             return;
         }
+
         $updateEventArgs = new UpdateEventArgs(
             $document,
             $metadata,
-            $changeSet,
+            new ChangeSet($changeSet),
             $eventManager
         );
 
@@ -168,7 +180,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
                 $updateEventArgs = new UpdateEventArgs(
                     $document,
                     $metadata,
-                    $documentManager->getUnitOfWork()->getDocumentChangeSet($document),
+                    new ChangeSet($documentManager->getUnitOfWork()->getDocumentChangeSet($document)),
                     $eventManager
                 );
             }
@@ -231,8 +243,8 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         $metadata = $eventArgs->getMetadata();
 
         foreach ($eventArgs->getRecompute() as $field) {
-            if (isset($changeSet[$field])) {
-                $oldValue = $changeSet[$field][0];
+            if ($changeSet->hasField($field)) {
+                $oldValue = $changeSet->getField($field)[0];
             } else {
                 $oldValue = null;
             }

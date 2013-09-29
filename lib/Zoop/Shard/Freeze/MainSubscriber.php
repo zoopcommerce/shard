@@ -11,6 +11,7 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\AccessControl\EventArgs as AccessControlEventArgs;
 use Zoop\Shard\Core\Events as CoreEvents;
+use Zoop\Shard\Core\ReadEventArgs;
 use Zoop\Shard\Core\UpdateEventArgs;
 use Zoop\Shard\Core\DeleteEventArgs;
 use Zoop\Shard\Core\MetadataSleepEventArgs;
@@ -34,15 +35,37 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     public function getSubscribedEvents()
     {
         return [
+            CoreEvents::READ,
             CoreEvents::DELETE,
             CoreEvents::UPDATE,
             CoreEvents::METADATA_SLEEP,
         ];
     }
 
+    public function read(ReadEventArgs $eventArgs)
+    {
+        $metadata = $eventArgs->getMetadata();
+
+        if (!isset($metadata->freeze['flag'])) {
+            return;
+        }
+
+        $readFilter = $this->serviceLocator->get('extension.freeze')->getReadFilter();
+
+        if ($readFilter == Extension::READ_ALL) {
+            return;
+        } else if ($readFilter == Extension::READ_ONLY_FROZEN) {
+            $criteria = [$metadata->freeze['flag'] => true];
+        } else if ($readFilter == Extension::READ_ONLY_NOT_FROZEN) {
+            $criteria = [$metadata->freeze['flag'] => false];
+        }
+
+        $eventArgs->addCriteria($criteria);
+    }
+
     /**
      *
-     * @param  \Zoop\Shard\ODMCore\UpdateEventArgs $eventArgs
+     * @param \Zoop\Shard\Core\UpdateEventArgs $eventArgs
      * @return type
      */
     public function update(UpdateEventArgs $eventArgs)
@@ -60,17 +83,17 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         array_walk(
             $metadata->freeze,
             function ($item) use ($changeSet, &$count) {
-                if (array_key_exists($item, $changeSet)) {
+                if ($changeSet->hasField($item)) {
                     ++$count;
                 }
             }
         );
 
-        if (count($changeSet) == $count) {
+        if (count($changeSet->getFieldNames()) == $count) {
             return;
         }
 
-        // Updates to frozen documents are not allowed. Roll them back
+        // Updates to frozen models are not allowed. Roll them back
         $eventArgs->setReject(true);
 
         // Raise frozenUpdateDenied
@@ -90,7 +113,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             return;
         }
 
-        // Deletions of frozen documents are not allowed. Roll them back
+        // Deletions of frozen models are not allowed. Roll them back
         $eventArgs->setReject(true);
 
         // Raise frozenDeleteDenied

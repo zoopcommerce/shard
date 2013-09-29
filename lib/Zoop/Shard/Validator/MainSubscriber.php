@@ -50,9 +50,9 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         $result = $documentValidator->isValid($document, $eventArgs->getMetadata(), $eventArgs->getChangeSet());
         if (! $result->getValue()) {
 
-            // Raise INVALID_OBJECT
+            // Raise INVALID_MODEL
             $eventArgs->getEventManager()->dispatchEvent(
-                Events::INVALID_OBJECT,
+                Events::INVALID_MODEL,
                 new EventArgs($document, $result)
             );
 
