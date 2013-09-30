@@ -127,6 +127,7 @@ class AnnotationSubscriber implements EventSubscriber
             $metadata->addProperty('serializer', true);
             $metadata->setSerializer(['fields' => []]);
         }
+
         return $metadata->getSerializer();
     }
 }

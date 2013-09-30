@@ -127,6 +127,7 @@ class AnnotationSubscriber implements EventSubscriber
             $metadata->addProperty('softDelete', true);
             $metadata->setSoftDelete([]);
         }
+
         return $metadata->getSoftDelete();
     }
 }

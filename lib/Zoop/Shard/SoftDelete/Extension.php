@@ -46,11 +46,13 @@ class Extension extends AbstractExtension
 
     protected $readFilter = 'readAll';
 
-    public function getReadFilter() {
+    public function getReadFilter()
+    {
         return $this->readFilter;
     }
 
-    public function setReadFilter($readFilter) {
+    public function setReadFilter($readFilter)
+    {
         $this->readFilter = (string) $readFilter;
     }
 }

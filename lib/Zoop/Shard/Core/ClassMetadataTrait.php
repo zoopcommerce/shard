@@ -13,6 +13,7 @@ use Zoop\Shard\Exception\InvalidArgumentException;
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
+ *
  */
 trait ClassMetadataTrait
 {
@@ -37,7 +38,7 @@ trait ClassMetadataTrait
         $property = lcfirst(substr($name, 3));
         if ($type == 'get' && isset($this->extensionProperties[$property])) {
             return $this->extensionProperties[$property]['value'];
-        } else if ($type == 'set') {
+        } elseif ($type == 'set') {
             if (!isset($this->extensionProperties[$property])) {
                 throw new InvalidArgumentException(sprintf('The property name %s is not valid', $property));
             }

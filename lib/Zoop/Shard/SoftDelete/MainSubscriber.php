@@ -13,7 +13,6 @@ use Zoop\Shard\AccessControl\EventArgs as AccessControlEventArgs;
 use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Core\ReadEventArgs;
 use Zoop\Shard\Core\UpdateEventArgs;
-use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  * Emits soft delete events
@@ -53,9 +52,9 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 
         if ($readFilter == Extension::READ_ALL) {
             return;
-        } else if ($readFilter == Extension::READ_ONLY_SOFT_DELETED) {
+        } elseif ($readFilter == Extension::READ_ONLY_SOFT_DELETED) {
             $criteria = [$softDeleteMetadata['flag'] => true];
-        } else if ($readFilter == Extension::READ_ONLY_NOT_SOFT_DELETED) {
+        } elseif ($readFilter == Extension::READ_ONLY_NOT_SOFT_DELETED) {
             $criteria = [$softDeleteMetadata['flag'] => false];
         }
 

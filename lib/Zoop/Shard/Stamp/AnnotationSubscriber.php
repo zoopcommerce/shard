@@ -120,6 +120,7 @@ class AnnotationSubscriber implements EventSubscriber
             $metadata->addProperty('stamp', true);
             $metadata->setStamp([]);
         }
+
         return $metadata->getStamp();
     }
 }

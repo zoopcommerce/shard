@@ -37,19 +37,23 @@ class Extension extends AbstractExtension
 
     protected $readFilterExclude = [];
 
-    public function getReadFilterInclude() {
+    public function getReadFilterInclude()
+    {
         return $this->readFilterInclude;
     }
 
-    public function setReadFilterInclude(array $readFilterInclude = []) {
+    public function setReadFilterInclude(array $readFilterInclude = [])
+    {
         $this->readFilterInclude = $readFilterInclude;
     }
 
-    public function getReadFilterExclude() {
+    public function getReadFilterExclude()
+    {
         return $this->readFilterExclude;
     }
 
-    public function setReadFilterExclude(array $readFilterExclude = []) {
+    public function setReadFilterExclude(array $readFilterExclude = [])
+    {
         $this->readFilterExclude = $readFilterExclude;
     }
 }

@@ -11,7 +11,6 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Core\CreateEventArgs;
-use Zoop\Shard\Core\MetadataSleepEventArgs;
 use Zoop\Shard\Core\UpdateEventArgs;
 
 /**
@@ -73,7 +72,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         $document = $eventArgs->getDocument();
         $metadata = $eventArgs->getMetadata();
         $stampMetadata = $metadata->getStamp();
-        
+
         if (isset($stampMetadata['updatedBy'])) {
             $metadata->setFieldValue($document, $stampMetadata['updatedBy'], $this->getUsername());
             $eventArgs->addRecompute($stampMetadata['updatedBy']);

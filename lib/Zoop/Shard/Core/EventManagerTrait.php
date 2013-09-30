@@ -11,14 +11,17 @@ trait EventManagerTrait
 
     protected $eventManager;
 
-    public function getEventManager() {
+    public function getEventManager()
+    {
         if (!isset($this->eventManager)) {
             $this->eventManager = $this->serviceLocator->get('eventmanager');
         }
+
         return $this->eventManager;
     }
 
-    public function setEventManager($eventManager) {
+    public function setEventManager($eventManager)
+    {
         $this->eventManager = $eventManager;
     }
 }

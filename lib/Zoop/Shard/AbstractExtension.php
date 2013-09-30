@@ -40,11 +40,13 @@ abstract class AbstractExtension extends AbstractOptions
         $this->serviceManagerConfig = $serviceManagerConfig;
     }
 
-    public function getModels() {
+    public function getModels()
+    {
         return $this->models;
     }
 
-    public function setModels($models) {
+    public function setModels($models)
+    {
         $this->models = $models;
     }
 

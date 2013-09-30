@@ -23,22 +23,25 @@ class ReadEventArgs extends BaseEventArgs
 
     protected $criteria = [];
 
-    public function getMetadata() {
+    public function getMetadata()
+    {
         return $this->metadata;
     }
 
-    public function getEventManager() {
+    public function getEventManager()
+    {
         return $this->eventManager;
     }
 
-    public function getCriteria() {
+    public function getCriteria()
+    {
         return $this->criteria;
     }
 
-    public function addCriteria($criteria) {
+    public function addCriteria($criteria)
+    {
         $this->criteria[] = $criteria;
     }
-
 
     public function __construct(ClassMetadata $metadata, BaseEventManager $eventManager)
     {

@@ -8,6 +8,7 @@ namespace Zoop\Shard\ODMCore;
 
 use Doctrine\ODM\MongoDB\Mapping\ClassMetadata;
 use Doctrine\ODM\MongoDB\Query\Filter\BsonFilter;
+use Doctrine\ODM\MongoDB\Query\CriteriaMerger;
 use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Core\ReadEventArgs;
 
@@ -23,19 +24,27 @@ class Filter extends BsonFilter
 
     protected $criteriaMerger;
 
-    public function getEventManager() {
+    public function getEventManager()
+    {
         return $this->eventManager;
     }
 
-    public function setEventManager($eventManager) {
+    public function setEventManager($eventManager)
+    {
         $this->eventManager = $eventManager;
     }
 
-    public function getCriteriaMerger() {
+    public function getCriteriaMerger()
+    {
+        if (!isset($this->criteriaMerger)) {
+            $this->criteriaMerger = new CriteriaMerger;
+        }
+
         return $this->criteriaMerger;
     }
 
-    public function setCriteriaMerger($criteriaMerger) {
+    public function setCriteriaMerger($criteriaMerger)
+    {
         $this->criteriaMerger = $criteriaMerger;
     }
 
@@ -63,6 +72,7 @@ class Filter extends BsonFilter
                 }
             }
         }
+
         return $array;
     }
 }

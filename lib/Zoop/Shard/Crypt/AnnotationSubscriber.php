@@ -71,6 +71,7 @@ class AnnotationSubscriber implements EventSubscriber
             $metadata->addProperty('crypt', true);
             $metadata->setCrypt([]);
         }
+
         return $metadata->getCrypt();
     }
 }

@@ -25,9 +25,9 @@ class ModelManager extends DocumentManager implements CoreModelManager
      * and uses the given Configuration.
      *
      * @static
-     * @param \Doctrine\MongoDB\Connection|null $conn
-     * @param Configuration|null $config
-     * @param \Doctrine\Common\EventManager|null $eventManager
+     * @param  \Doctrine\MongoDB\Connection|null  $conn
+     * @param  Configuration|null                 $config
+     * @param  \Doctrine\Common\EventManager|null $eventManager
      * @return DocumentManager
      */
     public static function create(Connection $conn = null, Configuration $config = null, EventManager $eventManager = null)

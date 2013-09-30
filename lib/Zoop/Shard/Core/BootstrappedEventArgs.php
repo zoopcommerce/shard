@@ -20,11 +20,13 @@ class BootstrappedEventArgs extends BaseEventArgs
 
     protected $eventManager;
 
-    public function getModelManager() {
+    public function getModelManager()
+    {
         return $this->modelManager;
     }
 
-    public function getEventManager() {
+    public function getEventManager()
+    {
         return $this->eventManager;
     }
 

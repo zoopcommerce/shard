@@ -32,10 +32,10 @@ class AnnotationEventArgs extends BaseEventArgs
     /**
      *
      * @param \Doctrine\Common\Persistence\Mapping\ClassMetadata $metadata
-     * @param type $eventType
-     * @param \Doctrine\Common\Annotations\Annotation $annotation
-     * @param type $reflection
-     * @param \Doctrine\Common\EventManager $eventManager
+     * @param type                                               $eventType
+     * @param \Doctrine\Common\Annotations\Annotation            $annotation
+     * @param type                                               $reflection
+     * @param \Doctrine\Common\EventManager                      $eventManager
      */
     public function __construct(
         ClassMetadata $metadata,

@@ -34,7 +34,7 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
 
     /**
      *
-     * @param \Zoop\Shard\SoftDelete\SoftDeleteEventArgs $eventArgs
+     * @param  \Zoop\Shard\SoftDelete\SoftDeleteEventArgs $eventArgs
      * @return type
      */
     public function preSoftDelete(SoftDeleteEventArgs $eventArgs)
@@ -62,7 +62,7 @@ class SoftDeleteSubscriber extends AbstractAccessControlSubscriber
 
     /**
      *
-     * @param \Zoop\Shard\SoftDelete\SoftDeleteEventArgs $eventArgs
+     * @param  \Zoop\Shard\SoftDelete\SoftDeleteEventArgs $eventArgs
      * @return type
      */
     public function preRestore(SoftDeleteEventArgs $eventArgs)

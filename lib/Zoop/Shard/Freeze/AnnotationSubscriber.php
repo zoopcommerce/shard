@@ -127,6 +127,7 @@ class AnnotationSubscriber implements EventSubscriber
             $metadata->addProperty('freeze', true);
             $metadata->setFreeze([]);
         }
+
         return $metadata->getFreeze();
     }
 }

@@ -7,18 +7,10 @@
 namespace Zoop\Shard\ODMCore;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\CachedReader;
-use Doctrine\ODM\MongoDB\Event\LoadClassMetadataEventArgs;
 use Doctrine\ODM\MongoDB\Event\OnFlushEventArgs;
 use Doctrine\ODM\MongoDB\Events as ODMEvents;
-use Doctrine\ODM\MongoDB\Query\CriteriaMerger;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Core\AbstractChangeEventArgs;
 use Zoop\Shard\Core\Events as CoreEvents;
-use Zoop\Shard\Core\LoadMetadataEventArgs;
-use Zoop\Shard\Core\BootstrappedEventArgs;
 use Zoop\Shard\Core\ChangeSet;
 use Zoop\Shard\Core\CreateEventArgs;
 use Zoop\Shard\Core\DeleteEventArgs;
@@ -29,10 +21,8 @@ use Zoop\Shard\Core\UpdateEventArgs;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
+class FlushSubscriber implements EventSubscriber
 {
-    use ServiceLocatorAwareTrait;
-
     /**
      *
      * @return array
@@ -41,50 +31,9 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     {
         return [
             // @codingStandardsIgnoreStart
-            ODMEvents::loadClassMetadata,
             ODMEvents::onFlush,
             // @codingStandardsIgnoreEnd
-            CoreEvents::BOOTSTRAPPED,
         ];
-    }
-
-    public function bootstrapped(BootstrappedEventArgs $eventArgs)
-    {
-        $filter = $eventArgs->getModelManager()->getFilterCollection()->enable('odmfilter');
-        $filter->setEventManager($eventArgs->getEventManager());
-        $filter->setCriteriaMerger(new CriteriaMerger);
-    }
-
-    /**
-     *
-     * @param \Doctrine\ODM\MongoDB\Event\LoadClassMetadataEventArgs $eventArgs
-     */
-    public function loadClassMetadata(LoadClassMetadataEventArgs $eventArgs)
-    {
-        $metadata = $eventArgs->getClassMetadata();
-        $documentManager = $eventArgs->getDocumentManager();
-        $eventManager = $documentManager->getEventManager();
-
-        if (! isset($this->annotationReader)) {
-            $this->annotationReader = new AnnotationReader;
-            $this->annotationReader = new CachedReader(
-                $this->annotationReader,
-                $documentManager->getConfiguration()->getMetadataCacheImpl()
-            );
-        }
-
-        //Inherit document annotations from parent classes
-        $parentMetadata = [];
-        if (count($metadata->parentClasses) > 0) {
-            foreach ($metadata->parentClasses as $parentClass) {
-                $parentMetadata[] = $documentManager->getClassMetadata($parentClass);
-            }
-        }
-
-        $eventManager->dispatchEvent(
-            CoreEvents::LOAD_METADATA,
-            new LoadMetadataEventArgs($metadata, $parentMetadata, $this->annotationReader, $eventManager)
-        );
     }
 
     /**

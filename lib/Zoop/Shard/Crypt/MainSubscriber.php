@@ -13,7 +13,6 @@ use Zoop\Shard\Crypt\BlockCipher\BlockCipherServiceInterface;
 use Zoop\Shard\Crypt\Hash\HashServiceInterface;
 use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Core\AbstractChangeEventArgs;
-use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  * Listener hashes fields marked with CryptHash annotation

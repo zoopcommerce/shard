@@ -38,7 +38,7 @@ class AccessController implements ServiceLocatorAwareInterface
     {
         $result = new AllowedResult(false);
 
-        if (! ($permissionsMetadata = $metadata->getPermissions())) {
+        if (!$metadata->hasProperty('permissions')) {
             return $result;
         }
 

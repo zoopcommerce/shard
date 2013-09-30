@@ -339,6 +339,7 @@ class AnnotationSubscriber implements EventSubscriber
             $metadata->addProperty('validator', true);
             $metadata->setValidator([]);
         }
+
         return $metadata->getValidator();
     }
 

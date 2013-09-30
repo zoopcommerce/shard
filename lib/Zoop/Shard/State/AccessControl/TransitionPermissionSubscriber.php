@@ -82,7 +82,7 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber
 
     /**
      *
-     * @param \Zoop\Shard\State\TransitionEventArgs $eventArgs
+     * @param  \Zoop\Shard\State\TransitionEventArgs $eventArgs
      * @return type
      */
     public function preTransition(TransitionEventArgs $eventArgs)

@@ -11,7 +11,6 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Core\ReadEventArgs;
-use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  *

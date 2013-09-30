@@ -15,15 +15,18 @@ class ChangeSet
 {
     protected $changeSet;
 
-    public function setField($field, $oldValue, $newValue) {
+    public function setField($field, $oldValue, $newValue)
+    {
         $this->changeSet[$field] = [$oldValue, $newValue];
     }
 
-    public function removeField($field) {
+    public function removeField($field)
+    {
         unset($this->changeSet[$field]);
     }
 
-    public function getField($field) {
+    public function getField($field)
+    {
         if (isset($this->changeSet[$field])) {
             return $this->changeSet[$field];
         }
@@ -39,7 +42,8 @@ class ChangeSet
         return array_keys($this->changeSet);
     }
 
-    public function __construct(array $changeSet = []) {
+    public function __construct(array $changeSet = [])
+    {
         $this->changeSet = $changeSet;
     }
 }

@@ -83,11 +83,13 @@ class Extension extends AbstractExtension
         $this->classMetadataFactory = $classMetadataFactory;
     }
 
-    public function getFilters() {
+    public function getFilters()
+    {
         return $this->filters;
     }
 
-    public function setFilters($filters) {
+    public function setFilters($filters)
+    {
         $this->filters = $filters;
     }
 

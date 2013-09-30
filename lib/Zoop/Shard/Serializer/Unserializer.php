@@ -59,10 +59,10 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
     /**
      * This will create a document from the supplied array.
      *
-     * @param array $data
-     * @param type $class
-     * @param type $document
-     * @param type $mode
+     * @param  array $data
+     * @param  type  $class
+     * @param  type  $document
+     * @param  type  $mode
      * @return type
      */
     public function fromArray(
@@ -76,10 +76,10 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
 
     /**
      *
-     * @param type $data
-     * @param type $class
-     * @param type $document
-     * @param type $mode
+     * @param  type $data
+     * @param  type $class
+     * @param  type $document
+     * @param  type $mode
      * @return type
      */
     public function fromJson(

@@ -12,7 +12,6 @@ use Zoop\Shard\Core\CreateEventArgs;
 use Zoop\Shard\Core\DeleteEventArgs;
 use Zoop\Shard\Core\ReadEventArgs;
 use Zoop\Shard\Core\UpdateEventArgs;
-use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  *

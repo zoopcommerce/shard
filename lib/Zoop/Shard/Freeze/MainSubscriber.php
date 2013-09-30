@@ -14,7 +14,6 @@ use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Core\ReadEventArgs;
 use Zoop\Shard\Core\UpdateEventArgs;
 use Zoop\Shard\Core\DeleteEventArgs;
-use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  * Emits freeze events
@@ -54,9 +53,9 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 
         if ($readFilter == Extension::READ_ALL) {
             return;
-        } else if ($readFilter == Extension::READ_ONLY_FROZEN) {
+        } elseif ($readFilter == Extension::READ_ONLY_FROZEN) {
             $criteria = [$freezeMetadata['flag'] => true];
-        } else if ($readFilter == Extension::READ_ONLY_NOT_FROZEN) {
+        } elseif ($readFilter == Extension::READ_ONLY_NOT_FROZEN) {
             $criteria = [$freezeMetadata['flag'] => false];
         }
 
@@ -65,7 +64,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 
     /**
      *
-     * @param \Zoop\Shard\Core\UpdateEventArgs $eventArgs
+     * @param  \Zoop\Shard\Core\UpdateEventArgs $eventArgs
      * @return type
      */
     public function update(UpdateEventArgs $eventArgs)
