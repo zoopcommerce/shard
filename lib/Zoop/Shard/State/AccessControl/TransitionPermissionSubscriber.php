@@ -75,7 +75,9 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber
             $config['options']['deny'] = [];
         }
 
-        $metadata->permissions[] = $config;
+        $permissionsMetadata = $metadata->getPermissions();
+        $permissionsMetadata[] = $config;
+        $metadata->setPermissions($permissionsMetadata);
     }
 
     /**
@@ -97,9 +99,11 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber
 
         if (! $accessController->areAllowed([$action], $metadata, $document, $eventArgs->getChangeSet())->getAllowed()) {
             //stop transition
-            $metadata
-                ->reflFields[array_keys($metadata->state)[0]]
-                ->setValue($document, $eventArgs->getTransition()->getFrom());
+            $metadata->setFieldValue(
+                $document,
+                array_keys($metadata->getState())[0],
+                $eventArgs->getTransition()->getFrom()
+            );
 
             $eventManager->dispatchEvent(
                 Events::TRANSITION_DENIED,

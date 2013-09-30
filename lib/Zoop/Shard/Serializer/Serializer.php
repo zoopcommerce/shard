@@ -83,11 +83,10 @@ class Serializer implements ServiceLocatorAwareInterface, ModelManagerAwareInter
 
     public function isSerializableField($field, ClassMetadata $metadata)
     {
-        if (! isset($metadata->fieldMappings[$field])) {
-            return false;
-        }
-        if (isset($metadata->serializer['fields'][$field]['serializeIgnore']) &&
-            $metadata->serializer['fields'][$field]['serializeIgnore']
+        $serializerMetadata = $metadata->getSerializer();
+
+        if (isset($serializerMetadata['fields'][$field]['serializeIgnore']) &&
+            $serializerMetadata['fields'][$field]['serializeIgnore']
         ) {
             return false;
         }
@@ -249,8 +248,10 @@ class Serializer implements ServiceLocatorAwareInterface, ModelManagerAwareInter
 
     protected function getReferenceSerializer($field, $metadata)
     {
-        if (isset($metadata->serializer['fields'][$field]['referenceSerializer'])) {
-            $name = $metadata->serializer['fields'][$field]['referenceSerializer'];
+        $serializerMetadata = $metadata->getSerializer();
+
+        if (isset($serializerMetadata['fields'][$field]['referenceSerializer'])) {
+            $name = $serializerMetadata['fields'][$field]['referenceSerializer'];
         } else {
             $name = 'serializer.reference.refLazy';
         }

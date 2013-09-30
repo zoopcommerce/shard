@@ -21,8 +21,9 @@ class HashHelper implements ServiceLocatorAwareInterface
 
     public function hashDocument($document, $metadata)
     {
-        if (isset($metadata->crypt['hash'])) {
-            foreach ($metadata->crypt['hash'] as $field => $config) {
+        $cryptMetadata = $metadata->getCrypt(); 
+        if (isset($cryptMetadata['hash'])) {
+            foreach ($cryptMetadata['hash'] as $field => $config) {
                 $service = $this->serviceLocator->get($config['service']);
                 if (! $service instanceof HashServiceInterface) {
                     throw new \Zoop\Shard\Exception\InvalidArgumentException();

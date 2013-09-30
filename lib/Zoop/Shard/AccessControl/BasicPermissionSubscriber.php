@@ -35,7 +35,6 @@ class BasicPermissionSubscriber implements EventSubscriber
     public function annotationBasicPermission(AnnotationEventArgs $eventArgs)
     {
         $annotation = $eventArgs->getAnnotation();
-        $metadata = $eventArgs->getMetadata();
 
         $config = [
             'factory' => 'Zoop\Shard\AccessControl\BasicPermissionFactory',
@@ -72,6 +71,9 @@ class BasicPermissionSubscriber implements EventSubscriber
             $config['options']['deny'] = [];
         }
 
-        $metadata->permissions[] = $config;
+        $metadata = $eventArgs->getMetadata();
+        $permissionsMetadata = $metadata->getPermissions();
+        $permissionsMetadata[] = $config;
+        $metadata->setPermissions($permissionsMetadata);
     }
 }

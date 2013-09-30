@@ -37,15 +37,15 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         return [
             CoreEvents::READ,
             CoreEvents::UPDATE,
-            CoreEvents::METADATA_SLEEP,
         ];
     }
 
     public function read(ReadEventArgs $eventArgs)
     {
         $metadata = $eventArgs->getMetadata();
+        $softDeleteMetadata = $metadata->getSoftDelete();
 
-        if (!isset($metadata->softDelete['flag'])) {
+        if (!isset($softDeleteMetadata) || !$softDeleteMetadata['flag']) {
             return;
         }
 
@@ -54,9 +54,9 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         if ($readFilter == Extension::READ_ALL) {
             return;
         } else if ($readFilter == Extension::READ_ONLY_SOFT_DELETED) {
-            $criteria = [$metadata->softDelete['flag'] => true];
+            $criteria = [$softDeleteMetadata['flag'] => true];
         } else if ($readFilter == Extension::READ_ONLY_NOT_SOFT_DELETED) {
-            $criteria = [$metadata->softDelete['flag'] => false];
+            $criteria = [$softDeleteMetadata['flag'] => false];
         }
 
         $eventArgs->addCriteria($criteria);
@@ -72,10 +72,12 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             return;
         }
 
+        $softDeleteMetadata = $metadata->getSoftDelete();
+
         $changeSet = $eventArgs->getChangeSet();
         $count = 0;
         array_walk(
-            $metadata->softDelete,
+            $softDeleteMetadata,
             function ($item) use ($changeSet, &$count) {
                 if ($changeSet->hasField($item)) {
                     ++$count;
@@ -104,12 +106,5 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         }
 
         return $this->softDeleter;
-    }
-
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
-    {
-        if (isset($eventArgs->getMetadata()->softDelete)) {
-            $eventArgs->addSerialized('softDelete');
-        }
     }
 }

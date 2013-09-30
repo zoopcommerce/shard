@@ -38,7 +38,7 @@ class AccessController implements ServiceLocatorAwareInterface
     {
         $result = new AllowedResult(false);
 
-        if (! isset($metadata->permissions)) {
+        if (! ($permissionsMetadata = $metadata->getPermissions())) {
             return $result;
         }
 
@@ -69,7 +69,7 @@ class AccessController implements ServiceLocatorAwareInterface
     {
         if (count($result->getNew()) > 0) {
             foreach ($result->getNew() as $field => $value) {
-                $newValue = $metadata->reflFields[$field]->getValue($document);
+                $newValue = $metadata->getFieldValue($document, $field);
                 if (! $this->testCriteriaAgainstValue($newValue, $value)) {
                     $result->setAllowed(false);
 
@@ -121,7 +121,7 @@ class AccessController implements ServiceLocatorAwareInterface
             $this->permissions[$class] = [];
         }
 
-        foreach ($metadata->permissions as $index => $permissionMetadata) {
+        foreach ($metadata->getPermissions() as $index => $permissionMetadata) {
             if (! isset($this->permissions[$class][$index])) {
                 $factory = $permissionMetadata['factory'];
                 $this->permissions[$class][$index] = $factory::get($metadata, $permissionMetadata['options']);

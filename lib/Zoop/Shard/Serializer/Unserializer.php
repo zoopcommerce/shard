@@ -38,10 +38,11 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
     public function fieldList(ClassMetadata $metadata, $includeId = true)
     {
         $return = [];
+        $serializerMetadata = $metadata->getSerializer();
 
         foreach ($metadata->getFieldNames() as $field) {
-            if (isset($metadata->serializer['fields'][$field]['unserializeIgnore']) &&
-                $metadata->serializer['fields'][$field]['unserializeIgnore']
+            if (isset($serializerMetadata['fields'][$field]['unserializeIgnore']) &&
+                $serializerMetadata['fields'][$field]['unserializeIgnore']
             ) {
                 continue;
             }

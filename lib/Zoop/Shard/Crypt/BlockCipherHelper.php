@@ -21,8 +21,9 @@ class BlockCipherHelper implements ServiceLocatorAwareInterface
 
     public function encryptDocument($document, $metadata)
     {
-        if (isset($metadata->crypt['blockCipher'])) {
-            foreach ($metadata->crypt['blockCipher'] as $field => $config) {
+        $cryptMetadata = $metadata->getCrypt();
+        if (isset($cryptMetadata['blockCipher'])) {
+            foreach ($cryptMetadata['blockCipher'] as $field => $config) {
                 $service = $this->serviceLocator->get($config['service']);
                 if (! $service instanceof BlockCipherServiceInterface) {
                     throw new \Zoop\Shard\Exception\InvalidArgumentException();
@@ -35,8 +36,9 @@ class BlockCipherHelper implements ServiceLocatorAwareInterface
 
     public function decryptDocument($document, $metadata)
     {
-        if (isset($metadata->crypt['blockCipher'])) {
-            foreach ($metadata->crypt['blockCipher'] as $field => $config) {
+        $cryptMetadata = $metadata->getCrypt();
+        if (isset($cryptMetadata['blockCipher'])) {
+            foreach ($cryptMetadata['blockCipher'] as $field => $config) {
                 $service = $this->serviceLocator->get($config['service']);
                 if (! $service instanceof BlockCipherServiceInterface) {
                     throw new \Zoop\Shard\Exception\InvalidArgumentException();

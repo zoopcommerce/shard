@@ -31,8 +31,7 @@ class MainSubscriber extends AbstractAccessControlSubscriber
             CoreEvents::READ,
             CoreEvents::CREATE,
             CoreEvents::DELETE,
-            CoreEvents::UPDATE,
-            CoreEvents::METADATA_SLEEP,
+            CoreEvents::UPDATE
         ];
     }
 
@@ -131,15 +130,5 @@ class MainSubscriber extends AbstractAccessControlSubscriber
             AccessControlEvents::DELETE_DENIED,
             new EventArgs($document, Actions::DELETE)
         );
-    }
-
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
-    {
-        if (isset($eventArgs->getMetadata()->accessConrol)) {
-            $eventArgs->addSerialized('accessConrol');
-        }
-        if (isset($eventArgs->getMetadata()->permissions)) {
-            $eventArgs->addSerialized('permissions');
-        }
     }
 }

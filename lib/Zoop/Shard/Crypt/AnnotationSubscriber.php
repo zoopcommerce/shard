@@ -38,10 +38,13 @@ class AnnotationSubscriber implements EventSubscriber
     {
         $annotation = $eventArgs->getAnnotation();
 
-        $eventArgs->getMetadata()->crypt['hash'][$eventArgs->getReflection()->getName()] = [
+        $metadata = $eventArgs->getMetadata();
+        $cryptMetadata = $this->getCryptMetadata($metadata);
+        $cryptMetadata['hash'][$eventArgs->getReflection()->getName()] = [
             'service' => $annotation->service,
             'salt' => $annotation->salt
         ];
+        $metadata->setCrypt($cryptMetadata);
     }
 
     /**
@@ -52,10 +55,22 @@ class AnnotationSubscriber implements EventSubscriber
     {
         $annotation = $eventArgs->getAnnotation();
 
-        $eventArgs->getMetadata()->crypt['blockCipher'][$eventArgs->getReflection()->getName()] = array(
+        $metadata = $eventArgs->getMetadata();
+        $cryptMetadata = $this->getCryptMetadata($metadata);
+        $cryptMetadata['blockCipher'][$eventArgs->getReflection()->getName()] = [
             'service' => $annotation->service,
             'key' => $annotation->key,
             'salt' => $annotation->salt
-        );
+        ];
+        $metadata->setCrypt($cryptMetadata);
+    }
+
+    protected function getCryptMetadata($metadata)
+    {
+        if (!$metadata->hasProperty('crypt')) {
+            $metadata->addProperty('crypt', true);
+            $metadata->setCrypt([]);
+        }
+        return $metadata->getCrypt();
     }
 }

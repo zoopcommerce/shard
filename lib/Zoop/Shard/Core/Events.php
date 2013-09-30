@@ -45,10 +45,5 @@ final class Events
 
     const LOAD_METADATA = 'loadMetadata';
 
-    /**
-     * Triggered by classmetadata __sleep
-     */
-    const METADATA_SLEEP = 'metadataSleep';
-
     const BOOTSTRAPPED = 'bootstrapped';
 }

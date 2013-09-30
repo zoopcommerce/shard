@@ -36,7 +36,6 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     {
         $events = [
             CoreEvents::VALIDATE,
-            CoreEvents::METADATA_SLEEP,
         ];
 
         return $events;
@@ -57,13 +56,6 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             );
 
             $eventArgs->setReject(true);
-        }
-    }
-
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
-    {
-        if (isset($eventArgs->getMetadata()->validator)) {
-            $eventArgs->addSerialized('validator');
         }
     }
 

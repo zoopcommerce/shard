@@ -9,7 +9,6 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Core\ChangeSet;
-use Zoop\Mystique\Result;
 
 /**
  *
@@ -31,13 +30,13 @@ class DocumentValidator implements DocumentValidatorInterface, ServiceLocatorAwa
     {
         $result = new DocumentValidatorResult(['value' => true]);
 
-        if (! isset($metadata->validator)) {
+        if (! ($validatorMetadata = $metadata->getValidator())) {
             return $result;
         }
 
         // Field level validators
-        if (isset($metadata->validator['fields'])) {
-            foreach ($metadata->validator['fields'] as $field => $validatorDefinition) {
+        if (isset($validatorMetadata['fields'])) {
+            foreach ($validatorMetadata['fields'] as $field => $validatorDefinition) {
 
                 //if a change set is provided, only validate fields that have changed
                 if (isset($changeSet) && !$changeSet->hasField($field)) {
@@ -54,9 +53,9 @@ class DocumentValidator implements DocumentValidatorInterface, ServiceLocatorAwa
         }
 
         // Document level validators
-        if (isset($metadata->validator['document'])) {
+        if (isset($validatorMetadata['document'])) {
             $result->addClassResult(
-                $this->getValidator($metadata->validator['document'])->isValid($document)
+                $this->getValidator($validatorMetadata['document'])->isValid($document)
             );
         }
 

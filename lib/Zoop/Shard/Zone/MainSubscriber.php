@@ -30,7 +30,6 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     {
         return [
             CoreEvents::READ,
-            CoreEvents::METADATA_SLEEP,
         ];
     }
 
@@ -38,14 +37,13 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     {
         $metadata = $eventArgs->getMetadata();
 
-        if (!isset($metadata->zones)) {
+        if (! ($field = $metadata->getZones())) {
             return;
         }
 
         $extension = $this->serviceLocator->get('extension.zone');
         $include = $extension->getReadFilterInclude();
         $exclude = $extension->getReadFilterExclude();
-        $field = $metadata->zones;
         $criteria = [];
 
         if (count($include) > 0) {
@@ -61,12 +59,5 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         }
 
         $eventArgs->addCriteria($criteria);
-    }
-
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
-    {
-        if (isset($eventArgs->getMetadata()->zones)) {
-            $eventArgs->addSerialized('zones');
-        }
     }
 }

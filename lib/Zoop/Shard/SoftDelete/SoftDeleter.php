@@ -20,17 +20,18 @@ class SoftDeleter implements ServiceLocatorAwareInterface
 {
     use ServiceLocatorAwareTrait;
     use EventManagerTrait;
-    
+
     public function getSoftDeleteField(ClassMetadata $metadata)
     {
-        if (isset($metadata->softDelete) && isset($metadata->softDelete['flag'])) {
-            return $metadata->softDelete['flag'];
+        $softDeleteMetadata = $metadata->getSoftDelete();
+        if (isset($softDeleteMetadata) && isset($softDeleteMetadata['flag'])) {
+            return $softDeleteMetadata['flag'];
         }
     }
 
     public function isSoftDeleted($document, ClassMetadata $metadata)
     {
-        return $metadata->reflFields[$metadata->softDelete['flag']]->getValue($document);
+        return $metadata->getFieldValue($document, $metadata->getSoftDelete()['flag']);
     }
 
     public function softDelete($document, ClassMetadata $metadata)

@@ -47,7 +47,9 @@ class AnnotationSubscriber implements EventSubscriber
         $metadata = $eventArgs->getMetadata();
         $eventManager = $eventArgs->getEventManager();
 
-        $metadata->softDelete['flag'] = $field;
+        $softDeleteMetadata = $this->getSoftDeleteMetadata($metadata);
+        $softDeleteMetadata['flag'] = $field;
+        $metadata->setSoftDelete($softDeleteMetadata);
 
         //Add sythentic annotation to create extra permission that will allow
         //updates on the softDelete field when access control is enabled.
@@ -77,7 +79,10 @@ class AnnotationSubscriber implements EventSubscriber
      */
     public function annotationSoftDeleteDeletedBy(AnnotationEventArgs $eventArgs)
     {
-        $eventArgs->getMetadata()->softDelete['deletedBy'] = $eventArgs->getReflection()->getName();
+        $metadata = $eventArgs->getMetadata();
+        $softDeleteMetadata = $this->getSoftDeleteMetadata($metadata);
+        $softDeleteMetadata['deletedBy'] = $eventArgs->getReflection()->getName();
+        $metadata->setSoftDelete($softDeleteMetadata);
     }
 
     /**
@@ -86,7 +91,10 @@ class AnnotationSubscriber implements EventSubscriber
      */
     public function annotationSoftDeleteDeletedOn(AnnotationEventArgs $eventArgs)
     {
-        $eventArgs->getMetadata()->softDelete['deletedOn'] = $eventArgs->getReflection()->getName();
+        $metadata = $eventArgs->getMetadata();
+        $softDeleteMetadata = $this->getSoftDeleteMetadata($metadata);
+        $softDeleteMetadata['deletedOn'] = $eventArgs->getReflection()->getName();
+        $metadata->setSoftDelete($softDeleteMetadata);
     }
 
     /**
@@ -95,7 +103,10 @@ class AnnotationSubscriber implements EventSubscriber
      */
     public function annotationSoftDeleteRestoredBy(AnnotationEventArgs $eventArgs)
     {
-        $eventArgs->getMetadata()->softDelete['restoredBy'] = $eventArgs->getReflection()->getName();
+        $metadata = $eventArgs->getMetadata();
+        $softDeleteMetadata = $this->getSoftDeleteMetadata($metadata);
+        $softDeleteMetadata['restoredBy'] = $eventArgs->getReflection()->getName();
+        $metadata->setSoftDelete($softDeleteMetadata);
     }
 
     /**
@@ -104,6 +115,18 @@ class AnnotationSubscriber implements EventSubscriber
      */
     public function annotationSoftDeleteRestoredOn(AnnotationEventArgs $eventArgs)
     {
-        $eventArgs->getMetadata()->softDelete['restoredOn'] = $eventArgs->getReflection()->getName();
+        $metadata = $eventArgs->getMetadata();
+        $softDeleteMetadata = $this->getSoftDeleteMetadata($metadata);
+        $softDeleteMetadata['restoredOn'] = $eventArgs->getReflection()->getName();
+        $metadata->setSoftDelete($softDeleteMetadata);
+    }
+
+    protected function getSoftDeleteMetadata($metadata)
+    {
+        if (!$metadata->hasProperty('softDelete')) {
+            $metadata->addProperty('softDelete', true);
+            $metadata->setSoftDelete([]);
+        }
+        return $metadata->getSoftDelete();
     }
 }

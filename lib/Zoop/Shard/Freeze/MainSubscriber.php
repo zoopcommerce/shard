@@ -37,16 +37,16 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         return [
             CoreEvents::READ,
             CoreEvents::DELETE,
-            CoreEvents::UPDATE,
-            CoreEvents::METADATA_SLEEP,
+            CoreEvents::UPDATE
         ];
     }
 
     public function read(ReadEventArgs $eventArgs)
     {
         $metadata = $eventArgs->getMetadata();
+        $freezeMetadata = $metadata->getFreeze();
 
-        if (!isset($metadata->freeze['flag'])) {
+        if (!isset($freezeMetadata) || !$freezeMetadata['flag']) {
             return;
         }
 
@@ -55,9 +55,9 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         if ($readFilter == Extension::READ_ALL) {
             return;
         } else if ($readFilter == Extension::READ_ONLY_FROZEN) {
-            $criteria = [$metadata->freeze['flag'] => true];
+            $criteria = [$freezeMetadata['flag'] => true];
         } else if ($readFilter == Extension::READ_ONLY_NOT_FROZEN) {
-            $criteria = [$metadata->freeze['flag'] => false];
+            $criteria = [$freezeMetadata['flag'] => false];
         }
 
         $eventArgs->addCriteria($criteria);
@@ -78,10 +78,12 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             return;
         }
 
+        $freezeMetadata = $metadata->getFreeze();
+
         $changeSet = $eventArgs->getChangeSet();
         $count = 0;
         array_walk(
-            $metadata->freeze,
+            $freezeMetadata,
             function ($item) use ($changeSet, &$count) {
                 if ($changeSet->hasField($item)) {
                     ++$count;
@@ -130,12 +132,5 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         }
 
         return $this->freezer;
-    }
-
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
-    {
-        if (isset($eventArgs->getMetadata()->freeze)) {
-            $eventArgs->addSerialized('freeze');
-        }
     }
 }

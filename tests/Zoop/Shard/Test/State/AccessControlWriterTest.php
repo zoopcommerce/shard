@@ -41,7 +41,7 @@ class AccessControlWriterTest extends BaseTest
 
         $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
     }
-/*
+
     public function testCreateDeny()
     {
         $this->calls = array();
@@ -139,7 +139,7 @@ class AccessControlWriterTest extends BaseTest
         $this->assertEquals('review', $testDoc->getState());
         $this->assertTrue(isset($this->calls[Events::TRANSITION_DENIED]));
     }
-*/
+
     public function testReadAccess()
     {
         $documentManager = $this->documentManager;

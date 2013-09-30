@@ -23,7 +23,7 @@ class TransitionPermissionFactory implements PermissionFactoryInterface
             $options['roles'],
             $options['allow'],
             $options['deny'],
-            array_keys($metadata->state)[0]
+            array_keys($metadata->getState())[0]
         );
     }
 }

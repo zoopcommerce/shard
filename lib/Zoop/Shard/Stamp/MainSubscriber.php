@@ -33,7 +33,6 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         return [
             CoreEvents::CREATE,
             CoreEvents::UPDATE,
-            CoreEvents::METADATA_SLEEP,
         ];
     }
 
@@ -45,22 +44,23 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     {
         $document = $eventArgs->getDocument();
         $metadata = $eventArgs->getMetadata();
+        $stampMetadata = $metadata->getStamp();
 
-        if (isset($metadata->stamp['createdBy'])) {
-            $metadata->setFieldValue($document, $metadata->stamp['createdBy'], $this->getUsername());
-            $eventArgs->addRecompute($metadata->stamp['createdBy']);
+        if (isset($stampMetadata['createdBy'])) {
+            $metadata->setFieldValue($document, $stampMetadata['createdBy'], $this->getUsername());
+            $eventArgs->addRecompute($stampMetadata['createdBy']);
         }
-        if (isset($metadata->stamp['createdOn'])) {
-            $metadata->setFieldValue($document, $metadata->stamp['createdOn'], time());
-            $eventArgs->addRecompute($metadata->stamp['createdOn']);
+        if (isset($stampMetadata['createdOn'])) {
+            $metadata->setFieldValue($document, $stampMetadata['createdOn'], time());
+            $eventArgs->addRecompute($stampMetadata['createdOn']);
         }
-        if (isset($metadata->stamp['updatedBy'])) {
-            $metadata->setFieldValue($document, $metadata->stamp['updatedBy'], $this->getUsername());
-            $eventArgs->addRecompute($metadata->stamp['updatedBy']);
+        if (isset($stampMetadata['updatedBy'])) {
+            $metadata->setFieldValue($document, $stampMetadata['updatedBy'], $this->getUsername());
+            $eventArgs->addRecompute($stampMetadata['updatedBy']);
         }
-        if (isset($metadata->stamp['updatedOn'])) {
-            $metadata->setFieldValue($document, $metadata->stamp['updatedOn'], time());
-            $eventArgs->addRecompute($metadata->stamp['updatedOn']);
+        if (isset($stampMetadata['updatedOn'])) {
+            $metadata->setFieldValue($document, $stampMetadata['updatedOn'], time());
+            $eventArgs->addRecompute($stampMetadata['updatedOn']);
         }
     }
 
@@ -72,21 +72,15 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     {
         $document = $eventArgs->getDocument();
         $metadata = $eventArgs->getMetadata();
-
-        if (isset($metadata->stamp['updatedBy'])) {
-            $metadata->setFieldValue($document, $metadata->stamp['updatedBy'], $this->getUsername());
-            $eventArgs->addRecompute($metadata->stamp['updatedBy']);
+        $stampMetadata = $metadata->getStamp();
+        
+        if (isset($stampMetadata['updatedBy'])) {
+            $metadata->setFieldValue($document, $stampMetadata['updatedBy'], $this->getUsername());
+            $eventArgs->addRecompute($stampMetadata['updatedBy']);
         }
-        if (isset($metadata->stamp['updatedOn'])) {
-            $metadata->setFieldValue($document, $metadata->stamp['updatedOn'], time());
-            $eventArgs->addRecompute($metadata->stamp['updatedOn']);
-        }
-    }
-
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
-    {
-        if (isset($eventArgs->getMetadata()->stamp)) {
-            $eventArgs->addSerialized('stamp');
+        if (isset($stampMetadata['updatedOn'])) {
+            $metadata->setFieldValue($document, $stampMetadata['updatedOn'], time());
+            $eventArgs->addRecompute($stampMetadata['updatedOn']);
         }
     }
 

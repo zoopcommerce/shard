@@ -23,14 +23,15 @@ class Freezer implements ServiceLocatorAwareInterface
 
     public function getFreezeField(ClassMetadata $metadata)
     {
-        if (isset($metadata->freeze) && isset($metadata->freeze['flag'])) {
-            return $metadata->freeze['flag'];
+        $freezeMetadata = $metadata->getFreeze();
+        if (isset($freezeMetadata) && isset($freezeMetadata['flag'])) {
+            return $freezeMetadata['flag'];
         }
     }
 
     public function isFrozen($document, ClassMetadata $metadata)
     {
-        return $metadata->getFieldValue($document, $metadata->freeze['flag']);
+        return $metadata->getFieldValue($document, $metadata->getFreeze()['flag']);
     }
 
     public function freeze($document, ClassMetadata $metadata)

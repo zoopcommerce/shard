@@ -39,12 +39,13 @@ class StampSubscriber implements ServiceLocatorAwareInterface
     {
         $document = $eventArgs->getDocument();
         $metadata = $eventArgs->getMetadata();
+        $softDeleteMetadata = $metadata->getSoftDelete();
 
-        if (isset($metadata->softDelete['deletedBy'])) {
-            $metadata->setFieldValue($document, $metadata->softDelete['deletedBy'], $this->getUsername());
+        if (isset($softDeleteMetadata['deletedBy'])) {
+            $metadata->setFieldValue($document, $softDeleteMetadata['deletedBy'], $this->getUsername());
         }
-        if (isset($metadata->softDelete['deletedOn'])) {
-            $metadata->setFieldValue($document, $metadata->softDelete['deletedOn'], time());
+        if (isset($softDeleteMetadata['deletedOn'])) {
+            $metadata->setFieldValue($document, $softDeleteMetadata['deletedOn'], time());
         }
     }
 
@@ -56,12 +57,13 @@ class StampSubscriber implements ServiceLocatorAwareInterface
     {
         $document = $eventArgs->getDocument();
         $metadata = $eventArgs->getMetadata();
+        $softDeleteMetadata = $metadata->getSoftDelete();
 
-        if (isset($metadata->softDelete['restoredBy'])) {
-            $metadata->setFieldValue($document, $metadata->softDelete['restoredBy'], $this->getUsername());
+        if (isset($softDeleteMetadata['restoredBy'])) {
+            $metadata->setFieldValue($document, $softDeleteMetadata['restoredBy'], $this->getUsername());
         }
-        if (isset($metadata->softDelete['restoredOn'])) {
-            $metadata->setFieldValue($document, $metadata->softDelete['restoredOn'], time());
+        if (isset($softDeleteMetadata['restoredOn'])) {
+            $metadata->setFieldValue($document, $softDeleteMetadata['restoredOn'], time());
         }
     }
 

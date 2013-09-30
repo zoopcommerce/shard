@@ -36,8 +36,7 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     public function getSubscribedEvents()
     {
         return [
-            CoreEvents::CRYPT,
-            CoreEvents::METADATA_SLEEP,
+            CoreEvents::CRYPT
         ];
     }
 
@@ -68,15 +67,16 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     protected function hashFields(AbstractChangeEventArgs $eventArgs)
     {
         $metadata = $eventArgs->getMetadata();
+        $cryptMetadata = $metadata->getCrypt();
 
-        if (! isset($metadata->crypt['hash'])) {
+        if (! isset($cryptMetadata) || ! isset($cryptMetadata['hash'])) {
             return;
         }
 
         $document = $eventArgs->getDocument();
         $changeSet = $eventArgs->getChangeSet();
 
-        foreach ($metadata->crypt['hash'] as $field => $setting) {
+        foreach ($cryptMetadata['hash'] as $field => $setting) {
             if ($this->hasChanged($field, $changeSet)) {
                 $service = $this->serviceLocator->get($setting['service']);
                 if (! $service instanceof HashServiceInterface) {
@@ -91,15 +91,16 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     protected function blockCipherFields(AbstractChangeEventArgs $eventArgs)
     {
         $metadata = $eventArgs->getMetadata();
+        $cryptMetadata = $metadata->getCrypt();
 
-        if (! isset($metadata->crypt['blockCipher'])) {
+        if (! isset($cryptMetadata) || ! isset($cryptMetadata['blockCipher'])) {
             return;
         }
 
         $document = $eventArgs->getDocument();
         $changeSet = $eventArgs->getChangeSet();
 
-        foreach ($metadata->crypt['blockCipher'] as $field => $setting) {
+        foreach ($cryptMetadata['blockCipher'] as $field => $setting) {
             if ($this->hasChanged($field, $changeSet)) {
                 $service = $this->serviceLocator->get($setting['service']);
                 if (! $service instanceof BlockCipherServiceInterface) {
@@ -125,12 +126,5 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         }
 
         return true;
-    }
-
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
-    {
-        if (isset($eventArgs->getMetadata()->crypt)) {
-            $eventArgs->addSerialized('crypt');
-        }
     }
 }

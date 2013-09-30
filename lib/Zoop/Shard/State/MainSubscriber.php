@@ -14,7 +14,6 @@ use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Core\UpdateEventArgs;
 use Zoop\Shard\Core\CreateEventArgs;
 use Zoop\Shard\Core\ReadEventArgs;
-use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  * Emits soft delete events
@@ -36,7 +35,6 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
             CoreEvents::READ,
             CoreEvents::CREATE,
             CoreEvents::UPDATE,
-            CoreEvents::METADATA_SLEEP,
         ];
     }
 
@@ -44,14 +42,14 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     {
         $metadata = $eventArgs->getMetadata();
 
-        if (!isset($metadata->state)) {
+        if (! ($stateMetadata = $metadata->getState())) {
             return;
         }
 
         $extension = $this->serviceLocator->get('extension.state');
         $include = $extension->getReadFilterInclude();
         $exclude = $extension->getReadFilterExclude();
-        $field = array_keys($metadata->state)[0];
+        $field = array_keys($stateMetadata)[0];
         $criteria = [];
 
         if (count($include) > 0) {
@@ -76,19 +74,19 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         }
 
         $metadata = $eventArgs->getMetadata();
-        if (! isset($metadata->state)) {
+        if (! ($stateMetadata = $metadata->getState())) {
             return;
         }
 
         $document = $eventArgs->getDocument();
         $eventManager = $eventArgs->getEventManager();
         $changeSet = $eventArgs->getChangeSet();
-        $field = array_keys($metadata->state)[0];
+        $field = array_keys($stateMetadata)[0];
 
         list($fromState, $toState) = $changeSet->getField($field);
 
         //stop state change if the new state is not on the defined state list
-        if (count($metadata->state[$field]) > 0 && ! in_array($toState, $metadata->state[$field])) {
+        if (count($stateMetadata[$field]) > 0 && ! in_array($toState, $stateMetadata[$field])) {
             $metadata->setFieldValue($document, $field, $fromState);
             $eventArgs->setReject(true);
             $eventManager->dispatchEvent(Events::BAD_STATE, $eventArgs);
@@ -128,28 +126,21 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         }
 
         $metadata = $eventArgs->getMetadata();
-        if (! isset($metadata->state)) {
+        if (! ($stateMetadata = $metadata->getState())) {
             return;
         }
 
-        $field = array_keys($metadata->state)[0];
+        $field = array_keys($stateMetadata)[0];
         $document = $eventArgs->getDocument();
 
-        if (count($metadata->state[$field]) > 0 &&
-            ! in_array($metadata->getFieldValue($document, $field), $metadata->state[$field])
+        if (count($stateMetadata[$field]) > 0 &&
+            ! in_array($metadata->getFieldValue($document, $field), $stateMetadata[$field])
         ) {
             $eventArgs->setReject(true);
             $eventArgs->getEventManager()->dispatchEvent(
                 Events::BAD_STATE,
                 $eventArgs
             );
-        }
-    }
-
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
-    {
-        if (isset($eventArgs->getMetadata()->state)) {
-            $eventArgs->addSerialized('state');
         }
     }
 }

@@ -47,7 +47,9 @@ class AnnotationSubscriber implements EventSubscriber
         $metadata = $eventArgs->getMetadata();
         $eventManager = $eventArgs->getEventManager();
 
-        $metadata->freeze['flag'] = $field;
+        $freezeMetadata = $this->getFreezeMetadata($metadata);
+        $freezeMetadata['flag'] = $field;
+        $metadata->setFreeze($freezeMetadata);
 
         //Add sythentic annotation to create extra permission that will allow
         //updates on the freeze field when access control is enabled.
@@ -77,7 +79,10 @@ class AnnotationSubscriber implements EventSubscriber
      */
     public function annotationFreezeFrozenBy(AnnotationEventArgs $eventArgs)
     {
-        $eventArgs->getMetadata()->freeze['frozenBy'] = $eventArgs->getReflection()->getName();
+        $metadata = $eventArgs->getMetadata();
+        $freezeMetadata = $this->getFreezeMetadata($metadata);
+        $freezeMetadata['frozenBy'] = $eventArgs->getReflection()->getName();
+        $metadata->setFreeze($freezeMetadata);
     }
 
     /**
@@ -86,7 +91,10 @@ class AnnotationSubscriber implements EventSubscriber
      */
     public function annotationFreezeFrozenOn(AnnotationEventArgs $eventArgs)
     {
-        $eventArgs->getMetadata()->freeze['frozenOn'] = $eventArgs->getReflection()->getName();
+        $metadata = $eventArgs->getMetadata();
+        $freezeMetadata = $this->getFreezeMetadata($metadata);
+        $freezeMetadata['frozenOn'] = $eventArgs->getReflection()->getName();
+        $metadata->setFreeze($freezeMetadata);
     }
 
     /**
@@ -95,7 +103,10 @@ class AnnotationSubscriber implements EventSubscriber
      */
     public function annotationFreezeThawedBy(AnnotationEventArgs $eventArgs)
     {
-        $eventArgs->getMetadata()->freeze['thawedBy'] = $eventArgs->getReflection()->getName();
+        $metadata = $eventArgs->getMetadata();
+        $freezeMetadata = $this->getFreezeMetadata($metadata);
+        $freezeMetadata['thawedBy'] = $eventArgs->getReflection()->getName();
+        $metadata->setFreeze($freezeMetadata);
     }
 
     /**
@@ -104,6 +115,18 @@ class AnnotationSubscriber implements EventSubscriber
      */
     public function annotationFreezeThawedOn(AnnotationEventArgs $eventArgs)
     {
-        $eventArgs->getMetadata()->freeze['thawedOn'] = $eventArgs->getReflection()->getName();
+        $metadata = $eventArgs->getMetadata();
+        $freezeMetadata = $this->getFreezeMetadata($metadata);
+        $freezeMetadata['thawedOn'] = $eventArgs->getReflection()->getName();
+        $metadata->setFreeze($freezeMetadata);
+    }
+
+    protected function getFreezeMetadata($metadata)
+    {
+        if (!$metadata->hasProperty('freeze')) {
+            $metadata->addProperty('freeze', true);
+            $metadata->setFreeze([]);
+        }
+        return $metadata->getFreeze();
     }
 }

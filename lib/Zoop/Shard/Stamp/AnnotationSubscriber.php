@@ -40,7 +40,9 @@ class AnnotationSubscriber implements EventSubscriber
         $metadata = $eventArgs->getMetadata();
         $eventManager = $eventArgs->getEventManager();
 
-        $metadata->stamp['createdBy'] = $field;
+        $stampMetadata = $this->getStampMetadata($metadata);
+        $stampMetadata['createdBy'] = $field;
+        $metadata->setStamp($stampMetadata);
 
         //Add sythentic annotation to create extra permission that will prevent
         //updates on the createdby field when access control is enabled.
@@ -70,7 +72,9 @@ class AnnotationSubscriber implements EventSubscriber
         $metadata = $eventArgs->getMetadata();
         $eventManager = $eventArgs->getEventManager();
 
-        $metadata->stamp['createdOn'] = $field;
+        $stampMetadata = $this->getStampMetadata($metadata);
+        $stampMetadata['createdOn'] = $field;
+        $metadata->setStamp($stampMetadata);
 
         //Add sythentic annotation to create extra permission that will prevent
         //updates on the createdby field when access control is enabled.
@@ -97,18 +101,25 @@ class AnnotationSubscriber implements EventSubscriber
     public function annotationStampUpdatedBy(AnnotationEventArgs $eventArgs)
     {
         $metadata = $eventArgs->getMetadata();
-        if (! isset($metadata->stamp)) {
-            $metadata->stamp = [];
-        }
-        $metadata->stamp['updatedBy'] = $eventArgs->getReflection()->getName();
+        $stampMetadata = $this->getStampMetadata($metadata);
+        $stampMetadata['updatedBy'] = $eventArgs->getReflection()->getName();
+        $metadata->setStamp($stampMetadata);
     }
 
     public function annotationStampUpdatedOn(AnnotationEventArgs $eventArgs)
     {
         $metadata = $eventArgs->getMetadata();
-        if (! isset($metadata->stamp)) {
-            $metadata->stamp = [];
+        $stampMetadata = $this->getStampMetadata($metadata);
+        $stampMetadata['updatedOn'] = $eventArgs->getReflection()->getName();
+        $metadata->setStamp($stampMetadata);
+    }
+
+    protected function getStampMetadata($metadata)
+    {
+        if (!$metadata->hasProperty('stamp')) {
+            $metadata->addProperty('stamp', true);
+            $metadata->setStamp([]);
         }
-        $metadata->stamp['updatedOn'] = $eventArgs->getReflection()->getName();
+        return $metadata->getStamp();
     }
 }

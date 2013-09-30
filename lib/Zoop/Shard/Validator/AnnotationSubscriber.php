@@ -67,6 +67,7 @@ class AnnotationSubscriber implements EventSubscriber
         $reflection = $eventArgs->getReflection();
         $metadata = $eventArgs->getMetadata();
         $validators = [];
+
         foreach ($annotation->value as $validatorAnnotation) {
             $validatorEventArgs = new AnnotationEventArgs(
                 $metadata,
@@ -79,10 +80,11 @@ class AnnotationSubscriber implements EventSubscriber
                 $validatorAnnotation::EVENT,
                 $validatorEventArgs
             );
-            if ($type == EventType::DOCUMENT && isset($metadata->validator['document'])) {
-                $validators[] = $metadata->validator['document'];
-            } elseif (isset($metadata->validator['fields'][$reflection->getName()])) {
-                 $validators[] = $metadata->validator['fields'][$reflection->getName()];
+            $validatorMetadata = $this->getValidatorMetadata($metadata);
+            if ($type == EventType::DOCUMENT && isset($validatorMetadata['document'])) {
+                $validators[] = $validatorMetadata['document'];
+            } elseif (isset($validatorMetadata['fields'][$reflection->getName()])) {
+                 $validators[] = $validatorMetadata['fields'][$reflection->getName()];
             }
         }
 
@@ -309,20 +311,35 @@ class AnnotationSubscriber implements EventSubscriber
 
     protected function setFieldValidator($eventArgs, $definition)
     {
+        $metadata = $eventArgs->getMetadata();
+        $validatorMetadata = $this->getValidatorMetadata($metadata);
         if ($eventArgs->getAnnotation()->value && isset($definition)) {
-            $eventArgs->getMetadata()->validator['fields'][$eventArgs->getReflection()->getName()] = $definition;
+            $validatorMetadata['fields'][$eventArgs->getReflection()->getName()] = $definition;
         } else {
-            unset($eventArgs->getMetadata()->validator['fields'][$eventArgs->getReflection()->getName()]);
+            unset($validatorMetadata['fields'][$eventArgs->getReflection()->getName()]);
         }
+        $metadata->setValidator($validatorMetadata);
     }
 
     protected function setDocumentValidator($eventArgs, $definition)
     {
+        $metadata = $eventArgs->getMetadata();
+        $validatorMetadata = $this->getValidatorMetadata($metadata);
         if ($eventArgs->getAnnotation()->value && isset($definition)) {
-            $eventArgs->getMetadata()->validator['document'] = $definition;
+            $validatorMetadata['document'] = $definition;
         } else {
-            unset($eventArgs->getMetadata()->validator['document']);
+            unset($validatorMetadata['document']);
         }
+        $metadata->setValidator($validatorMetadata);
+    }
+
+    protected function getValidatorMetadata($metadata)
+    {
+        if (!$metadata->hasProperty('validator')) {
+            $metadata->addProperty('validator', true);
+            $metadata->setValidator([]);
+        }
+        return $metadata->getValidator();
     }
 
     /**

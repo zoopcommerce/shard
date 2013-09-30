@@ -31,6 +31,7 @@ class AnnotationSubscriber implements EventSubscriber
     public function annotationOwner(AnnotationEventArgs $eventArgs)
     {
         $metadata = $eventArgs->getMetadata();
-        $metadata->owner = $eventArgs->getReflection()->getName();
+        $metadata->addProperty('owner', true);
+        $metadata->setOwner($eventArgs->getReflection()->getName());
     }
 }
