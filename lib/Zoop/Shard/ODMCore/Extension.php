@@ -18,13 +18,19 @@ class Extension extends AbstractExtension
 {
 
     protected $subscribers = [
-        'subscriber.odmcore.mainsubscriber'
+        'subscriber.odmcore.boostrappedsubscriber',
+        'subscriber.odmcore.flushsubscriber',
+        'subscriber.odmcore.loadmetadatasubscriber'
     ];
 
     protected $serviceManagerConfig = [
         'invokables' => [
-            'subscriber.odmcore.mainsubscriber' =>
-                'Zoop\Shard\ODMCore\MainSubscriber'
+            'subscriber.odmcore.boostrappedsubscriber' =>
+                'Zoop\Shard\ODMCore\BootstrappedSubscriber',
+            'subscriber.odmcore.flushsubscriber' =>
+                'Zoop\Shard\ODMCore\FlushSubscriber',
+            'subscriber.odmcore.loadmetadatasubscriber' =>
+                'Zoop\Shard\ODMCore\LoadMetadataSubscriber'
         ],
         'factories' => [
             'modelmanager' => 'Zoop\Shard\ODMCore\DevDocumentManagerFactory'
