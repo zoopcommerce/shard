@@ -30,8 +30,11 @@ class ModelManager extends DocumentManager implements CoreModelManager
      * @param  \Doctrine\Common\EventManager|null $eventManager
      * @return DocumentManager
      */
-    public static function create(Connection $conn = null, Configuration $config = null, EventManager $eventManager = null)
-    {
+    public static function create(
+        Connection $conn = null,
+        Configuration $config = null,
+        EventManager $eventManager = null
+    ) {
         return new ModelManager($conn, $config, $eventManager);
     }
 }

@@ -58,7 +58,10 @@ class Filter extends BsonFilter
         $eventArgs = new ReadEventArgs($metadata, $this->eventManager);
         $this->eventManager->dispatchEvent(CoreEvents::READ, $eventArgs);
 
-        return call_user_func_array([$this->getCriteriaMerger(), 'merge'], $this->replaceRegex($eventArgs->getCriteria()));
+        return call_user_func_array(
+            [$this->getCriteriaMerger(), 'merge'],
+            $this->replaceRegex($eventArgs->getCriteria())
+        );
     }
 
     protected function replaceRegex(array $array)

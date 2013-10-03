@@ -33,7 +33,10 @@ class ModelManagerDelegatorFactory implements DelegatorFactoryInterface
             return $this->modelManager;
         } else {
             $this->modelManager = call_user_func($callback);
-            $this->modelManager->getEventManager()->dispatchEvent(Events::BOOTSTRAPPED, new BootstrappedEventArgs($this->modelManager, $this->modelManager->getEventManager()));
+            $this->modelManager->getEventManager()->dispatchEvent(
+                Events::BOOTSTRAPPED,
+                new BootstrappedEventArgs($this->modelManager, $this->modelManager->getEventManager())
+            );
         }
 
         return $this->modelManager;

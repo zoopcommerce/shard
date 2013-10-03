@@ -37,8 +37,13 @@ class TransitionEventArgs extends AbstractEventArgs implements RejectInterface
         return $this->changeSet;
     }
 
-    public function __construct($document, ClassMetadata $metadata, Transition $transition, ChangeSet $changeSet, EventManager $eventManager)
-    {
+    public function __construct(
+        $document,
+        ClassMetadata $metadata,
+        Transition $transition,
+        ChangeSet $changeSet,
+        EventManager $eventManager
+    ) {
         $this->document = $document;
         $this->metadata = $metadata;
         $this->transition = $transition;
