@@ -37,7 +37,6 @@
         include 'extensions/freeze.php';
         include 'extensions/generator.php';
         include 'extensions/owner.php';
-        include 'extensions/rest.php';
         include 'extensions/serializer.php';
         include 'extensions/soft-delete.php';
         include 'extensions/stamp.php';
