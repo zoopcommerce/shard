@@ -102,11 +102,11 @@
     <h2>Create a Manifest</h2>
     <p>The first thing to do is create a Manifest. The Manifest constructor takes a configuration array. Configuration keys are:</p>
 
-    <h3>documents</h3>
+    <h3>models</h3>
     <p>Specifies any document namespaces you want the DocumentManager to use</p>
 
 <pre class="prettyprint linenums">
-'documents' => [
+'models' => [
     'My\Document\Namespace' => 'my/document/directory/'
 ]
 </pre>
@@ -119,8 +119,7 @@
 <pre class="prettyprint linenums">
 'extension_configs' => [
     'extension.odmcore',
-    'extension.accessControl' => true,
-    'extension.rest' => ['endpointMap' => [...]]
+    'extension.accesscontrol' => true,
 ]
 </pre>
 
@@ -139,11 +138,11 @@
     <p>You can create a Manifest like this:</p>
 <pre class="prettyprint linenums">
 $manifest = new Zoop\Shard\Manifest([
-    'documents' => [
+    'models' => [
         'My\Document\Namespace' => 'my/document/directory/' //Specify the location of any documents you want to use.
     ],
     'extension_configs' => [
-        'extension.accessControl' => true //List any extensions you want to enable
+        'extension.accesscontrol' => true //List any extensions you want to enable
     ],
 ]);
 </pre>
@@ -153,9 +152,7 @@ $manifest = new Zoop\Shard\Manifest([
     <p>Once created, the manifest can be used to retrieve all the resources used by all the extensions for the configuration of a DocumentManager. Eg:</p>
 
 <pre class="prettyprint linenums">
-$manifest->getDocuments(); //Array of all the document namespaces required
-
-$manifest->getFilters(); //Array of all the filters required
+$manifest->getModels(); //Array of all the document namespaces required
 
 $manifest->getSubscribers(); //Array of all the event subscribers required
 </pre>
@@ -164,12 +161,12 @@ $manifest->getSubscribers(); //Array of all the event subscribers required
 
     <p>By default, Shard configures a document manager for development use. It has default useful whilst creating your app, but is not tuned for production performance.</p>
 
-    <p>To configure your own document manager to your taste, override the <code>objectmanager</code> service with your own factory.</p>
+    <p>To configure your own document manager to your taste, override the <code>modelmanager</code> service with your own factory.</p>
 
 <pre class="prettyprint linenums">
 'service_manager_config' => [
     'factories' => [
-        'objectmanager' => 'My\DocumentManager\Factory'
+        'modelmanager' => 'My\DocumentManager\Factory'
     ]
 ]
 </pre>
@@ -182,7 +179,7 @@ $manifest->getSubscribers(); //Array of all the event subscribers required
 
 <pre class="prettyprint linenums">
 $manifest = new Manifest([...]);
-$documentManager = $manifest->getServiceManager()->get('objectmanager');
+$documentManager = $manifest->getModelManager();
 </pre>
 
     <p>Then just use the DocumentManager, and the extensions will do all their work for you.</p>
