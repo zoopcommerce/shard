@@ -42,9 +42,10 @@ class AnnotationSubscriber implements EventSubscriber
     public function annotationSerializerEager(AnnotationEventArgs $eventArgs)
     {
         $metadata = $eventArgs->getMetadata();
-        $this->createMetadata($metadata);
-        $metadata->serializer['fields'][$eventArgs->getReflection()->getName()]['referenceSerializer'] =
+        $serializeMetadata = $this->getSerializerMetadata($metadata);
+        $serializeMetadata['fields'][$eventArgs->getReflection()->getName()]['referenceSerializer'] =
             'serializer.reference.eager';
+        $metadata->setSerializer($serializeMetadata);
     }
 
     /**
@@ -55,9 +56,11 @@ class AnnotationSubscriber implements EventSubscriber
     {
         $metadata = $eventArgs->getMetadata();
         $annotation = $eventArgs->getAnnotation();
-        $this->createMetadata($metadata);
-        $metadata->serializer['fields'][$eventArgs->getReflection()->getName()]['serializeIgnore'] =
+        $serializeMetadata = $this->getSerializerMetadata($metadata);
+        $serializeMetadata['fields'][$eventArgs->getReflection()->getName()]['serializeIgnore'] =
             $annotation->value;
+
+        $metadata->setSerializer($serializeMetadata);
     }
 
     /**
@@ -68,9 +71,11 @@ class AnnotationSubscriber implements EventSubscriber
     {
         $metadata = $eventArgs->getMetadata();
         $annotation = $eventArgs->getAnnotation();
-        $this->createMetadata($metadata);
-        $metadata->serializer['fields'][$eventArgs->getReflection()->getName()]['unserializeIgnore'] =
+        $serializeMetadata = $this->getSerializerMetadata($metadata);
+        $serializeMetadata['fields'][$eventArgs->getReflection()->getName()]['unserializeIgnore'] =
             $annotation->value;
+
+        $metadata->setSerializer($serializeMetadata);
     }
 
     /**
@@ -80,9 +85,11 @@ class AnnotationSubscriber implements EventSubscriber
     public function annotationSerializerRefLazy(AnnotationEventArgs $eventArgs)
     {
         $metadata = $eventArgs->getMetadata();
-        $this->createMetadata($metadata);
-        $metadata->serializer['fields'][$eventArgs->getReflection()->getName()]['referenceSerializer'] =
+        $serializeMetadata = $this->getSerializerMetadata($metadata);
+        $serializeMetadata['fields'][$eventArgs->getReflection()->getName()]['referenceSerializer'] =
             'serializer.reference.refLazy';
+
+        $metadata->setSerializer($serializeMetadata);
     }
 
     /**
@@ -93,9 +100,11 @@ class AnnotationSubscriber implements EventSubscriber
     {
         $metadata = $eventArgs->getMetadata();
         $annotation = $eventArgs->getAnnotation();
-        $this->createMetadata($metadata);
-        $metadata->serializer['fields'][$eventArgs->getReflection()->getName()]['referenceSerializer'] =
+        $serializeMetadata = $this->getSerializerMetadata($metadata);
+        $serializeMetadata['fields'][$eventArgs->getReflection()->getName()]['referenceSerializer'] =
             $annotation->value;
+
+        $metadata->setSerializer($serializeMetadata);
     }
 
     /**
@@ -105,17 +114,20 @@ class AnnotationSubscriber implements EventSubscriber
     public function annotationSerializerSimpleLazy(AnnotationEventArgs $eventArgs)
     {
         $metadata = $eventArgs->getMetadata();
-        $this->createMetadata($metadata);
-        $metadata->serializer['fields'][$eventArgs->getReflection()->getName()]['referenceSerializer'] =
+        $serializeMetadata = $this->getSerializerMetadata($metadata);
+        $serializeMetadata['fields'][$eventArgs->getReflection()->getName()]['referenceSerializer'] =
             'serializer.reference.simpleLazy';
+
+        $metadata->setSerializer($serializeMetadata);
     }
 
-    protected function createMetadata($metadata)
+    protected function getSerializerMetadata($metadata)
     {
-        if (! isset($metadata->serializer)) {
-            $metadata->serializer = [
-                'fields'   => []
-            ];
+        if (!$metadata->hasProperty('serializer')) {
+            $metadata->addProperty('serializer', true);
+            $metadata->setSerializer(['fields' => []]);
         }
+
+        return $metadata->getSerializer();
     }
 }

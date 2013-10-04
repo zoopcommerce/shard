@@ -30,8 +30,9 @@ class BasicHashService implements HashServiceInterface, ServiceLocatorAwareInter
 
     public function hashField($field, $document, $metadata)
     {
-        if (isset($metadata->crypt['hash'][$field]['salt'])) {
-            $saltInterface = $this->serviceLocator->get($metadata->crypt['hash'][$field]['salt']);
+        $cryptMetadata = $metadata->getCrypt();
+        if (isset($cryptMetadata['hash'][$field]['salt'])) {
+            $saltInterface = $this->serviceLocator->get($cryptMetadata['hash'][$field]['salt']);
         } else {
             $saltInterface = $document;
         }
@@ -39,10 +40,11 @@ class BasicHashService implements HashServiceInterface, ServiceLocatorAwareInter
             $salt = $saltInterface->getSalt();
         }
 
-        $metadata->reflFields[$field]->setValue(
+        $metadata->setFieldValue(
             $document,
+            $field,
             $this->hashValue(
-                $metadata->reflFields[$field]->getValue($document),
+                $metadata->getFieldValue($document, $field),
                 $salt
             )
         );

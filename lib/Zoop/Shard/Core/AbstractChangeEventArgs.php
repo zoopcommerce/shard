@@ -42,8 +42,12 @@ abstract class AbstractChangeEventArgs extends AbstractEventArgs implements Reje
         $this->recompute[] = $field;
     }
 
-    public function __construct($document, ClassMetadata $metadata, array $changeSet, BaseEventManager $eventManager)
-    {
+    public function __construct(
+        $document,
+        ClassMetadata $metadata,
+        ChangeSet $changeSet,
+        BaseEventManager $eventManager
+    ) {
         $this->document = $document;
         $this->metadata = $metadata;
         $this->changeSet = $changeSet;

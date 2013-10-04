@@ -15,7 +15,7 @@ namespace Zoop\Shard\Validator;
 final class Events
 {
     /**
-     * Fires if an invalid document is created or updated
+     * Fires if an invalid model is created or updated
      */
-    const INVALID_OBJECT = 'invalidObject';
+    const INVALID_MODEL = 'invalidModel';
 }

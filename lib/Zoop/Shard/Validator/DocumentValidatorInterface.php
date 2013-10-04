@@ -6,6 +6,7 @@
 namespace Zoop\Shard\Validator;
 
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Zoop\Shard\Core\ChangeSet;
 
 /**
  *
@@ -27,5 +28,5 @@ interface DocumentValidatorInterface
      * @return Zoop\Validator\ValidatorResult
      * @throws Exception\RuntimeException     If validation of $value is impossible
      */
-    public function isValid($document, ClassMetadata $metadata, array $changeSet = null);
+    public function isValid($document, ClassMetadata $metadata, ChangeSet $changeSet = null);
 }

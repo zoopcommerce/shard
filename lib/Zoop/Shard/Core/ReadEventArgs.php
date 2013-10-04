@@ -6,8 +6,8 @@
  */
 namespace Zoop\Shard\Core;
 
-use Doctrine\Common\EventManager;
 use Doctrine\Common\EventArgs as BaseEventArgs;
+use Doctrine\Common\EventManager as BaseEventManager;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 
 /**
@@ -15,13 +15,13 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class MetadataSleepEventArgs extends BaseEventArgs
+class ReadEventArgs extends BaseEventArgs
 {
     protected $metadata;
 
     protected $eventManager;
 
-    protected $serialized;
+    protected $criteria = [];
 
     public function getMetadata()
     {
@@ -33,25 +33,19 @@ class MetadataSleepEventArgs extends BaseEventArgs
         return $this->eventManager;
     }
 
-    public function getSerialized()
+    public function getCriteria()
     {
-        return $this->serialized;
+        return $this->criteria;
     }
 
-    public function setSerialized($serialized)
+    public function addCriteria($criteria)
     {
-        $this->serialized = $serialized;
+        $this->criteria[] = $criteria;
     }
 
-    public function addSerialized($name)
-    {
-        $this->serialized[] = $name;
-    }
-
-    public function __construct(ClassMetadata $metadata, array $serialized, EventManager $eventManager)
+    public function __construct(ClassMetadata $metadata, BaseEventManager $eventManager)
     {
         $this->metadata = $metadata;
-        $this->serialized = $serialized;
         $this->eventManager = $eventManager;
     }
 }

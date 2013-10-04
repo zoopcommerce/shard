@@ -35,6 +35,8 @@ class AnnotationSubscriber implements EventSubscriber
      */
     public function annotationZones(AnnotationEventArgs $eventArgs)
     {
-        $eventArgs->getMetadata()->zones = $eventArgs->getReflection()->getName();
+        $metadata = $eventArgs->getMetadata();
+        $metadata->addProperty('zones', true);
+        $metadata->setZones($eventArgs->getReflection()->getName());
     }
 }

@@ -18,7 +18,6 @@ class Extension extends AbstractExtension
 {
     protected $subscribers = [
         'subscriber.serializer.annotation',
-        'subscriber.serializer.mainsubscriber'
     ];
 
     protected $serviceManagerConfig = [

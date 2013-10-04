@@ -75,12 +75,15 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber
             $config['options']['deny'] = [];
         }
 
-        $metadata->permissions[] = $config;
+        $permissionsMetadata = $metadata->getPermissions();
+        $permissionsMetadata[] = $config;
+        $metadata->setPermissions($permissionsMetadata);
     }
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
+     * @param  \Zoop\Shard\State\TransitionEventArgs $eventArgs
+     * @return type
      */
     public function preTransition(TransitionEventArgs $eventArgs)
     {
@@ -94,11 +97,13 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber
         $action = $eventArgs->getTransition()->getAction();
         $metadata = $eventArgs->getMetadata();
 
-        if (! $accessController->areAllowed([$action], $metadata, $document)->getAllowed()) {
+        if (!$accessController->areAllowed([$action], $metadata, $document, $eventArgs->getChangeSet())->getAllowed()) {
             //stop transition
-            $metadata
-                ->reflFields[array_keys($metadata->state)[0]]
-                ->setValue($document, $eventArgs->getTransition()->getFrom());
+            $metadata->setFieldValue(
+                $document,
+                array_keys($metadata->getState())[0],
+                $eventArgs->getTransition()->getFrom()
+            );
 
             $eventManager->dispatchEvent(
                 Events::TRANSITION_DENIED,

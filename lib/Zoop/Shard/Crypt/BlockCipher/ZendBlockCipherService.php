@@ -45,8 +45,9 @@ class ZendBlockCipherService implements BlockCipherServiceInterface, ServiceLoca
 
     public function encryptField($field, $document, $metadata)
     {
-        if (isset($metadata->crypt['blockCipher'][$field]['salt'])) {
-            $saltInterface = $this->serviceLocator->get($metadata->crypt['blockCipher'][$field]['salt']);
+        $cryptMetadata = $metadata->getCrypt();
+        if (isset($cryptMetadata['blockCipher'][$field]['salt'])) {
+            $saltInterface = $this->serviceLocator->get($cryptMetadata['blockCipher'][$field]['salt']);
         } else {
             $saltInterface = $document;
         }
@@ -56,12 +57,13 @@ class ZendBlockCipherService implements BlockCipherServiceInterface, ServiceLoca
             $salt = null;
         }
 
-        $key = $this->serviceLocator->get($metadata->crypt['blockCipher'][$field]['key'])->getKey();
+        $key = $this->serviceLocator->get($cryptMetadata['blockCipher'][$field]['key'])->getKey();
 
-        $metadata->reflFields[$field]->setValue(
+        $metadata->setFieldValue(
             $document,
+            $field,
             $this->encryptValue(
-                $metadata->reflFields[$field]->getValue($document),
+                $metadata->getFieldValue($document, $field),
                 $key,
                 $salt
             )
@@ -70,12 +72,14 @@ class ZendBlockCipherService implements BlockCipherServiceInterface, ServiceLoca
 
     public function decryptField($field, $document, $metadata)
     {
-        $key = $this->serviceLocator->get($metadata->crypt['blockCipher'][$field]['key'])->getKey();
+        $cryptMetadata = $metadata->getCrypt();
+        $key = $this->serviceLocator->get($cryptMetadata['blockCipher'][$field]['key'])->getKey();
 
-        $metadata->reflFields[$field]->setValue(
+        $metadata->setFieldValue(
             $document,
+            $field,
             $this->decryptValue(
-                $metadata->reflFields[$field]->getValue($document),
+                $metadata->getFieldValue($document, $field),
                 $key
             )
         );
