@@ -15,7 +15,7 @@ class StateListTest extends BaseTest
     {
         $manifest = new Manifest(
             [
-                'documents' => [
+                'models' => [
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
@@ -25,7 +25,7 @@ class StateListTest extends BaseTest
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
         $eventManager = $this->documentManager->getEventManager();
         $eventManager->addEventListener(Events::BAD_STATE, $this);
     }

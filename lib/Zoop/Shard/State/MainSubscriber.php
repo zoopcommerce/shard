@@ -7,11 +7,13 @@
 namespace Zoop\Shard\State;
 
 use Doctrine\Common\EventSubscriber;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Common\State\Transition;
 use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Core\UpdateEventArgs;
 use Zoop\Shard\Core\CreateEventArgs;
-use Zoop\Shard\Core\MetadataSleepEventArgs;
+use Zoop\Shard\Core\ReadEventArgs;
 
 /**
  * Emits soft delete events
@@ -19,8 +21,9 @@ use Zoop\Shard\Core\MetadataSleepEventArgs;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class MainSubscriber implements EventSubscriber
+class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
 {
+    use ServiceLocatorAwareTrait;
 
     /**
      *
@@ -29,10 +32,39 @@ class MainSubscriber implements EventSubscriber
     public function getSubscribedEvents()
     {
         return [
+            CoreEvents::READ,
             CoreEvents::CREATE,
             CoreEvents::UPDATE,
-            CoreEvents::METADATA_SLEEP,
         ];
+    }
+
+    public function read(ReadEventArgs $eventArgs)
+    {
+        $metadata = $eventArgs->getMetadata();
+
+        if (! ($stateMetadata = $metadata->getState())) {
+            return;
+        }
+
+        $extension = $this->serviceLocator->get('extension.state');
+        $include = $extension->getReadFilterInclude();
+        $exclude = $extension->getReadFilterExclude();
+        $field = array_keys($stateMetadata)[0];
+        $criteria = [];
+
+        if (count($include) > 0) {
+            $criteria[$field] = ['$in' => $include];
+        }
+
+        if (count($exclude) > 0) {
+            $criteria[$field] = ['$nin' => $exclude];
+        }
+
+        if (count($criteria) == 0) {
+            return;
+        }
+
+        $eventArgs->addCriteria($criteria);
     }
 
     public function update(UpdateEventArgs $eventArgs)
@@ -42,20 +74,19 @@ class MainSubscriber implements EventSubscriber
         }
 
         $metadata = $eventArgs->getMetadata();
-        if (! isset($metadata->state)) {
+        if (! ($stateMetadata = $metadata->getState())) {
             return;
         }
 
         $document = $eventArgs->getDocument();
         $eventManager = $eventArgs->getEventManager();
         $changeSet = $eventArgs->getChangeSet();
-        $field = array_keys($metadata->state)[0];
+        $field = array_keys($stateMetadata)[0];
 
-        $fromState = $changeSet[$field][0];
-        $toState = $changeSet[$field][1];
+        list($fromState, $toState) = $changeSet->getField($field);
 
         //stop state change if the new state is not on the defined state list
-        if (count($metadata->state[$field]) > 0 && ! in_array($toState, $metadata->state[$field])) {
+        if (count($stateMetadata[$field]) > 0 && ! in_array($toState, $stateMetadata[$field])) {
             $metadata->setFieldValue($document, $field, $fromState);
             $eventArgs->setReject(true);
             $eventManager->dispatchEvent(Events::BAD_STATE, $eventArgs);
@@ -68,6 +99,7 @@ class MainSubscriber implements EventSubscriber
             $document,
             $metadata,
             new Transition($fromState, $toState),
+            $changeSet,
             $eventManager
         );
         $eventManager->dispatchEvent(Events::PRE_TRANSITION, $transitionEventArgs);
@@ -94,28 +126,21 @@ class MainSubscriber implements EventSubscriber
         }
 
         $metadata = $eventArgs->getMetadata();
-        if (! isset($metadata->state)) {
+        if (! ($stateMetadata = $metadata->getState())) {
             return;
         }
 
-        $field = array_keys($metadata->state)[0];
+        $field = array_keys($stateMetadata)[0];
         $document = $eventArgs->getDocument();
 
-        if (count($metadata->state[$field]) > 0 &&
-            ! in_array($metadata->getFieldValue($document, $field), $metadata->state[$field])
+        if (count($stateMetadata[$field]) > 0 &&
+            ! in_array($metadata->getFieldValue($document, $field), $stateMetadata[$field])
         ) {
             $eventArgs->setReject(true);
             $eventArgs->getEventManager()->dispatchEvent(
                 Events::BAD_STATE,
                 $eventArgs
             );
-        }
-    }
-
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
-    {
-        if (isset($eventArgs->getMetadata()->state)) {
-            $eventArgs->addSerialized('state');
         }
     }
 }

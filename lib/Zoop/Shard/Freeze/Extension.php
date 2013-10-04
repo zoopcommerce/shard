@@ -16,15 +16,17 @@ use Zoop\Shard\AbstractExtension;
  */
 class Extension extends AbstractExtension
 {
+    const READ_ALL = 'readAll';
+
+    const READ_ONLY_FROZEN = 'readOnlyFrozen';
+
+    const READ_ONLY_NOT_FROZEN = 'readOnlyNotFrozen';
+
     protected $subscribers = [
         'subscriber.freeze.mainsubscriber',
         'subscriber.freeze.stampsubscriber',
         'subscriber.freeze.annotationsubscriber',
         'subscriber.freeze.freezesubscriber'
-    ];
-
-    protected $filters = [
-        'freeze' => 'Zoop\Shard\Freeze\Filter\Freeze'
     ];
 
     protected $serviceManagerConfig = [
@@ -40,4 +42,16 @@ class Extension extends AbstractExtension
     protected $dependencies = [
         'extension.annotation' => true
     ];
+
+    protected $readFilter = 'readAll';
+
+    public function getReadFilter()
+    {
+        return $this->readFilter;
+    }
+
+    public function setReadFilter($readFilter)
+    {
+        $this->readFilter = (string) $readFilter;
+    }
 }

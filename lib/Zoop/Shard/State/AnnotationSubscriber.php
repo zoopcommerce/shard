@@ -43,7 +43,8 @@ class AnnotationSubscriber implements EventSubscriber
         $metadata = $eventArgs->getMetadata();
         $eventManager = $eventArgs->getEventManager();
 
-        $metadata->state = [$field => $eventArgs->getAnnotation()->value];
+        $metadata->addProperty('state', true);
+        $metadata->setState([$field => $eventArgs->getAnnotation()->value]);
 
         //Add sythentic annotation to create extra permission that will allow
         //updates on the state field when access control is enabled.

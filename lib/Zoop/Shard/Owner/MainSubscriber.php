@@ -11,7 +11,6 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Core\CreateEventArgs;
-use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  *
@@ -30,7 +29,6 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     {
         return [
             CoreEvents::CREATE,
-            CoreEvents::METADATA_SLEEP,
         ];
     }
 
@@ -43,20 +41,14 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         $document = $eventArgs->getDocument();
         $metadata = $eventArgs->getMetadata();
 
-        if (isset($metadata->owner)) {
-            $reflField = $metadata->reflFields[$metadata->owner];
-            $owner = $reflField->getValue($document);
-            if (! isset($owner)) {
-                $reflField->setValue($document, $this->getUsername());
-                $eventArgs->addRecompute($metadata->owner);
-            }
+        if (! ($ownerField = $metadata->getOwner())) {
+            return;
         }
-    }
 
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
-    {
-        if (isset($eventArgs->getMetadata()->owner)) {
-            $eventArgs->addSerialized('owner');
+        $owner = $metadata->getFieldValue($document, $ownerField);
+        if (! isset($owner)) {
+            $metadata->setFieldValue($document, $ownerField, $this->getUsername());
+            $eventArgs->addRecompute($ownerField);
         }
     }
 

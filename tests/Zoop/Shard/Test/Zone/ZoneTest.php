@@ -13,7 +13,7 @@ class ZoneTest extends BaseTest
 
         $manifest = new Manifest(
             [
-                'documents' => [
+                'models' => [
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
@@ -23,7 +23,8 @@ class ZoneTest extends BaseTest
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
+        $this->extension = $manifest->getServiceManager()->get('extension.zone');
     }
 
     public function testBasicFunction()
@@ -60,7 +61,6 @@ class ZoneTest extends BaseTest
     {
 
         $documentManager = $this->documentManager;
-        $documentManager->getFilterCollection()->enable('zone');
 
         $testDocA = new Simple();
         $testDocA->setName('miriam');
@@ -79,10 +79,7 @@ class ZoneTest extends BaseTest
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(['lucy', 'miriam'], $docNames);
 
-        $documentManager->getFilterCollection()->enable('zone');
-        $filter = $documentManager->getFilterCollection()->getFilter('zone');
-
-        $filter->setZones(['zone1']);
+        $this->extension->setReadFilterInclude(['zone1']);
 
         $documentManager->flush();
         $documentManager->clear();
@@ -90,31 +87,33 @@ class ZoneTest extends BaseTest
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(['miriam'], $docNames);
 
-        $filter->setZones(['zone1', 'zone3']);
+        $this->extension->setReadFilterInclude(['zone1', 'zone3']);
         $documentManager->clear();
 
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(['lucy', 'miriam'], $docNames);
 
-        $filter->setZones(['zone2']);
+        $this->extension->setReadFilterInclude(['zone2']);
         $documentManager->clear();
 
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(['lucy', 'miriam'], $docNames);
 
-        $filter->excludeZoneList();
+        $this->extension->setReadFilterInclude();
+        $this->extension->setReadFilterExclude(['zone2']);
         $documentManager->clear();
 
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertCount(0, $docNames);
 
-        $filter->setZones(['zone1']);
+        $this->extension->setReadFilterExclude(['zone1']);
         $documentManager->clear();
 
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(['lucy'], $docNames);
 
-        $documentManager->getFilterCollection()->disable('zone');
+        $this->extension->setReadFilterInclude();
+        $this->extension->setReadFilterExclude();
         $documentManager->clear();
 
         list($testDocs, $docNames) = $this->getTestDocs();

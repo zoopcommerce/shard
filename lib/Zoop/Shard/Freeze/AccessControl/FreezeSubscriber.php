@@ -35,7 +35,8 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
+     * @param  \Zoop\Shard\Freeze\FreezerEventArgs $eventArgs
+     * @return type
      */
     public function preFreeze(FreezerEventArgs $eventArgs)
     {
@@ -62,7 +63,8 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
 
     /**
      *
-     * @param \Doctrine\ODM\MongoDB\Event\OnFlushEventArgs $eventArgs
+     * @param  \Zoop\Shard\Freeze\FreezerEventArgs $eventArgs
+     * @return type
      */
     public function preThaw(FreezerEventArgs $eventArgs)
     {

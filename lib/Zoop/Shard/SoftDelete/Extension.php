@@ -17,9 +17,11 @@ use Zoop\Shard\AbstractExtension;
 class Extension extends AbstractExtension
 {
 
-    protected $filters = [
-        'softDelete' => 'Zoop\Shard\SoftDelete\Filter\SoftDelete'
-    ];
+    const READ_ALL = 'readAll';
+
+    const READ_ONLY_SOFT_DELETED = 'readOnlySoftDeleted';
+
+    const READ_ONLY_NOT_SOFT_DELETED = 'readOnlyNotSoftDeleted';
 
     protected $subscribers = [
         'subscriber.softdelete.mainsubscriber',
@@ -41,4 +43,16 @@ class Extension extends AbstractExtension
     protected $dependencies = [
         'extension.annotation' => true
     ];
+
+    protected $readFilter = 'readAll';
+
+    public function getReadFilter()
+    {
+        return $this->readFilter;
+    }
+
+    public function setReadFilter($readFilter)
+    {
+        $this->readFilter = (string) $readFilter;
+    }
 }

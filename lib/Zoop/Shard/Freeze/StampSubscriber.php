@@ -38,12 +38,13 @@ class StampSubscriber implements ServiceLocatorAwareInterface
     {
         $document = $eventArgs->getDocument();
         $metadata = $eventArgs->getMetadata();
+        $freezeMetadata = $metadata->getFreeze();
 
-        if (isset($metadata->freeze['frozenBy'])) {
-            $metadata->setFieldValue($document, $metadata->freeze['frozenBy'], $this->getUsername());
+        if (isset($freezeMetadata['frozenBy'])) {
+            $metadata->setFieldValue($document, $freezeMetadata['frozenBy'], $this->getUsername());
         }
-        if (isset($metadata->freeze['frozenOn'])) {
-            $metadata->setFieldValue($document, $metadata->freeze['frozenOn'], time());
+        if (isset($freezeMetadata['frozenOn'])) {
+            $metadata->setFieldValue($document, $freezeMetadata['frozenOn'], time());
         }
     }
 
@@ -55,12 +56,13 @@ class StampSubscriber implements ServiceLocatorAwareInterface
     {
         $document = $eventArgs->getDocument();
         $metadata = $eventArgs->getMetadata();
+        $freezeMetadata = $metadata->getFreeze();
 
-        if (isset($metadata->freeze['thawedBy'])) {
-            $metadata->setFieldValue($document, $metadata->freeze['thawedBy'], $this->getUsername());
+        if (isset($freezeMetadata['thawedBy'])) {
+            $metadata->setFieldValue($document, $freezeMetadata['thawedBy'], $this->getUsername());
         }
-        if (isset($metadata->freeze['thawedOn'])) {
-            $metadata->setFieldValue($document, $metadata->freeze['thawedOn'], time());
+        if (isset($freezeMetadata['thawedOn'])) {
+            $metadata->setFieldValue($document, $freezeMetadata['thawedOn'], time());
         }
     }
 

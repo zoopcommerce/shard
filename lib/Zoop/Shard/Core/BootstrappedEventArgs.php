@@ -7,6 +7,7 @@
 namespace Zoop\Shard\Core;
 
 use Doctrine\Common\EventArgs as BaseEventArgs;
+use Doctrine\Common\EventManager as BaseEventManager;
 
 /**
  *
@@ -15,4 +16,23 @@ use Doctrine\Common\EventArgs as BaseEventArgs;
  */
 class BootstrappedEventArgs extends BaseEventArgs
 {
+    protected $modelManager;
+
+    protected $eventManager;
+
+    public function getModelManager()
+    {
+        return $this->modelManager;
+    }
+
+    public function getEventManager()
+    {
+        return $this->eventManager;
+    }
+
+    public function __construct(ModelManager $modelManager, BaseEventManager $eventManager)
+    {
+        $this->modelManager = $modelManager;
+        $this->eventManager = $eventManager;
+    }
 }

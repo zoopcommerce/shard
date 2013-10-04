@@ -10,8 +10,8 @@ use Zoop\Shard\AccessControl\Events as AccessControlEvents;
 use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Core\CreateEventArgs;
 use Zoop\Shard\Core\DeleteEventArgs;
+use Zoop\Shard\Core\ReadEventArgs;
 use Zoop\Shard\Core\UpdateEventArgs;
-use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  *
@@ -27,17 +27,41 @@ class MainSubscriber extends AbstractAccessControlSubscriber
     public function getSubscribedEvents()
     {
         return [
-            CoreEvents::BOOTSTRAPPED,
+            CoreEvents::READ,
             CoreEvents::CREATE,
             CoreEvents::DELETE,
-            CoreEvents::UPDATE,
-            CoreEvents::METADATA_SLEEP,
+            CoreEvents::UPDATE
         ];
     }
 
-    public function bootstrapped()
+    public function read(ReadEventArgs $eventArgs)
     {
-        $this->getAccessController()->enableReadFilter();
+        $accessController = $this->getAccessController();
+        $metadata = $eventArgs->getMetadata();
+        $result = $accessController->areAllowed([Actions::READ], $metadata);
+
+        if ($result->hasCriteria()) {
+            if ($result->getAllowed()) {
+                $criteria = $result->getNew();
+            } else {
+                $criteria = [];
+                foreach ($result->getNew() as $field => $value) {
+                    if (isset($value['$regex'])) {
+                        $criteria[$field] = ['$not' => $value];
+                    } else {
+                        $criteria[$field] = ['$ne' => $value];
+                    }
+                }
+            }
+        } else {
+            if ($result->getAllowed()) {
+                $criteria = []; //allow read
+            } else {
+                $criteria = [$metadata->identifier => ['$exists' => false]]; //deny read
+            }
+        }
+
+        $eventArgs->addCriteria($criteria);
     }
 
     public function create(CreateEventArgs $eventArgs)
@@ -71,7 +95,7 @@ class MainSubscriber extends AbstractAccessControlSubscriber
         $document = $eventArgs->getDocument();
         $actions = [];
 
-        foreach (array_keys($eventArgs->getChangeSet()) as $field) {
+        foreach ($eventArgs->getChangeSet()->getFieldNames() as $field) {
             $actions[] = Actions::update($field);
         }
 
@@ -105,15 +129,5 @@ class MainSubscriber extends AbstractAccessControlSubscriber
             AccessControlEvents::DELETE_DENIED,
             new EventArgs($document, Actions::DELETE)
         );
-    }
-
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
-    {
-        if (isset($eventArgs->getMetadata()->accessConrol)) {
-            $eventArgs->addSerialized('accessConrol');
-        }
-        if (isset($eventArgs->getMetadata()->permissions)) {
-            $eventArgs->addSerialized('permissions');
-        }
     }
 }

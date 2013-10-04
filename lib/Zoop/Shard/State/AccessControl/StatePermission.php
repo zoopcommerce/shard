@@ -115,7 +115,7 @@ class StatePermission implements PermissionInterface
 
             if ($denyMatch) {
                 //one or more actions are explicitly denied
-                return new AllowedResult(false, [], [$this->stateField => $this->mongoRegex($this->states)]);
+                return new AllowedResult(false, [], [$this->stateField => $this->regex($this->states)]);
             }
             if ($allowMatch) {
                 $allowMatches++;
@@ -123,19 +123,19 @@ class StatePermission implements PermissionInterface
         }
         if ($allowMatches == count($testActions)) {
             //all actions are explicitly allowed
-            return new AllowedResult(true, [], [$this->stateField => $this->mongoRegex($this->states)]);
+            return new AllowedResult(true, [], [$this->stateField => $this->regex($this->states)]);
         }
 
         //Permission is neither explicitly allowed or denied.
         return new AllowedResult;
     }
 
-    protected function mongoRegex(array $states)
+    protected function regex(array $states)
     {
         $result = [];
         foreach ($states as $state) {
             if (!strpos(PermissionInterface::WILD, $state)) {
-                $result[] = new \MongoRegex($state);
+                $result[] = ['$regex' => $state];
             } else {
                 $result[] = $state;
             }

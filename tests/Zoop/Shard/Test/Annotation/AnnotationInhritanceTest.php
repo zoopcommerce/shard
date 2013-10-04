@@ -14,7 +14,7 @@ class AnnotationInheritaceTest extends BaseTest
     {
         $manifest = new Manifest(
             [
-                'documents' => [
+                'models' => [
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
@@ -34,7 +34,7 @@ class AnnotationInheritaceTest extends BaseTest
            ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
     }
 
     public function testAnnotationInheritance()
@@ -43,8 +43,8 @@ class AnnotationInheritaceTest extends BaseTest
 
         $metadata = $documentManager->getClassMetadata(get_class(new ChildA));
 
-        $this->assertEquals(['class' => 'ParentValidator', 'options' => []], $metadata->validator['document']);
-        $this->assertEquals(true, $metadata->serializer['fields']['name']['serializeIgnore']);
+        $this->assertEquals(['class' => 'ParentValidator', 'options' => []], $metadata->getValidator()['document']);
+        $this->assertEquals(true, $metadata->getSerializer()['fields']['name']['serializeIgnore']);
     }
 
     public function testAnnotationInheritanceOverride()
@@ -53,7 +53,7 @@ class AnnotationInheritaceTest extends BaseTest
 
         $metadata = $documentManager->getClassMetadata(get_class(new ChildB));
 
-        $this->assertEquals(['class' => 'ChildBValidator', 'options' => []], $metadata->validator['document']);
-        $this->assertEquals(false, $metadata->serializer['fields']['name']['serializeIgnore']);
+        $this->assertEquals(['class' => 'ChildBValidator', 'options' => []], $metadata->getValidator()['document']);
+        $this->assertEquals(false, $metadata->getSerializer()['fields']['name']['serializeIgnore']);
     }
 }

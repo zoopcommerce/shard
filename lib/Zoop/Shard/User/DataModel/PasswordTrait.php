@@ -32,6 +32,7 @@ trait PasswordTrait
 
     /**
      * @ODM\String
+     * @Shard\Serializer\Ignore
      * @Shard\Validator\Required
      */
     protected $salt;

@@ -18,16 +18,22 @@ class Extension extends AbstractExtension
 {
 
     protected $subscribers = [
-        'subscriber.odmcore.mainsubscriber'
+        'subscriber.odmcore.boostrappedsubscriber',
+        'subscriber.odmcore.flushsubscriber',
+        'subscriber.odmcore.loadmetadatasubscriber'
     ];
 
     protected $serviceManagerConfig = [
         'invokables' => [
-            'subscriber.odmcore.mainsubscriber' =>
-                'Zoop\Shard\ODMCore\MainSubscriber'
+            'subscriber.odmcore.boostrappedsubscriber' =>
+                'Zoop\Shard\ODMCore\BootstrappedSubscriber',
+            'subscriber.odmcore.flushsubscriber' =>
+                'Zoop\Shard\ODMCore\FlushSubscriber',
+            'subscriber.odmcore.loadmetadatasubscriber' =>
+                'Zoop\Shard\ODMCore\LoadMetadataSubscriber'
         ],
         'factories' => [
-            'objectmanager' => 'Zoop\Shard\ODMCore\DevDocumentManagerFactory'
+            'modelmanager' => 'Zoop\Shard\ODMCore\DevDocumentManagerFactory'
         ]
     ];
 
@@ -38,6 +44,10 @@ class Extension extends AbstractExtension
     protected $hydratorDir;
 
     protected $classMetadataFactory = 'Zoop\Shard\ODMCore\ClassMetadataFactory';
+
+    protected $filters = [
+        'odmfilter' => 'Zoop\Shard\ODMCore\Filter'
+    ];
 
     public function getDefaultDb()
     {
@@ -77,6 +87,16 @@ class Extension extends AbstractExtension
     public function setClassMetadataFactory($classMetadataFactory)
     {
         $this->classMetadataFactory = $classMetadataFactory;
+    }
+
+    public function getFilters()
+    {
+        return $this->filters;
+    }
+
+    public function setFilters($filters)
+    {
+        $this->filters = $filters;
     }
 
     public function __construct()

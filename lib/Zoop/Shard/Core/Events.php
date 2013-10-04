@@ -13,6 +13,10 @@ namespace Zoop\Shard\Core;
  */
 final class Events
 {
+    /**
+     * Triggered by an attempt to fetch an object
+     */
+    const READ = 'read';
 
     /**
      * Triggered by object creation
@@ -40,11 +44,6 @@ final class Events
     const CRYPT = 'crypt';
 
     const LOAD_METADATA = 'loadMetadata';
-
-    /**
-     * Triggered by classmetadata __sleep
-     */
-    const METADATA_SLEEP = 'metadataSleep';
 
     const BOOTSTRAPPED = 'bootstrapped';
 }

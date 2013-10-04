@@ -25,7 +25,7 @@ class LazySubscriberFactory implements FactoryInterface
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
         $instance = new LazySubscriber();
-
+        $instance->setServiceLocator($serviceLocator);
         $instance->setConfig($serviceLocator->get('manifest')->getLazySubscriberConfig());
 
         return $instance;

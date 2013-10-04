@@ -14,7 +14,7 @@ class StateTest extends BaseTest
     {
         $manifest = new Manifest(
             [
-                'documents' => [
+                'models' => [
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
@@ -24,7 +24,8 @@ class StateTest extends BaseTest
             ]
         );
 
-        $this->documentManager = $manifest->getServiceManager()->get('objectmanager');
+        $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
+        $this->extension = $manifest->getServiceManager()->get('extension.state');
     }
 
     public function testBasicFunction()
@@ -59,7 +60,6 @@ class StateTest extends BaseTest
     public function testFilter()
     {
         $documentManager = $this->documentManager;
-        $documentManager->getFilterCollection()->enable('state');
 
         $testDocA = new Simple();
         $testDocA->setName('miriam');
@@ -80,19 +80,21 @@ class StateTest extends BaseTest
         $documentManager->flush();
         $documentManager->clear();
 
-        $filter = $documentManager->getFilterCollection()->getFilter('state');
-        $filter->addState('active');
+        $this->extension->setReadFilterInclude(['active']);
 
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(array('miriam'), $docNames);
 
-        $filter->excludeStateList();
+        $this->extension->setReadFilterInclude();
+        $this->extension->setReadFilterExclude(['active']);
+
         $documentManager->clear();
 
         list($testDocs, $docNames) = $this->getTestDocs();
         $this->assertEquals(array('lucy'), $docNames);
 
-        $documentManager->getFilterCollection()->disable('state');
+        $this->extension->setReadFilterInclude();
+        $this->extension->setReadFilterExclude();
 
         $documentManager->clear();
 

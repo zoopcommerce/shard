@@ -11,19 +11,19 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Exception;
-use Zoop\Shard\Core\ObjectManagerAwareInterface;
-use Zoop\Shard\Core\ObjectManagerAwareTrait;
+use Zoop\Shard\Core\ModelManagerAwareInterface;
+use Zoop\Shard\Core\ModelManagerAwareTrait;
 
 /**
- * Provides methods for unserializing documents
+ * Provides methods for unserializing models
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareInterface
+class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInterface
 {
     use ServiceLocatorAwareTrait;
-    use ObjectManagerAwareTrait;
+    use ModelManagerAwareTrait;
 
     const UNSERIALIZE_UPDATE = 'unserialize_update';
     const UNSERIALIZE_PATCH = 'unserliaze_patch';
@@ -38,10 +38,11 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
     public function fieldList(ClassMetadata $metadata, $includeId = true)
     {
         $return = [];
+        $serializerMetadata = $metadata->getSerializer();
 
         foreach ($metadata->getFieldNames() as $field) {
-            if (isset($metadata->serializer['fields'][$field]['unserializeIgnore']) &&
-                $metadata->serializer['fields'][$field]['unserializeIgnore']
+            if (isset($serializerMetadata['fields'][$field]['unserializeIgnore']) &&
+                $serializerMetadata['fields'][$field]['unserializeIgnore']
             ) {
                 continue;
             }
@@ -58,10 +59,11 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
     /**
      * This will create a document from the supplied array.
      *
-     * @param  array                                 $data
-     * @param  \Doctrine\ODM\MongoDB\DocumentManager $documentManager
-     * @param  string                                $className
-     * @return object
+     * @param  array $data
+     * @param  type  $class
+     * @param  type  $document
+     * @param  type  $mode
+     * @return type
      */
     public function fromArray(
         array $data,
@@ -73,13 +75,12 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
     }
 
     /**
-     * This will create a document from the supplied json string.
-     * WARNING: the constructor of the document will not be called.
      *
-     * @param  string                                $data
-     * @param  \Doctrine\ODM\MongoDB\DocumentManager $documentManager
-     * @param  string                                $className
-     * @return object
+     * @param  type $data
+     * @param  type $class
+     * @param  type $document
+     * @param  type $mode
+     * @return type
      */
     public function fromJson(
         $data,
@@ -105,11 +106,11 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
         $document = null,
         $mode = self::UNSERIALIZE_PATCH
     ) {
-        $metadata = $this->objectManager->getClassMetadata($class);
+        $metadata = $this->modelManager->getClassMetadata($class);
 
         // Check for discrimnator and discriminator field in data
         if (isset($metadata->discriminatorField) && isset($data[$metadata->discriminatorField['fieldName']])) {
-            $metadata = $this->objectManager->getClassMetadata(
+            $metadata = $this->modelManager->getClassMetadata(
                 $metadata->discriminatorMap[$data[$metadata->discriminatorField['fieldName']]]
             );
         }
@@ -118,12 +119,12 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
         if (isset($data['$ref'])) {
             $pieces = explode('/', $data['$ref']);
 
-            return $this->objectManager->getRepository($metadata->name)->find($pieces[count($pieces) - 1]);
+            return $this->modelManager->getRepository($metadata->name)->find($pieces[count($pieces) - 1]);
         }
 
-        // Attempt to load prexisting object
+        // Attempt to load prexisting model
         if (! isset($document) && isset($data[$metadata->identifier])) {
-            $document = $this->objectManager->getRepository($metadata->name)->find($data[$metadata->identifier]);
+            $document = $this->modelManager->getRepository($metadata->name)->find($data[$metadata->identifier]);
         }
 
         $newInstance = false;
@@ -142,7 +143,7 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
     protected function unserializeField($data, ClassMetadata $metadata, $document, $field, $mode)
     {
         if ($metadata->hasAssociation($field) && $metadata->isSingleValuedAssociation($field)) {
-            $value = $this->unserializeSingleObject($data, $metadata, $document, $field, $mode);
+            $value = $this->unserializeSingleModel($data, $metadata, $document, $field, $mode);
         } elseif ($metadata->hasAssociation($field)) {
             $value = $this->unserializeCollection($data, $metadata, $document, $field, $mode);
         } else {
@@ -156,7 +157,7 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
         }
     }
 
-    protected function unserializeSingleObject($data, ClassMetadata $metadata, $document, $field, $mode)
+    protected function unserializeSingleModel($data, ClassMetadata $metadata, $document, $field, $mode)
     {
         if (!isset($data[$field])) {
             return null;
@@ -167,10 +168,10 @@ class Unserializer implements ServiceLocatorAwareInterface, ObjectManagerAwareIn
         if (isset($data[$field]['$ref'])) {
             $pieces = explode('/', $data[$field]['$ref']);
 
-            return $this->objectManager->getRepository($targetClass)->find($pieces[count($pieces) - 1]);
+            return $this->modelManager->getRepository($targetClass)->find($pieces[count($pieces) - 1]);
         }
         if (is_string($data[$field])) {
-            $document = $this->objectManager->getRepository($metadata->name)->find($data[$field]);
+            $document = $this->modelManager->getRepository($metadata->name)->find($data[$field]);
         }
 
         return $this->unserialize(

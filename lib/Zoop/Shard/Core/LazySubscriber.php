@@ -7,7 +7,6 @@
 namespace Zoop\Shard\Core;
 
 use Doctrine\Common\EventSubscriber;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
@@ -15,7 +14,7 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class LazySubscriber implements EventSubscriber, ServiceLocatorAwareInterface
+class LazySubscriber implements EventSubscriber
 {
     use ServiceLocatorAwareTrait;
 

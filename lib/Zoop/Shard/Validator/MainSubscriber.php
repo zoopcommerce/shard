@@ -11,7 +11,6 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Core\AbstractChangeEventArgs;
-use Zoop\Shard\Core\MetadataSleepEventArgs;
 
 /**
  *
@@ -36,7 +35,6 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
     {
         $events = [
             CoreEvents::VALIDATE,
-            CoreEvents::METADATA_SLEEP,
         ];
 
         return $events;
@@ -50,20 +48,13 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         $result = $documentValidator->isValid($document, $eventArgs->getMetadata(), $eventArgs->getChangeSet());
         if (! $result->getValue()) {
 
-            // Raise INVALID_OBJECT
+            // Raise INVALID_MODEL
             $eventArgs->getEventManager()->dispatchEvent(
-                Events::INVALID_OBJECT,
+                Events::INVALID_MODEL,
                 new EventArgs($document, $result)
             );
 
             $eventArgs->setReject(true);
-        }
-    }
-
-    public function metadataSleep(MetadataSleepEventArgs $eventArgs)
-    {
-        if (isset($eventArgs->getMetadata()->validator)) {
-            $eventArgs->addSerialized('validator');
         }
     }
 
