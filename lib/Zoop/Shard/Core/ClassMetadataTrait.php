@@ -54,12 +54,7 @@ trait ClassMetadataTrait
     public function __sleep()
     {
         $fields = parent::__sleep();
-
-        foreach ($this->extensionProperties as $field => $settings) {
-            if ($settings['sleep']) {
-                $fields[] = $field;
-            }
-        }
+        $fields[] = 'extensionProperties';
 
         return $fields;
     }
