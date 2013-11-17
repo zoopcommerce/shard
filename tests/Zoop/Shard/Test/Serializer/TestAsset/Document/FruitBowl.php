@@ -42,6 +42,19 @@ class FruitBowl
      */
     protected $referencedFruit;
 
+    /**
+     * @ODM\ReferenceOne(
+     *     discriminatorMap={
+     *         "apple"="Zoop\Shard\Test\Serializer\TestAsset\Document\Apple",
+     *         "orange"="Zoop\Shard\Test\Serializer\TestAsset\Document\Orange"
+     *     },
+     *     discriminatorField="type",
+     *     cascade="all"
+     * )
+     * @Shard\Serializer\Eager
+     */
+    protected $referencedSingleFruit;
+
     public function getId()
     {
         return $this->id;
@@ -65,6 +78,16 @@ class FruitBowl
     public function setReferencedFruit($referencedFruit)
     {
         $this->referencedFruit = $referencedFruit;
+    }
+
+    public function getReferencedSingleFruit()
+    {
+        return $this->referencedSingleFruit;
+    }
+
+    public function setReferencedSingleFruit($referencedSingleFruit)
+    {
+        $this->referencedSingleFruit = $referencedSingleFruit;
     }
 
     public function __construct()

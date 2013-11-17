@@ -158,6 +158,69 @@ class SerializerDiscriminatorTest extends BaseTest
         $this->assertCount(2, $testDoc->getReferencedFruit());
     }
 
+    public function testUnserializeReferenceDiscriminatorWithRefNotation()
+    {
+        $apple = new Apple;
+        $apple->setColor('green');
+        $this->documentManager->persist($apple);
+
+        $orange = new Orange;
+        $orange->setSize('small');
+        $this->documentManager->persist($orange);
+
+        $this->documentManager->flush();
+
+        $data = array(
+            'referencedFruit' => [
+                ['$ref' => 'Fruit/' . $apple->getId()],
+                ['$ref' => 'Fruit/' . $orange->getId()]
+            ]
+        );
+
+        $testDoc = $this->unserializer->fromArray(
+            $data,
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
+        );
+
+        $this->assertTrue($testDoc instanceof FruitBowl);
+        $this->assertCount(2, $testDoc->getReferencedFruit());
+
+        $item1 = $testDoc->getReferencedFruit()[0];
+        $this->assertTrue($item1 === $apple);
+
+        $item2 = $testDoc->getReferencedFruit()[1];
+        $this->assertTrue($item2 === $orange);
+
+        $this->documentManager->remove($apple);
+        $this->documentManager->remove($orange);
+        $this->documentManager->flush();
+    }
+
+    public function testUnserializeSingleReferenceDiscriminatorWithRefNotation()
+    {
+        $apple = new Apple;
+        $apple->setColor('green');
+        $this->documentManager->persist($apple);
+
+        $this->documentManager->flush();
+
+        $data = array(
+            'referencedSingleFruit' => ['$ref' => 'Fruit/' . $apple->getId()]
+        );
+
+        $testDoc = $this->unserializer->fromArray(
+            $data,
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
+        );
+
+        $this->assertTrue($testDoc instanceof FruitBowl);
+
+        $this->assertTrue($apple === $testDoc->getReferencedSingleFruit());
+
+        $this->documentManager->remove($apple);
+        $this->documentManager->flush();
+    }
+
     public function testSerializeReferenceDiscriminator()
     {
 
