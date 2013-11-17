@@ -163,15 +163,20 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
             return null;
         }
 
-        $targetClass = $metadata->getAssociationTargetClass($field);
+        $mapping = $metadata->fieldMappings[$field];
 
         if (isset($data[$field]['$ref'])) {
-            $pieces = explode('/', $data[$field]['$ref']);
-
-            return $this->modelManager->getRepository($targetClass)->find($pieces[count($pieces) - 1]);
+            return $this->getDocumentFromRef($data[$field]['$ref'], $mapping);
         }
+
         if (is_string($data[$field])) {
             $document = $this->modelManager->getRepository($metadata->name)->find($data[$field]);
+        }
+
+        if (isset($mapping['discriminatorField']) && isset($data[$field][$mapping['discriminatorField']])) {
+            $targetClass = $mapping['discriminatorMap'][$data[$field][$mapping['discriminatorField']]];
+        } else {
+            $targetClass = $metadata->getAssociationTargetClass($field);
         }
 
         return $this->unserialize(
@@ -193,10 +198,15 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
             $mapping = $metadata->fieldMappings[$field];
 
             foreach ($data[$field] as $index => $dataItem) {
-                if (isset($mapping['discriminatorField']) && isset($dataItem[$mapping['discriminatorField']])) {
-                    $targetClass = $mapping['discriminatorMap'][$dataItem[$mapping['discriminatorField']]];
+
+                if (isset($dataItem['$ref'])) {
+                    $collection[$index] = $this->getDocumentFromRef($dataItem['$ref'], $mapping);
+                } else {
+                    if (isset($mapping['discriminatorField']) && isset($dataItem[$mapping['discriminatorField']])) {
+                        $targetClass = $mapping['discriminatorMap'][$dataItem[$mapping['discriminatorField']]];
+                    }
+                    $collection[$index] = $this->unserialize($dataItem, $targetClass, $collection[$index], $mode);
                 }
-                $collection[$index] = $this->unserialize($dataItem, $targetClass, $collection[$index], $mode);
             }
         } elseif ($mode == self::UNSERIALIZE_UPDATE) {
             foreach ($collection->getKeys() as $key) {
@@ -223,6 +233,22 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
         }
 
         return $data[$field];
+    }
+
+    protected function getDocumentFromRef($ref, array $mapping)
+    {
+        list($collectionName, $id) = explode('/', $ref);
+        if (isset($mapping['discriminatorMap'])) {
+            foreach ($mapping['discriminatorMap'] as $class) {
+                if ($this->modelManager->getClassMetadata($class)->collection == $collectionName) {
+                    $targetClass = $class;
+                    break;
+                }
+            }
+        } else {
+            $targetClass = $mapping['targetDocument'];
+        }
+        return $this->modelManager->getRepository($targetClass)->find($id);
     }
 
     protected function getTypeSerializer($type)
