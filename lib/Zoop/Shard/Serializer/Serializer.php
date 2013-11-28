@@ -216,7 +216,10 @@ class Serializer implements ServiceLocatorAwareInterface, ModelManagerAwareInter
         }
 
         if (isset($mapping['discriminatorMap'])) {
-            $serializedDocument[$mapping['discriminatorField']] =
+            $discriminatorField = isset($mapping['discriminatorField']) ?
+                $mapping['discriminatorField'] :
+                '_doctrine_class_name';
+            $serializedDocument[$discriminatorField] =
                 array_search(get_class($document), $mapping['discriminatorMap']);
         }
         if ($mapping['strategy'] == 'set') {

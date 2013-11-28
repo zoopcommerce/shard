@@ -23,8 +23,7 @@ class FruitBowl
      *     discriminatorMap={
      *         "apple"="Zoop\Shard\Test\Serializer\TestAsset\Document\Apple",
      *         "orange"="Zoop\Shard\Test\Serializer\TestAsset\Document\Orange"
-     *     },
-     *     discriminatorField="type"
+     *     }
      * )
      */
     protected $embeddedFruit;
