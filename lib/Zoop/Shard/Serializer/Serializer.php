@@ -153,24 +153,33 @@ class Serializer implements ServiceLocatorAwareInterface, ModelManagerAwareInter
     protected function serializeSingleModel(ClassMetadata $metadata, $value, $field)
     {
         $mapping = $metadata->fieldMappings[$field];
-
+        $serializedDocument = null;
+        
         if (isset($mapping['embedded'])) {
             if (is_array($value)) {
-                return $this->applySerializeMetadataToArray($value, $mapping['targetDocument']);
+                $serializedDocument = $this->applySerializeMetadataToArray($value, $mapping['targetDocument']);
             } else {
-                return $this->serialize($value);
+                $serializedDocument = $this->serialize($value);
+            }
+        } else {
+            //serialize reference
+            if ($this->nestingDepth < $this->maxNestingDepth) {
+                $this->nestingDepth++;
+                $serializedDocument = $this->getReferenceSerializer($field, $metadata)->serialize($value);
+                $this->nestingDepth--;
             }
         }
 
-        //serialize reference
-        if ($this->nestingDepth < $this->maxNestingDepth) {
-            $this->nestingDepth++;
-            $serializedDocument = $this->getReferenceSerializer($field, $metadata)->serialize($value);
-            $this->nestingDepth--;
-            if ($serializedDocument) {
-                return $serializedDocument;
-            }
+        //add discriminator field if required
+        if ($serializedDocument && isset($mapping['discriminatorMap'])) {
+            $discriminatorField = isset($mapping['discriminatorField']) ?
+                $mapping['discriminatorField'] :
+                '_doctrine_class_name';
+            $serializedDocument[$discriminatorField] =
+                array_search(get_class($value), $mapping['discriminatorMap']);
         }
+        
+        return $serializedDocument;
     }
 
     protected function serializeCollection(ClassMetadata $metadata, $value, $field)
@@ -216,7 +225,10 @@ class Serializer implements ServiceLocatorAwareInterface, ModelManagerAwareInter
         }
 
         if (isset($mapping['discriminatorMap'])) {
-            $serializedDocument[$mapping['discriminatorField']] =
+            $discriminatorField = isset($mapping['discriminatorField']) ?
+                $mapping['discriminatorField'] :
+                '_doctrine_class_name';
+            $serializedDocument[$discriminatorField] =
                 array_search(get_class($document), $mapping['discriminatorMap']);
         }
         if ($mapping['strategy'] == 'set') {

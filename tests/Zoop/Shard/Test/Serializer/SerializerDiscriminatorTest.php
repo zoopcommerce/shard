@@ -82,12 +82,12 @@ class SerializerDiscriminatorTest extends BaseTest
         $data = array(
             'embeddedFruit' => [
                 [
-                    'type' => 'apple',
+                    '_doctrine_class_name' => 'apple',
                     'variety' => 'red delicious',
                     'color' => 'red'
                 ],
                 [
-                    'type' => 'orange',
+                    '_doctrine_class_name' => 'orange',
                     'variety' => 'naval',
                     'size' => 'small'
                 ]
@@ -117,13 +117,37 @@ class SerializerDiscriminatorTest extends BaseTest
         $correct = array(
             'embeddedFruit' => [
                 [
-                    'type' => 'apple',
-                    'variety' => 'granny smith'
+                    '_doctrine_class_name' => 'apple',
+                    'variety' => 'granny smith',
+                    'type' => 'apple'
                 ],
                 [
-                    'type' => 'orange',
-                    'variety' => 'naval'
+                    '_doctrine_class_name' => 'orange',
+                    'variety' => 'naval',
+                    'type' => 'orange'
                 ]
+            ]
+        );
+
+        $array = $this->serializer->toArray($fruitBowl);
+
+        $this->assertEquals($correct, $array);
+    }
+
+    public function testSerializeSingleEmbeddedDiscriminator()
+    {
+
+        $apple = new Apple();
+        $apple->setVariety('granny smith');
+
+        $fruitBowl = new FruitBowl;
+        $fruitBowl->setEmbeddedSingleFruit($apple);
+
+        $correct = array(
+            'embeddedSingleFruit' => [
+                '_doctrine_class_name' => 'apple',
+                'variety' => 'granny smith',
+                'type' => 'apple'
             ]
         );
 
