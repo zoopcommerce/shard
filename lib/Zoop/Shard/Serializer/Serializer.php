@@ -162,12 +162,12 @@ class Serializer implements ServiceLocatorAwareInterface, ModelManagerAwareInter
                 $serializedDocument = $this->serialize($value);
             }
         } else {
-            //serialize reference       
+            //serialize reference
             if ($this->nestingDepth < $this->maxNestingDepth) {
                 $this->nestingDepth++;
                 $serializedDocument = $this->getReferenceSerializer($field, $metadata)->serialize($value);
                 $this->nestingDepth--;
-            }            
+            }
         }
 
         //add discriminator field if required

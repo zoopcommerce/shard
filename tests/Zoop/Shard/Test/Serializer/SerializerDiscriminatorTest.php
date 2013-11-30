@@ -144,7 +144,7 @@ class SerializerDiscriminatorTest extends BaseTest
         $fruitBowl->setEmbeddedSingleFruit($apple);
 
         $correct = array(
-            'embeddedSingleFruit' => [                
+            'embeddedSingleFruit' => [
                 '_doctrine_class_name' => 'apple',
                 'variety' => 'granny smith',
                 'type' => 'apple'
@@ -155,7 +155,7 @@ class SerializerDiscriminatorTest extends BaseTest
 
         $this->assertEquals($correct, $array);
     }
-    
+
     public function testUnserializeReferenceDiscriminator()
     {
         $data = array(

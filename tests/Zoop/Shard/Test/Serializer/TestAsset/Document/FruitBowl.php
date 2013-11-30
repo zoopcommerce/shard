@@ -51,7 +51,7 @@ class FruitBowl
      * @Shard\Serializer\Eager
      */
     protected $embeddedSingleFruit;
-    
+
     /**
      * @ODM\ReferenceOne(
      *     discriminatorMap={
@@ -90,16 +90,16 @@ class FruitBowl
         $this->referencedFruit = $referencedFruit;
     }
 
-    public function getEmbeddedSingleFruit() 
+    public function getEmbeddedSingleFruit()
     {
         return $this->embeddedSingleFruit;
     }
 
-    public function setEmbeddedSingleFruit($embeddedSingleFruit) 
+    public function setEmbeddedSingleFruit($embeddedSingleFruit)
     {
         $this->embeddedSingleFruit = $embeddedSingleFruit;
     }
-    
+
     public function getReferencedSingleFruit()
     {
         return $this->referencedSingleFruit;
