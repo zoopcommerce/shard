@@ -134,6 +134,28 @@ class SerializerDiscriminatorTest extends BaseTest
         $this->assertEquals($correct, $array);
     }
 
+    public function testSerializeSingleEmbeddedDiscriminator()
+    {
+
+        $apple = new Apple();
+        $apple->setVariety('granny smith');
+
+        $fruitBowl = new FruitBowl;
+        $fruitBowl->setEmbeddedSingleFruit($apple);
+
+        $correct = array(
+            'embeddedSingleFruit' => [                
+                '_doctrine_class_name' => 'apple',
+                'variety' => 'granny smith',
+                'type' => 'apple'
+            ]
+        );
+
+        $array = $this->serializer->toArray($fruitBowl);
+
+        $this->assertEquals($correct, $array);
+    }
+    
     public function testUnserializeReferenceDiscriminator()
     {
         $data = array(

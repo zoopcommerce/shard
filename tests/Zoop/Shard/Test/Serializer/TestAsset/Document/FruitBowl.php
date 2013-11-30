@@ -42,6 +42,17 @@ class FruitBowl
     protected $referencedFruit;
 
     /**
+     * @ODM\EmbedOne(
+     *     discriminatorMap={
+     *         "apple"="Zoop\Shard\Test\Serializer\TestAsset\Document\Apple",
+     *         "orange"="Zoop\Shard\Test\Serializer\TestAsset\Document\Orange"
+     *     }
+     * )
+     * @Shard\Serializer\Eager
+     */
+    protected $embeddedSingleFruit;
+    
+    /**
      * @ODM\ReferenceOne(
      *     discriminatorMap={
      *         "apple"="Zoop\Shard\Test\Serializer\TestAsset\Document\Apple",
@@ -79,6 +90,16 @@ class FruitBowl
         $this->referencedFruit = $referencedFruit;
     }
 
+    public function getEmbeddedSingleFruit() 
+    {
+        return $this->embeddedSingleFruit;
+    }
+
+    public function setEmbeddedSingleFruit($embeddedSingleFruit) 
+    {
+        $this->embeddedSingleFruit = $embeddedSingleFruit;
+    }
+    
     public function getReferencedSingleFruit()
     {
         return $this->referencedSingleFruit;
