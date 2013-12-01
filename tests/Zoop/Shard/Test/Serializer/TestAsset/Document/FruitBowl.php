@@ -44,8 +44,8 @@ class FruitBowl
     /**
      * @ODM\EmbedOne(
      *     discriminatorMap={
-     *         "apple"="Zoop\Shard\Test\Serializer\TestAsset\Document\Apple",
-     *         "orange"="Zoop\Shard\Test\Serializer\TestAsset\Document\Orange"
+     *         "apple"="Zoop\Shard\Test\Serializer\TestAsset\Document\EmbeddedApple",
+     *         "orange"="Zoop\Shard\Test\Serializer\TestAsset\Document\EmbeddedOrange"
      *     }
      * )
      * @Shard\Serializer\Eager

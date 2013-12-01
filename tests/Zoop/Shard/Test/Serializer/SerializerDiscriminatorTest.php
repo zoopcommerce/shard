@@ -5,6 +5,7 @@ namespace Zoop\Shard\Test\Serializer;
 use Doctrine\Common\Collections\ArrayCollection;
 use Zoop\Shard\Manifest;
 use Zoop\Shard\Test\BaseTest;
+use Zoop\Shard\Test\Serializer\TestAsset\Document\EmbeddedApple;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\Apple;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\Orange;
@@ -14,18 +15,19 @@ use Zoop\Shard\Test\Serializer\TestAsset\Document\Female;
 
 class SerializerDiscriminatorTest extends BaseTest
 {
+
     public function setUp()
     {
         $manifest = new Manifest(
-            [
-                'models' => [
-                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-                ],
-                'extension_configs' => [
-                    'extension.serializer' => true,
-                    'extension.odmcore' => true
-                ],
-            ]
+                [
+            'models' => [
+                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+            ],
+            'extension_configs' => [
+                'extension.serializer' => true,
+                'extension.odmcore' => true
+            ],
+                ]
         );
 
         $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
@@ -69,8 +71,7 @@ class SerializerDiscriminatorTest extends BaseTest
         );
 
         $testDoc = $this->unserializer->fromArray(
-            $data,
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\Fruit'
+                $data, 'Zoop\Shard\Test\Serializer\TestAsset\Document\Fruit'
         );
 
         $this->assertTrue($testDoc instanceof Apple);
@@ -95,8 +96,7 @@ class SerializerDiscriminatorTest extends BaseTest
         );
 
         $testDoc = $this->unserializer->fromArray(
-            $data,
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
+                $data, 'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
         );
 
         $this->assertTrue($testDoc instanceof FruitBowl);
@@ -137,8 +137,8 @@ class SerializerDiscriminatorTest extends BaseTest
     public function testSerializeSingleEmbeddedDiscriminator()
     {
 
-        $apple = new Apple();
-        $apple->setVariety('granny smith');
+        $apple = new EmbeddedApple();
+        $apple->setColor('red');
 
         $fruitBowl = new FruitBowl;
         $fruitBowl->setEmbeddedSingleFruit($apple);
@@ -146,8 +146,7 @@ class SerializerDiscriminatorTest extends BaseTest
         $correct = array(
             'embeddedSingleFruit' => [
                 '_doctrine_class_name' => 'apple',
-                'variety' => 'granny smith',
-                'type' => 'apple'
+                'color' => 'red'
             ]
         );
 
@@ -155,26 +154,22 @@ class SerializerDiscriminatorTest extends BaseTest
 
         $this->assertEquals($correct, $array);
     }
-    
+
     public function testUnserializeSingleEmbeddedDiscriminator()
     {
         $data = array(
             'embeddedSingleFruit' => [
-                [
-                    'type' => 'apple',
-                    'variety' => 'red delicious',
-                    'color' => 'red'
-                ]
+                '_doctrine_class_name' => 'apple',
+                'color' => 'red'
             ]
         );
 
         $testDoc = $this->unserializer->fromArray(
-            $data,
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
+                $data, 'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
         );
 
         $this->assertTrue($testDoc instanceof FruitBowl);
-        $this->assertTrue($testDoc->getEmbeddedFruit() instanceof Apple);
+        $this->assertTrue($testDoc->getEmbeddedFruit() instanceof EmbeddedApple);
     }
 
     public function testUnserializeReferenceDiscriminator()
@@ -195,8 +190,7 @@ class SerializerDiscriminatorTest extends BaseTest
         );
 
         $testDoc = $this->unserializer->fromArray(
-            $data,
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
+                $data, 'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
         );
 
         $this->assertTrue($testDoc instanceof FruitBowl);
@@ -223,8 +217,7 @@ class SerializerDiscriminatorTest extends BaseTest
         );
 
         $testDoc = $this->unserializer->fromArray(
-            $data,
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
+                $data, 'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
         );
 
         $this->assertTrue($testDoc instanceof FruitBowl);
@@ -254,8 +247,7 @@ class SerializerDiscriminatorTest extends BaseTest
         );
 
         $testDoc = $this->unserializer->fromArray(
-            $data,
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
+                $data, 'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
         );
 
         $this->assertTrue($testDoc instanceof FruitBowl);
@@ -317,8 +309,7 @@ class SerializerDiscriminatorTest extends BaseTest
         );
 
         $testDoc = $this->unserializer->fromArray(
-            $data,
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\Family'
+                $data, 'Zoop\Shard\Test\Serializer\TestAsset\Document\Family'
         );
 
         $this->assertTrue($testDoc instanceof Family);
@@ -377,8 +368,7 @@ class SerializerDiscriminatorTest extends BaseTest
         );
 
         $testDoc = $this->unserializer->fromArray(
-            $data,
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\Family'
+                $data, 'Zoop\Shard\Test\Serializer\TestAsset\Document\Family'
         );
 
         $this->assertTrue($testDoc instanceof Family);
@@ -424,4 +414,5 @@ class SerializerDiscriminatorTest extends BaseTest
 
         $this->assertEquals($correct, $array);
     }
+
 }
