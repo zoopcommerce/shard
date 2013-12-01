@@ -155,6 +155,27 @@ class SerializerDiscriminatorTest extends BaseTest
 
         $this->assertEquals($correct, $array);
     }
+    
+    public function testUnserializeSingleEmbeddedDiscriminator()
+    {
+        $data = array(
+            'embeddedSingleFruit' => [
+                [
+                    'type' => 'apple',
+                    'variety' => 'red delicious',
+                    'color' => 'red'
+                ]
+            ]
+        );
+
+        $testDoc = $this->unserializer->fromArray(
+            $data,
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
+        );
+
+        $this->assertTrue($testDoc instanceof FruitBowl);
+        $this->assertTrue($testDoc->getEmbeddedFruit() instanceof Apple);
+    }
 
     public function testUnserializeReferenceDiscriminator()
     {
