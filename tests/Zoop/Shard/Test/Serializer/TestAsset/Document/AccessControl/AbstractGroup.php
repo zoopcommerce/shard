@@ -7,14 +7,14 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Zoop\Shard\Annotation\Annotations as Shard;
 
 /**
- * @ODM\Document(collection="Group")
+ * @ODM\Document(collection="AccessControlGroup")
  * @ODM\InheritanceType("SINGLE_COLLECTION")
  * @ODM\DiscriminatorMap({
  *     "Administrators" = "Zoop\Shard\Test\Serializer\TestAsset\Document\AccessControl\Administrators",
  *     "Guests"         = "Zoop\Shard\Test\Serializer\TestAsset\Document\AccessControl\Guests"
  * })
  */
-abstract class Group
+abstract class AbstractGroup
 {
 
     /**

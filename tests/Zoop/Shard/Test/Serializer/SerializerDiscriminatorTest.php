@@ -202,46 +202,8 @@ class SerializerDiscriminatorTest extends BaseTest
         $testDoc = $this->unserializer->fromArray(
                 $data, 'Zoop\Shard\Test\Serializer\TestAsset\Document\AccessControl\Administrators'
         );
-        die(var_dump($testDoc));
+        
         $this->assertTrue($testDoc instanceof AccessControl\Administrators);
-    }
-
-    public function testSerializeSingleEmbeddedDiscriminator()
-    {
-
-        $apple = new EmbeddedApple();
-        $apple->setColor('red');
-
-        $fruitBowl = new FruitBowl;
-        $fruitBowl->setEmbeddedSingleFruit($apple);
-
-        $correct = array(
-            'embeddedSingleFruit' => [
-                '_doctrine_class_name' => 'apple',
-                'color' => 'red'
-            ]
-        );
-
-        $array = $this->serializer->toArray($fruitBowl);
-
-        $this->assertEquals($correct, $array);
-    }
-
-    public function testUnserializeSingleEmbeddedDiscriminator()
-    {
-        $data = array(
-            'embeddedSingleFruit' => [
-                '_doctrine_class_name' => 'apple',
-                'color' => 'red'
-            ]
-        );
-
-        $testDoc = $this->unserializer->fromArray(
-                $data, 'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
-        );
-
-        $this->assertTrue($testDoc instanceof FruitBowl);
-        $this->assertTrue($testDoc->getEmbeddedFruit() instanceof EmbeddedApple);
     }
 
     public function testUnserializeReferenceDiscriminator()

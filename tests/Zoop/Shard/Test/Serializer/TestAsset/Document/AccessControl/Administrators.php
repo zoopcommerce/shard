@@ -9,7 +9,7 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 /**
  * @ODM\Document
  */
-class Administrators extends Group
+class Administrators extends AbstractGroup
 {
 
     /**
