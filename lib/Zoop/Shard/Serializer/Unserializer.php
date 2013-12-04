@@ -17,6 +17,8 @@ use Zoop\Shard\Core\ModelManagerAwareTrait;
 /**
  * Provides methods for unserializing models
  *
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
@@ -191,6 +193,9 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
         );
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     */
     protected function unserializeCollection($data, ClassMetadata $metadata, $document, $field, $mode)
     {
         if ($mode == self::UNSERIALIZE_UPDATE || !($collection = $metadata->getFieldValue($document, $field))) {
@@ -203,7 +208,11 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
 
             foreach ($data[$field] as $index => $dataItem) {
                 if (isset($dataItem['$ref'])) {
-                    $collection[$index] = $this->getDocumentFromRef($dataItem['$ref'], $mapping);
+                    if (isset($collection[$index])) {
+                        $collection[$index] = $this->getDocumentFromRef($dataItem['$ref'], $mapping);
+                    } else {
+                        $collection[] = $this->getDocumentFromRef($dataItem['$ref'], $mapping);
+                    }
                 } else {
                     if (isset($mapping['discriminatorMap'])) {
                         $discriminatorField = isset($mapping['discriminatorField']) ?

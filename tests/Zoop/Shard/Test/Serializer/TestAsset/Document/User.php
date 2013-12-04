@@ -39,6 +39,11 @@ class User
      */
     protected $location;
 
+    /**
+     * @ODM\Field(type="boolean")
+     */
+    protected $active;
+
     public function __construct()
     {
         $this->groups = new ArrayCollection();
@@ -102,5 +107,15 @@ class User
     public function setProfile(Profile $profile)
     {
         $this->profile = $profile;
+    }
+
+    public function getActive()
+    {
+        return $this->active;
+    }
+
+    public function setActive($active)
+    {
+        $this->active = (bool) $active;
     }
 }

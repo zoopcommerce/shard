@@ -41,16 +41,25 @@ class UnserializeModeTest extends BaseTest
         $user->addGroup(new Group('groupA'));
         $user->addGroup(new Group('groupB'));
         $user->setProfile(new Profile('Tim', 'Roediger'));
+        $user->setActive(true);
 
         $documentManager->persist($user);
         $documentManager->flush();
+
         $id = $user->getId();
+        $data = $this->serializer->toArray($user);
+        $groups = $data['groups'];
+        $groups[] = [
+            'name'=> 'groupC'
+        ];
         $documentManager->clear();
 
         $updated = $this->unserializer->fromArray(
             [
                 'id' => $id,
-                'location' => 'there'
+                'location' => 'there',
+                'active' => false,
+                'groups' => $groups
             ],
             'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
         );
@@ -58,6 +67,8 @@ class UnserializeModeTest extends BaseTest
         $this->assertEquals('there', $updated->location());
         $this->assertEquals('superdweebie', $updated->getUsername());
         $this->assertEquals('Tim', $updated->getProfile()->getFirstName());
+        $this->assertEquals(false, $updated->getActive());
+        $this->assertCount(3, $updated->getGroups());
 
         $documentManager->remove($updated);
         $documentManager->flush();
@@ -75,16 +86,25 @@ class UnserializeModeTest extends BaseTest
         $user->addGroup(new Group('groupA'));
         $user->addGroup(new Group('groupB'));
         $user->setProfile(new Profile('Tim', 'Roediger'));
+        $user->setActive(true);
 
         $documentManager->persist($user);
         $documentManager->flush();
         $id = $user->getId();
+
+        $data = $this->serializer->toArray($user);
+        $groups = $data['groups'];
+        unset($groups[1]);
+
         $documentManager->clear();
 
+        /* @var $updated User */
         $updated = $this->unserializer->fromArray(
             [
                 'id' => $id,
-                'location' => 'there'
+                'location' => 'there',
+                'active' => false,
+                'groups' => $groups
             ],
             'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
             null,
@@ -92,8 +112,9 @@ class UnserializeModeTest extends BaseTest
         );
 
         $this->assertEquals('there', $updated->location());
+        $this->assertEquals(false, $updated->getActive());
         $this->assertEquals(null, $updated->getUsername());
         $this->assertEquals(null, $updated->getProfile());
-
+        $this->assertCount(1, $updated->getGroups());
     }
 }
