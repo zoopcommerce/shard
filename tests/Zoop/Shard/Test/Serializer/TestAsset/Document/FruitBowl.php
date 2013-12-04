@@ -3,7 +3,6 @@
 namespace Zoop\Shard\Test\Serializer\TestAsset\Document;
 
 use Doctrine\Common\Collections\ArrayCollection;
-
 //Annotation imports
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Zoop\Shard\Annotation\Annotations as Shard;
@@ -44,13 +43,21 @@ class FruitBowl
     /**
      * @ODM\EmbedOne(
      *     discriminatorMap={
-     *         "apple"="Zoop\Shard\Test\Serializer\TestAsset\Document\Apple",
-     *         "orange"="Zoop\Shard\Test\Serializer\TestAsset\Document\Orange"
+     *         "apple"="Zoop\Shard\Test\Serializer\TestAsset\Document\EmbeddedApple",
+     *         "orange"="Zoop\Shard\Test\Serializer\TestAsset\Document\EmbeddedOrange"
      *     }
      * )
      * @Shard\Serializer\Eager
      */
     protected $embeddedSingleFruit;
+
+    /**
+     * @ODM\EmbedOne(
+     *     targetDocument="Zoop\Shard\Test\Serializer\TestAsset\Document\EmbeddedApple"
+     * )
+     * @Shard\Serializer\Eager
+     */
+    protected $embeddedSingleFruitTarget;
 
     /**
      * @ODM\ReferenceOne(
@@ -108,6 +115,16 @@ class FruitBowl
     public function setReferencedSingleFruit($referencedSingleFruit)
     {
         $this->referencedSingleFruit = $referencedSingleFruit;
+    }
+
+    public function getEmbeddedSingleFruitTarget()
+    {
+        return $this->embeddedSingleFruitTarget;
+    }
+
+    public function setEmbeddedSingleFruitTarget(EmbeddedApple $embeddedSingleFruitTarget)
+    {
+        $this->embeddedSingleFruitTarget = $embeddedSingleFruitTarget;
     }
 
     public function __construct()

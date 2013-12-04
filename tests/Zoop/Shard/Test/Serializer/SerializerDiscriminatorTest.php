@@ -5,6 +5,8 @@ namespace Zoop\Shard\Test\Serializer;
 use Doctrine\Common\Collections\ArrayCollection;
 use Zoop\Shard\Manifest;
 use Zoop\Shard\Test\BaseTest;
+use Zoop\Shard\Test\Serializer\TestAsset\Document\AccessControl;
+use Zoop\Shard\Test\Serializer\TestAsset\Document\EmbeddedApple;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\Apple;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\Orange;
@@ -16,17 +18,15 @@ class SerializerDiscriminatorTest extends BaseTest
 {
     public function setUp()
     {
-        $manifest = new Manifest(
-            [
-                'models' => [
-                    __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
-                ],
-                'extension_configs' => [
-                    'extension.serializer' => true,
-                    'extension.odmcore' => true
-                ],
-            ]
-        );
+        $manifest = new Manifest([
+            'models' => [
+                __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
+            ],
+            'extension_configs' => [
+                'extension.serializer' => true,
+                'extension.odmcore' => true
+            ],
+        ]);
 
         $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
         $this->serializer = $manifest->getServiceManager()->get('serializer');
@@ -134,26 +134,76 @@ class SerializerDiscriminatorTest extends BaseTest
         $this->assertEquals($correct, $array);
     }
 
-    public function testSerializeSingleEmbeddedDiscriminator()
+    public function testSerializeSingleEmbeddedNoDiscriminator()
     {
+        $adminName = 'Admin Name';
+        $admin = new AccessControl\Administrator();
+        $admin->setName($adminName);
 
-        $apple = new Apple();
-        $apple->setVariety('granny smith');
+        $super1Name = 'Super User 1 Name';
+        $super1 = new AccessControl\SuperUser();
+        $super1->setName($super1Name);
 
-        $fruitBowl = new FruitBowl;
-        $fruitBowl->setEmbeddedSingleFruit($apple);
+        $super2Name = 'Super User 2 Name';
+        $super2 = new AccessControl\SuperUser();
+        $super2->setName($super2Name);
+
+        $admins = new AccessControl\Administrators();
+        $admins->setOwner($admin);
+
+        $admins->addUser($super1);
+        $admins->addUser($super2);
 
         $correct = array(
-            'embeddedSingleFruit' => [
-                '_doctrine_class_name' => 'apple',
-                'variety' => 'granny smith',
-                'type' => 'apple'
-            ]
+            'owner' => [
+                '_doctrine_class_name' => 'Administrator',
+                'name' => $adminName
+            ],
+            'users' => [
+                [
+                    '_doctrine_class_name' => 'SuperUser',
+                    'name' => $super1Name
+                ],
+                [
+                    '_doctrine_class_name' => 'SuperUser',
+                    'name' => $super2Name
+                ]
+            ],
         );
 
-        $array = $this->serializer->toArray($fruitBowl);
-
+        $array = $this->serializer->toArray($admins);
         $this->assertEquals($correct, $array);
+    }
+
+    public function testUnserializeSingleEmbeddedNoDiscriminator()
+    {
+        $adminName = 'Admin Name';
+        $super1Name = 'Super User 1 Name';
+        $super2Name = 'Super User 2 Name';
+
+        $data = array(
+            'owner' => [
+                '_doctrine_class_name' => 'Administrator',
+                'name' => $adminName
+            ],
+            'users' => [
+                [
+                    '_doctrine_class_name' => 'SuperUser',
+                    'name' => $super1Name
+                ],
+                [
+                    '_doctrine_class_name' => 'SuperUser',
+                    'name' => $super2Name
+                ]
+            ],
+        );
+
+        $testDoc = $this->unserializer->fromArray(
+            $data,
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\AccessControl\Administrators'
+        );
+
+        $this->assertTrue($testDoc instanceof AccessControl\Administrators);
     }
 
     public function testUnserializeReferenceDiscriminator()

@@ -173,8 +173,12 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
             $document = $this->modelManager->getRepository($metadata->name)->find($data[$field]);
         }
 
-        if (isset($mapping['discriminatorField']) && isset($data[$field][$mapping['discriminatorField']])) {
-            $targetClass = $mapping['discriminatorMap'][$data[$field][$mapping['discriminatorField']]];
+        if (isset($mapping['discriminatorMap'])) {
+            $discriminatorField = isset($mapping['discriminatorField']) ?
+                    $mapping['discriminatorField'] :
+                    '_doctrine_class_name';
+
+            $targetClass = $mapping['discriminatorMap'][$data[$field][$discriminatorField]];
         } else {
             $targetClass = $metadata->getAssociationTargetClass($field);
         }
