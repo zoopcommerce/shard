@@ -15,7 +15,8 @@ class Administrators extends AbstractGroup
      * @ODM\EmbedMany(
      *     discriminatorMap={
      *         "Administrator"  = "Zoop\Shard\Test\Serializer\TestAsset\Document\AccessControl\Administrator",
-     *         "SuperUser"      = "Zoop\Shard\Test\Serializer\TestAsset\Document\AccessControl\SuperUser"
+     *         "SuperUser"      = "Zoop\Shard\Test\Serializer\TestAsset\Document\AccessControl\SuperUser",
+     *         "Guest"          = "Zoop\Shard\Test\Serializer\TestAsset\Document\AccessControl\Guest"
      *     }
      * )
      */

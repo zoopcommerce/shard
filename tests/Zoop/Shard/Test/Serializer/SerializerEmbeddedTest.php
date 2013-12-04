@@ -3,9 +3,7 @@
 namespace Zoop\Shard\Test\Serializer;
 
 use Zoop\Shard\Manifest;
-use Zoop\Shard\Serializer\Unserializer;
 use Zoop\Shard\Test\BaseTest;
-use Zoop\Shard\Test\Serializer\TestAsset\Document\AccessControl;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\EmbeddedApple;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl;
 
