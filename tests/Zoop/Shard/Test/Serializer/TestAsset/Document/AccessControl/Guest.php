@@ -9,7 +9,7 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 /**
  * @ODM\EmbeddedDocument
  */
-class Administrator extends AbstractUser implements UserInterface
+class Guest extends AbstractUser implements UserInterface
 {
 
 }

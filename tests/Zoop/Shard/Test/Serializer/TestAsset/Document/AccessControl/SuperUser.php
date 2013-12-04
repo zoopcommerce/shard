@@ -11,5 +11,5 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  */
 class SuperUser extends AbstractUser implements UserInterface
 {
-    
+
 }

@@ -105,4 +105,100 @@ class SerializerEmbeddedTest extends BaseTest
         $this->assertTrue($testDoc instanceof FruitBowl);
         $this->assertTrue($testDoc->getEmbeddedSingleFruit() instanceof EmbeddedApple);
     }
+
+    public function testUnserializeUpdateEmbedMany()
+    {
+        //create the ACL group
+        $admins = new AccessControl\Administrators();
+
+        //create the users
+        $adminName = 'Admin Name';
+        $admin = new AccessControl\Administrator();
+        $admin->setName($adminName);
+
+        $super1Name = 'Super User 1 Name';
+        $super1 = new AccessControl\SuperUser();
+        $super1->setName($super1Name);
+
+        $super2Name = 'Super User 2 Name';
+        $super2 = new AccessControl\SuperUser();
+        $super2->setName($super2Name);
+
+        //add users to group and set the group owner
+        $admins->setOwner($admin);
+        $admins->addUser($super1);
+        $admins->addUser($super2);
+
+        //save the document first
+        $this->documentManager->persist($admin);
+        $this->documentManager->flush();
+
+        //get the serialized data
+        $data = $this->serializer->toArray($admins);
+
+        //change the number of users in the group back to 1
+        unset($data['users'][1]);
+
+        /* @var $mergedDoc AccessControl\Administrators */
+        $mergedDoc = $this->unserializer->fromArray(
+            $data,
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\AccessControl\Administrators',
+            $admins,
+            Unserializer::UNSERIALIZE_UPDATE
+        );
+        $this->assertTrue($mergedDoc instanceof AccessControl\Administrators);
+        $this->assertCount(1, $mergedDoc->getUsers());
+
+        $this->documentManager->remove($admins);
+        $this->documentManager->flush();
+    }
+
+    public function testUnserializePatchEmbedMany()
+    {
+        //create the ACL group
+        $admins = new AccessControl\Administrators();
+
+        //create the users
+        $adminName = 'Admin Name';
+        $admin = new AccessControl\Administrator();
+        $admin->setName($adminName);
+
+        $super1Name = 'Super User 1 Name';
+        $super1 = new AccessControl\SuperUser();
+        $super1->setName($super1Name);
+
+        $super2Name = 'Super User 2 Name';
+        $super2 = new AccessControl\SuperUser();
+        $super2->setName($super2Name);
+
+        //add users to group and set the group owner
+        $admins->setOwner($admin);
+        $admins->addUser($super1);
+        $admins->addUser($super2);
+
+        //save the document first
+        $this->documentManager->persist($admin);
+        $this->documentManager->flush();
+
+        //get the serialized data
+        $data = $this->serializer->toArray($admins);
+
+        //add another user
+        $data['users'][] = [
+            'name' => "Guest User Name",
+            '_doctrine_class_name' => "Guest"
+        ];
+
+        /* @var $mergedDoc AccessControl\Administrators */
+        $mergedDoc = $this->unserializer->fromArray(
+            $data,
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\AccessControl\Administrators',
+            $admins
+        );
+        $this->assertTrue($mergedDoc instanceof AccessControl\Administrators);
+        $this->assertCount(3, $mergedDoc->getUsers());
+
+        $this->documentManager->remove($admins);
+        $this->documentManager->flush();
+    }
 }
