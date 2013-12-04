@@ -12,7 +12,6 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  */
 class FruitBowl
 {
-
     /**
      * @ODM\Id(strategy="UUID")
      */
@@ -133,5 +132,4 @@ class FruitBowl
         $this->embeddedFruit = new ArrayCollection();
         $this->referencedFruit = new ArrayCollection();
     }
-
 }

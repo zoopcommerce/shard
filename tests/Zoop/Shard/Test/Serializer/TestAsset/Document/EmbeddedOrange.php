@@ -11,7 +11,6 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  */
 class EmbeddedOrange
 {
-
     /**
      *
      * @ODM\String
@@ -27,5 +26,4 @@ class EmbeddedOrange
     {
         $this->size = $size;
     }
-
 }

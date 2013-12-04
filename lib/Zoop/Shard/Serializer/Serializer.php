@@ -154,7 +154,7 @@ class Serializer implements ServiceLocatorAwareInterface, ModelManagerAwareInter
     {
         $mapping = $metadata->fieldMappings[$field];
         $serializedDocument = null;
-        
+
         if (isset($mapping['embedded'])) {
             if (is_array($value)) {
                 $serializedDocument = $this->applySerializeMetadataToArray($value, $mapping['targetDocument']);
@@ -178,7 +178,7 @@ class Serializer implements ServiceLocatorAwareInterface, ModelManagerAwareInter
             $serializedDocument[$discriminatorField] =
                 array_search(get_class($value), $mapping['discriminatorMap']);
         }
-        
+
         return $serializedDocument;
     }
 

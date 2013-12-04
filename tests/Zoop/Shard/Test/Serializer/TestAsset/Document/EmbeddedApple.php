@@ -11,7 +11,6 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  */
 class EmbeddedApple
 {
-
     /**
      *
      * @ODM\String
@@ -27,5 +26,4 @@ class EmbeddedApple
     {
         $this->color = $color;
     }
-
 }

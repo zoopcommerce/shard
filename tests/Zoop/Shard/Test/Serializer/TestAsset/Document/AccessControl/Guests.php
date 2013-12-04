@@ -11,7 +11,6 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  */
 class Guests extends AbstractGroup
 {
-
     /**
      * @ODM\EmbeddMany(
      *     discriminatorMap={
@@ -35,5 +34,4 @@ class Guests extends AbstractGroup
     {
         $this->users[] = $user;
     }
-
 }

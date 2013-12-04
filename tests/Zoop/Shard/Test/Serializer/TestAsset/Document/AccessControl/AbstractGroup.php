@@ -16,7 +16,6 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  */
 abstract class AbstractGroup
 {
-
     /**
      * @ODM\Id(strategy="UUID")
      */
@@ -45,5 +44,4 @@ abstract class AbstractGroup
     {
         $this->owner = $owner;
     }
-
 }

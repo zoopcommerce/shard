@@ -8,7 +8,6 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 
 abstract class AbstractUser
 {
-
     /**
      * @ODM\String
      */
@@ -23,5 +22,4 @@ abstract class AbstractUser
     {
         $this->name = $name;
     }
-
 }

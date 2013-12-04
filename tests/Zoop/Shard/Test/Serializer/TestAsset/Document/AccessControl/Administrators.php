@@ -11,7 +11,6 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  */
 class Administrators extends AbstractGroup
 {
-
     /**
      * @ODM\EmbedMany(
      *     discriminatorMap={
@@ -36,5 +35,4 @@ class Administrators extends AbstractGroup
     {
         $this->users[] = $user;
     }
-
 }

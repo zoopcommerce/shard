@@ -11,11 +11,9 @@ use Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl;
 
 class SerializerEmbeddedTest extends BaseTest
 {
-
     public function setUp()
     {
-        $manifest = new Manifest(
-                [
+        $manifest = new Manifest([
             'models' => [
                 __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
             ],
@@ -23,8 +21,7 @@ class SerializerEmbeddedTest extends BaseTest
                 'extension.serializer' => true,
                 'extension.odmcore' => true
             ],
-                ]
-        );
+        ]);
 
         $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
         $this->serializer = $manifest->getServiceManager()->get('serializer');
@@ -61,7 +58,8 @@ class SerializerEmbeddedTest extends BaseTest
 
         /* @var $testDoc FruitBowl */
         $testDoc = $this->unserializer->fromArray(
-                $data, 'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
+            $data,
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
         );
 
         $this->assertTrue($testDoc instanceof FruitBowl);
@@ -100,11 +98,11 @@ class SerializerEmbeddedTest extends BaseTest
 
         /* @var $testDoc FruitBowl */
         $testDoc = $this->unserializer->fromArray(
-                $data, 'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
+            $data,
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl'
         );
 
         $this->assertTrue($testDoc instanceof FruitBowl);
         $this->assertTrue($testDoc->getEmbeddedSingleFruit() instanceof EmbeddedApple);
     }
-
 }
