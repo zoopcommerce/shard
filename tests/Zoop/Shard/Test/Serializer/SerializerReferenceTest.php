@@ -79,11 +79,12 @@ class SerializerReferenceTest extends BaseTest
         $this->assertArrayHasKey('cakes', $array['flavour']);
 
         $array['ingredients'][3] = ['name' => 'coconut'];
+
         $cake = $this->unserializer->fromArray(
             $array,
             'Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager'
         );
-
+        
         $this->assertInstanceOf('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager', $cake);
         $this->assertEquals('chocolate', $cake->getFlavour()->getName());
         $this->assertCount(4, $cake->getIngredients());

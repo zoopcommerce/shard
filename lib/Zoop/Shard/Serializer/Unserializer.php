@@ -8,6 +8,7 @@ namespace Zoop\Shard\Serializer;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Doctrine\ODM\MongoDB\PersistentCollection;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Exception;
@@ -16,8 +17,6 @@ use Zoop\Shard\Core\ModelManagerAwareTrait;
 
 /**
  * Provides methods for unserializing models
- *
- * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
@@ -174,16 +173,8 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
         if (is_string($data[$field])) {
             $document = $this->modelManager->getRepository($metadata->name)->find($data[$field]);
         }
-
-        if (isset($mapping['discriminatorMap'])) {
-            $discriminatorField = isset($mapping['discriminatorField']) ?
-                    $mapping['discriminatorField'] :
-                    '_doctrine_class_name';
-
-            $targetClass = $mapping['discriminatorMap'][$data[$field][$discriminatorField]];
-        } else {
-            $targetClass = $metadata->getAssociationTargetClass($field);
-        }
+        
+        $targetClass = $this->getTargetClass($metadata, $data[$field], $field);
 
         return $this->unserialize(
             $data[$field],
@@ -192,49 +183,128 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
             $mode
         );
     }
-
-    /**
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     */
+    
     protected function unserializeCollection($data, ClassMetadata $metadata, $document, $field, $mode)
     {
-        if ($mode == self::UNSERIALIZE_UPDATE || !($collection = $metadata->getFieldValue($document, $field))) {
+        if ($mode == self::UNSERIALIZE_UPDATE) {
+            $collection = $this->unserializeUpdateCollection($data, $metadata, $document, $field);
+        } elseif ($mode == self::UNSERIALIZE_PATCH) {
+            $collection = $this->unserializePatchCollection($data, $metadata, $document, $field);
+        } else {
             $collection = new ArrayCollection;
         }
 
-        if (isset($data[$field])) {
-            $targetClass = $metadata->getAssociationTargetClass($field);
+        return $collection;
+    }
+
+    protected function unserializeUpdateCollection($data, ClassMetadata $metadata, $document, $field)
+    {
+        $collection = new ArrayCollection;
+        if (isset($data[$field]) && !empty($data[$field])) {
             $mapping = $metadata->fieldMappings[$field];
 
+            foreach ($data[$field] as $dataItem) {
+                if (isset($dataItem['$ref'])) {
+                    $collection[] = $this->getDocumentFromRef($dataItem['$ref'], $mapping);
+                } else {
+                    $collection[] = $this->unserialize($dataItem, $this->getTargetClass($metadata, $dataItem, $field));
+                }
+            }
+        } else {
+            $this->emptyCollection($metadata, $document, $field);
+        }
+
+        return $collection;
+    }
+
+    protected function unserializePatchCollection($data, ClassMetadata $metadata, $document, $field)
+    {
+        //accommodates persistent collections.
+        $oldCollection = $metadata->getFieldValue($document, $field);
+        $collection = new ArrayCollection;
+        
+        if (isset($data[$field]) && !empty($data[$field])) {
+            $mapping = $metadata->fieldMappings[$field];
             foreach ($data[$field] as $index => $dataItem) {
                 if (isset($dataItem['$ref'])) {
-                    if (isset($collection[$index])) {
-                        $collection[$index] = $this->getDocumentFromRef($dataItem['$ref'], $mapping);
-                    } else {
-                        $collection[] = $this->getDocumentFromRef($dataItem['$ref'], $mapping);
-                    }
+                    $collection[] = $this->getDocumentFromRef($dataItem['$ref'], $mapping);
                 } else {
-                    if (isset($mapping['discriminatorMap'])) {
-                        $discriminatorField = isset($mapping['discriminatorField']) ?
-                            $mapping['discriminatorField'] :
-                            '_doctrine_class_name';
-                        $targetClass = $mapping['discriminatorMap'][$dataItem[$discriminatorField]];
-                    }
-
-                    if (isset($collection[$index])) {
-                        $collection[$index] = $this->unserialize($dataItem, $targetClass, $collection[$index], $mode);
+                    $targetClass = $this->getTargetClass($metadata, $dataItem, $field);
+                    if (isset($oldCollection[$index])) {
+                        $collection[] = $this->unserialize(
+                            $dataItem,
+                            $targetClass,
+                            $oldCollection[$index],
+                            self::UNSERIALIZE_PATCH
+                        );
                     } else {
                         $collection[] = $this->unserialize($dataItem, $targetClass);
                     }
                 }
             }
-        } elseif ($mode == self::UNSERIALIZE_UPDATE) {
+            
+            if ($oldCollection instanceof PersistentCollection) {
+                $oldCollection->clear();
+                foreach ($collection as $index => $entry) {
+                    $oldCollection[$index] = $entry;
+                }
+                $collection = $oldCollection;
+            }
+        } else {
+            $collection = new ArrayCollection;
+            $this->emptyCollection($metadata, $document, $field);
+        }
+        return $collection;
+    }
+    
+    
+
+    protected function unserializePatchPersistenCollection($data, ClassMetadata $metadata, $document, $field)
+    {
+        $oldCollection = $metadata->getFieldValue($document, $field);
+        if(!($oldCollection = $metadata->getFieldValue($document, $field))) {
+            $collection = new ArrayCollection;
+        } else {
+            if($oldCollection instanceof PersistentCollection) {
+                $collection->clear();
+            } else {
+                $collection = new ArrayCollection;
+            }
+        }
+        
+        if (isset($data[$field]) && !empty($data[$field])) {
+            $mapping = $metadata->fieldMappings[$field];
+            foreach ($data[$field] as $index => $dataItem) {
+                if (isset($dataItem['$ref'])) {
+                    $collection[] = $this->getDocumentFromRef($dataItem['$ref'], $mapping);
+                } else {
+                    $targetClass = $this->getTargetClass($metadata, $dataItem, $field);
+                    if ($oldCollection[$index]) {
+                        $collection[] = $this->unserialize(
+                            $dataItem,
+                            $targetClass,
+                            $oldCollection[$index],
+                            self::UNSERIALIZE_PATCH
+                        );
+                    } else {
+                        $collection[] = $this->unserialize($dataItem, $targetClass);
+                    }
+                }
+            }
+        } else {
+            $this->emptyCollection($metadata, $document, $field);
+        }
+        return $collection;
+    }
+
+    protected function emptyCollection(ClassMetadata $metadata, $document, $field)
+    {
+        $collection = $metadata->getFieldValue($document, $field);
+        if ($collection) {
             foreach ($collection->getKeys() as $key) {
                 $collection->remove($key);
             }
         }
-
-        return $collection;
     }
 
     protected function unserializeSingleValue($data, ClassMetadata $metadata, $field)
@@ -274,5 +344,20 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
     protected function getTypeSerializer($type)
     {
         return $this->serviceLocator->get($this->typeSerializers[$type]);
+    }
+
+    protected function getTargetClass(ClassMetadata $metadata, $data, $field)
+    {
+        $mapping = $metadata->fieldMappings[$field];
+        if (isset($mapping['discriminatorMap'])) {
+            $discriminatorField = isset($mapping['discriminatorField']) ?
+            $mapping['discriminatorField'] :
+            '_doctrine_class_name';
+            $targetClass = $mapping['discriminatorMap'][$data[$discriminatorField]];
+        } else {
+            $targetClass = $metadata->getAssociationTargetClass($field);
+        }
+
+        return $targetClass;
     }
 }
