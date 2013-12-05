@@ -24,8 +24,7 @@ class Extension extends AbstractExtension
         'invokables' => [
             'subscriber.serializer.annotation'     => 'Zoop\Shard\Serializer\AnnotationSubscriber',
             'subscriber.serializer.mainsubscriber' => 'Zoop\Shard\Serializer\MainSubscriber',
-            'serializer.reference.refLazy'         => 'Zoop\Shard\Serializer\Reference\RefLazy',
-            'serializer.reference.simpleLazy'      => 'Zoop\Shard\Serializer\Reference\SimpleLazy',
+            'serializer.reference.lazy'            => 'Zoop\Shard\Serializer\Reference\Lazy',
             'serializer.reference.eager'           => 'Zoop\Shard\Serializer\Reference\Eager',
             'serializer.type.dateToISO8601'        => 'Zoop\Shard\Serializer\Type\DateToISO8601',
             'serializer.type.dateToTimestamp'      => 'Zoop\Shard\Serializer\Type\DateToTimestamp'

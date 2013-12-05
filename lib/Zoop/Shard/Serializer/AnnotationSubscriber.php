@@ -28,9 +28,8 @@ class AnnotationSubscriber implements EventSubscriber
         return [
             Shard\Serializer\Eager::EVENT,
             Shard\Serializer\Ignore::EVENT,
-            Shard\Serializer\RefLazy::EVENT,
+            Shard\Serializer\Lazy::EVENT,
             Shard\Serializer\ReferenceSerializer::EVENT,
-            Shard\Serializer\SimpleLazy::EVENT,
             Shard\Unserializer\Ignore::EVENT,
         ];
     }
@@ -82,12 +81,12 @@ class AnnotationSubscriber implements EventSubscriber
      *
      * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
      */
-    public function annotationSerializerRefLazy(AnnotationEventArgs $eventArgs)
+    public function annotationSerializerLazy(AnnotationEventArgs $eventArgs)
     {
         $metadata = $eventArgs->getMetadata();
         $serializeMetadata = $this->getSerializerMetadata($metadata);
         $serializeMetadata['fields'][$eventArgs->getReflection()->getName()]['referenceSerializer'] =
-            'serializer.reference.refLazy';
+            'serializer.reference.lazy';
 
         $metadata->setSerializer($serializeMetadata);
     }
@@ -103,20 +102,6 @@ class AnnotationSubscriber implements EventSubscriber
         $serializeMetadata = $this->getSerializerMetadata($metadata);
         $serializeMetadata['fields'][$eventArgs->getReflection()->getName()]['referenceSerializer'] =
             $annotation->value;
-
-        $metadata->setSerializer($serializeMetadata);
-    }
-
-    /**
-     *
-     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
-     */
-    public function annotationSerializerSimpleLazy(AnnotationEventArgs $eventArgs)
-    {
-        $metadata = $eventArgs->getMetadata();
-        $serializeMetadata = $this->getSerializerMetadata($metadata);
-        $serializeMetadata['fields'][$eventArgs->getReflection()->getName()]['referenceSerializer'] =
-            'serializer.reference.simpleLazy';
 
         $metadata->setSerializer($serializeMetadata);
     }

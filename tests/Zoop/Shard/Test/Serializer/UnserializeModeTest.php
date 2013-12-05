@@ -30,7 +30,7 @@ class UnserializeModeTest extends BaseTest
         $this->unserializer = $manifest->getServiceManager()->get('unserializer');
     }
 
-    public function testUnserializePatch()
+    public function testUnserializePatchGeneral()
     {
         $documentManager = $this->documentManager;
 
@@ -38,10 +38,44 @@ class UnserializeModeTest extends BaseTest
         $user->setUsername('superdweebie');
         $user->setPassword('secret'); //uses Serialize Ignore annotation
         $user->defineLocation('here');
-        $user->addGroup(new Group('groupA'));
-        $user->addGroup(new Group('groupB'));
         $user->setProfile(new Profile('Tim', 'Roediger'));
         $user->setActive(true);
+
+        $documentManager->persist($user);
+        $documentManager->flush();
+
+        $id = $user->getId();
+        $documentManager->clear();
+        /* @var $updated User */
+        $updated = $this->unserializer->fromArray(
+            [
+                'id' => $id,
+                'location' => 'there',
+                'profile' => [
+                    'firstname' => 'Tom'
+                ],
+                'active' => false
+            ],
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
+        );
+
+        $this->assertEquals('there', $updated->location());
+        $this->assertEquals('superdweebie', $updated->getUsername());
+        $this->assertEquals('Tom', $updated->getProfile()->getFirstname());
+        $this->assertEquals(false, $updated->getActive());
+
+        $documentManager->remove($updated);
+        $documentManager->flush();
+        $documentManager->clear();
+    }
+
+    public function testUnserializePatchAddItemToCollection()
+    {
+        $documentManager = $this->documentManager;
+
+        $user = new User();
+        $user->addGroup(new Group('groupA'));
+        $user->addGroup(new Group('groupB'));
 
         $documentManager->persist($user);
         $documentManager->flush();
@@ -54,20 +88,15 @@ class UnserializeModeTest extends BaseTest
         ];
         $documentManager->clear();
 
+        /* @var $updated User */
         $updated = $this->unserializer->fromArray(
             [
                 'id' => $id,
-                'location' => 'there',
-                'active' => false,
                 'groups' => $groups
             ],
             'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
         );
 
-        $this->assertEquals('there', $updated->location());
-        $this->assertEquals('superdweebie', $updated->getUsername());
-        $this->assertEquals('Tim', $updated->getProfile()->getFirstName());
-        $this->assertEquals(false, $updated->getActive());
         $this->assertCount(3, $updated->getGroups());
 
         $documentManager->remove($updated);
@@ -75,7 +104,70 @@ class UnserializeModeTest extends BaseTest
         $documentManager->clear();
     }
 
-    public function testUnserializeUpdate()
+    public function testUnserializePatchRemoveItemFromCollection()
+    {
+        $documentManager = $this->documentManager;
+
+        $user = new User();
+        $user->addGroup(new Group('groupA'));
+        $user->addGroup(new Group('groupB'));
+
+        $documentManager->persist($user);
+        $documentManager->flush();
+
+        $id = $user->getId();
+        $data = $this->serializer->toArray($user);
+        $groups = $data['groups'];
+        unset($groups[1]);
+        $documentManager->clear();
+
+        /* @var $updated User */
+        $updated = $this->unserializer->fromArray(
+            [
+                'id' => $id,
+                'groups' => $groups
+            ],
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
+        );
+
+        $this->assertCount(1, $updated->getGroups());
+
+        $documentManager->remove($updated);
+        $documentManager->flush();
+        $documentManager->clear();
+    }
+
+    public function testUnserializePatchEmptyCollection()
+    {
+        $documentManager = $this->documentManager;
+
+        $user = new User();
+        $user->addGroup(new Group('groupA'));
+        $user->addGroup(new Group('groupB'));
+
+        $documentManager->persist($user);
+        $documentManager->flush();
+
+        $id = $user->getId();
+        $documentManager->clear();
+
+        /* @var $updated User */
+        $updated = $this->unserializer->fromArray(
+            [
+                'id' => $id,
+                'groups' => []
+            ],
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
+        );
+
+        $this->assertCount(0, $updated->getGroups());
+
+        $documentManager->remove($updated);
+        $documentManager->flush();
+        $documentManager->clear();
+    }
+
+    public function testUnserializeUpdateGeneral()
     {
         $documentManager = $this->documentManager;
 
@@ -83,19 +175,12 @@ class UnserializeModeTest extends BaseTest
         $user->setUsername('superdweebie');
         $user->setPassword('secret'); //uses Serialize Ignore annotation
         $user->defineLocation('here');
-        $user->addGroup(new Group('groupA'));
-        $user->addGroup(new Group('groupB'));
         $user->setProfile(new Profile('Tim', 'Roediger'));
         $user->setActive(true);
 
         $documentManager->persist($user);
         $documentManager->flush();
         $id = $user->getId();
-
-        $data = $this->serializer->toArray($user);
-        $groups = $data['groups'];
-        unset($groups[1]);
-
         $documentManager->clear();
 
         /* @var $updated User */
@@ -104,7 +189,9 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'location' => 'there',
                 'active' => false,
-                'groups' => $groups
+                'profile' => [
+                    'firstname' => 'Tom'
+                ]
             ],
             'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
             null,
@@ -114,7 +201,112 @@ class UnserializeModeTest extends BaseTest
         $this->assertEquals('there', $updated->location());
         $this->assertEquals(false, $updated->getActive());
         $this->assertEquals(null, $updated->getUsername());
-        $this->assertEquals(null, $updated->getProfile());
+        $this->assertEquals('Tom', $updated->getProfile()->getFirstname());
+        $this->assertEquals(null, $updated->getProfile()->getLastname());
+
+        $documentManager->remove($updated);
+        $documentManager->flush();
+        $documentManager->clear();
+    }
+
+    public function testUnserializeUpdateAddItemToCollection()
+    {
+        $documentManager = $this->documentManager;
+
+        $user = new User();
+        $user->addGroup(new Group('groupA'));
+        $user->addGroup(new Group('groupB'));
+
+        $documentManager->persist($user);
+        $documentManager->flush();
+        $id = $user->getId();
+        $data = $this->serializer->toArray($user);
+        $groups = $data['groups'];
+        $groups[] = [
+            'name'=> 'groupC'
+        ];
+        $documentManager->clear();
+
+        /* @var $updated User */
+        $updated = $this->unserializer->fromArray(
+            [
+                'id' => $id,
+                'groups' => $groups
+            ],
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
+            null,
+            Unserializer::UNSERIALIZE_UPDATE
+        );
+
+        $this->assertCount(3, $updated->getGroups());
+
+        $documentManager->remove($updated);
+        $documentManager->flush();
+        $documentManager->clear();
+    }
+
+    public function testUnserializeUpdateRemoveItemFromCollection()
+    {
+        $documentManager = $this->documentManager;
+
+        $user = new User();
+        $user->addGroup(new Group('groupA'));
+        $user->addGroup(new Group('groupB'));
+
+        $documentManager->persist($user);
+        $documentManager->flush();
+        $id = $user->getId();
+        $data = $this->serializer->toArray($user);
+        $groups = $data['groups'];
+        unset($groups[1]);
+        $documentManager->clear();
+
+        /* @var $updated User */
+        $updated = $this->unserializer->fromArray(
+            [
+                'id' => $id,
+                'groups' => $groups
+            ],
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
+            null,
+            Unserializer::UNSERIALIZE_UPDATE
+        );
+
         $this->assertCount(1, $updated->getGroups());
+
+        $documentManager->remove($updated);
+        $documentManager->flush();
+        $documentManager->clear();
+    }
+
+    public function testUnserializeUpdateEmptyCollection()
+    {
+        $documentManager = $this->documentManager;
+
+        $user = new User();
+        $user->addGroup(new Group('groupA'));
+        $user->addGroup(new Group('groupB'));
+
+        $documentManager->persist($user);
+        $documentManager->flush();
+        $id = $user->getId();
+        $documentManager->clear();
+
+        /* @var $updated User */
+        $updated = $this->unserializer->fromArray(
+            [
+                'id' => $id,
+                'groups' => []
+            ],
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
+            null,
+            Unserializer::UNSERIALIZE_UPDATE
+        );
+
+        $this->assertCount(0, $updated->getGroups());
+
+        $documentManager->remove($updated);
+        $documentManager->flush();
+        $documentManager->clear();
     }
 }

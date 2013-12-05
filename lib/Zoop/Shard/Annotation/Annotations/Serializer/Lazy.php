@@ -9,16 +9,16 @@ namespace Zoop\Shard\Annotation\Annotations\Serializer;
 use Doctrine\Common\Annotations\Annotation;
 
 /**
- * Shorthand for @ReferenceSerializer("Zoop\Shard\Serializer\Reference\SimpleLazy")
+ * Shorthand for @ReferenceSerializer("Zoop\Shard\Serializer\Reference\Lazy")
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  *
  * @Annotation
  */
-final class SimpleLazy extends Annotation
+final class Lazy extends Annotation
 {
-    const EVENT = 'annotationSerializerSimpleLazy';
+    const EVENT = 'annotationSerializerLazy';
 
     public $value = true;
 }

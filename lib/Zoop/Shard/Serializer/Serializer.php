@@ -163,11 +163,9 @@ class Serializer implements ServiceLocatorAwareInterface, ModelManagerAwareInter
             }
         } else {
             //serialize reference
-            if ($this->nestingDepth < $this->maxNestingDepth) {
-                $this->nestingDepth++;
-                $serializedDocument = $this->getReferenceSerializer($field, $metadata)->serialize($value);
-                $this->nestingDepth--;
-            }
+            $this->nestingDepth++;
+            $serializedDocument = $this->getReferenceSerializer($field, $metadata)->serialize($value);
+            $this->nestingDepth--;
         }
 
         //add discriminator field if required
@@ -196,19 +194,17 @@ class Serializer implements ServiceLocatorAwareInterface, ModelManagerAwareInter
                 $result = $this->serializeCollectionItem($embedDocument, $index, $mapping, $this, $result);
             }
         } else {
-            if ($this->nestingDepth < $this->maxNestingDepth) {
-                $this->nestingDepth++;
-                foreach ($value as $index => $referenceDocument) {
-                    $result = $this->serializeCollectionItem(
-                        $referenceDocument,
-                        $index,
-                        $mapping,
-                        $this->getReferenceSerializer($field, $metadata),
-                        $result
-                    );
-                }
-                $this->nestingDepth--;
+            $this->nestingDepth++;
+            foreach ($value as $index => $referenceDocument) {
+                $result = $this->serializeCollectionItem(
+                    $referenceDocument,
+                    $index,
+                    $mapping,
+                    $this->getReferenceSerializer($field, $metadata),
+                    $result
+                );
             }
+            $this->nestingDepth--;
         }
 
         if (count($result) == 0) {
@@ -231,6 +227,7 @@ class Serializer implements ServiceLocatorAwareInterface, ModelManagerAwareInter
             $serializedDocument[$discriminatorField] =
                 array_search(get_class($document), $mapping['discriminatorMap']);
         }
+
         if ($mapping['strategy'] == 'set') {
             $targetMetadata = $this->modelManager->getClassMetadata(get_class($document));
             if (isset($serializedDocument[$targetMetadata->getIdentifier()])) {
@@ -262,10 +259,12 @@ class Serializer implements ServiceLocatorAwareInterface, ModelManagerAwareInter
     {
         $serializerMetadata = $metadata->getSerializer();
 
-        if (isset($serializerMetadata['fields'][$field]['referenceSerializer'])) {
+        if ($this->nestingDepth <= $this->maxNestingDepth &&
+            isset($serializerMetadata['fields'][$field]['referenceSerializer'])
+        ) {
             $name = $serializerMetadata['fields'][$field]['referenceSerializer'];
         } else {
-            $name = 'serializer.reference.refLazy';
+            $name = 'serializer.reference.lazy';
         }
 
         return $this->serviceLocator->get($name);
