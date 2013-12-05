@@ -11,7 +11,7 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 /**
  * @ODM\Document
  */
-class CakeRefLazy
+class CakeLazy
 {
     /**
      * @ODM\Id(strategy="UUID")
@@ -20,13 +20,13 @@ class CakeRefLazy
 
     /**
      * @ODM\ReferenceMany(targetDocument="Ingredient")
-     * @Shard\Serializer\RefLazy
+     * @Shard\Serializer\Lazy
      */
     protected $ingredients;
 
     /**
      * @ODM\ReferenceOne(targetDocument="Flavour")
-     * @Shard\Serializer\RefLazy
+     * @Shard\Serializer\Lazy
      */
     protected $flavour;
 

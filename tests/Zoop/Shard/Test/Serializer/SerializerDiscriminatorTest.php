@@ -6,7 +6,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Zoop\Shard\Manifest;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\AccessControl;
-use Zoop\Shard\Test\Serializer\TestAsset\Document\EmbeddedApple;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\Apple;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\FruitBowl;
 use Zoop\Shard\Test\Serializer\TestAsset\Document\Orange;
@@ -246,8 +245,8 @@ class SerializerDiscriminatorTest extends BaseTest
 
         $data = array(
             'referencedFruit' => [
-                ['$ref' => 'Fruit/' . $apple->getId()],
-                ['$ref' => 'Fruit/' . $orange->getId()]
+                ['$ref' => $apple->getId(), 'type' => 'apple'],
+                ['$ref' => $orange->getId(), 'type' => 'orange']
             ]
         );
 
@@ -279,7 +278,7 @@ class SerializerDiscriminatorTest extends BaseTest
         $this->documentManager->flush();
 
         $data = array(
-            'referencedSingleFruit' => ['$ref' => 'Fruit/' . $apple->getId()]
+            'referencedSingleFruit' => ['$ref' => $apple->getId(), 'type' => 'apple']
         );
 
         $testDoc = $this->unserializer->fromArray(

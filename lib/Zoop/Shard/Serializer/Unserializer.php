@@ -36,6 +36,7 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
     {
         $this->typeSerializers = $typeSerializers;
     }
+
     public function fieldList(ClassMetadata $metadata, $includeId = true)
     {
         $return = [];
@@ -118,9 +119,7 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
 
         // Check for reference
         if (isset($data['$ref'])) {
-            $pieces = explode('/', $data['$ref']);
-
-            return $this->modelManager->getRepository($metadata->name)->find($pieces[count($pieces) - 1]);
+            return $this->modelManager->getRepository($metadata->name)->find($data['$ref']);
         }
 
         // Attempt to load prexisting model
@@ -164,16 +163,16 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
             return null;
         }
 
-        $mapping = $metadata->fieldMappings[$field];
-
         if (isset($data[$field]['$ref'])) {
-            return $this->getDocumentFromRef($data[$field]['$ref'], $mapping);
+            return $this->modelManager
+                ->getRepository($this->getTargetClass($metadata, $data[$field], $field))
+                ->find($data[$field]['$ref']);
         }
 
         if (is_string($data[$field])) {
             $document = $this->modelManager->getRepository($metadata->name)->find($data[$field]);
         }
-        
+
         $targetClass = $this->getTargetClass($metadata, $data[$field], $field);
 
         return $this->unserialize(
@@ -183,35 +182,39 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
             $mode
         );
     }
-    
+
     protected function unserializeCollection($data, ClassMetadata $metadata, $document, $field, $mode)
     {
-        if ($mode == self::UNSERIALIZE_UPDATE) {
-            $collection = $this->unserializeUpdateCollection($data, $metadata, $document, $field);
-        } elseif ($mode == self::UNSERIALIZE_PATCH) {
-            $collection = $this->unserializePatchCollection($data, $metadata, $document, $field);
-        } else {
-            $collection = new ArrayCollection;
-        }
 
-        return $collection;
-    }
-
-    protected function unserializeUpdateCollection($data, ClassMetadata $metadata, $document, $field)
-    {
-        $collection = new ArrayCollection;
         if (isset($data[$field]) && !empty($data[$field])) {
-            $mapping = $metadata->fieldMappings[$field];
-
-            foreach ($data[$field] as $dataItem) {
-                if (isset($dataItem['$ref'])) {
-                    $collection[] = $this->getDocumentFromRef($dataItem['$ref'], $mapping);
-                } else {
-                    $collection[] = $this->unserialize($dataItem, $this->getTargetClass($metadata, $dataItem, $field));
-                }
+            if ($mode == self::UNSERIALIZE_UPDATE) {
+                return $this->unserializeUpdateCollection($data, $metadata, $field);
+            } else {
+                return $this->unserializePatchCollection($data, $metadata, $document, $field);
             }
         } else {
-            $this->emptyCollection($metadata, $document, $field);
+            //empty existing collection
+            $collection = $metadata->getFieldValue($document, $field);
+            if ($collection) {
+                foreach ($collection->getKeys() as $key) {
+                    $collection->remove($key);
+                }
+            }
+            return new ArrayCollection;
+        }
+    }
+
+    protected function unserializeUpdateCollection($data, ClassMetadata $metadata, $field)
+    {
+        $collection = new ArrayCollection;
+
+        foreach ($data[$field] as $dataItem) {
+            $targetClass = $this->getTargetClass($metadata, $dataItem, $field);
+            if (isset($dataItem['$ref'])) {
+                $collection[] = $this->modelManager->getRepository($targetClass)->find($dataItem['$ref']);
+            } else {
+                $collection[] = $this->unserialize($dataItem, $targetClass);
+            }
         }
 
         return $collection;
@@ -222,89 +225,34 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
         //accommodates persistent collections.
         $oldCollection = $metadata->getFieldValue($document, $field);
         $collection = new ArrayCollection;
-        
-        if (isset($data[$field]) && !empty($data[$field])) {
-            $mapping = $metadata->fieldMappings[$field];
-            foreach ($data[$field] as $index => $dataItem) {
-                if (isset($dataItem['$ref'])) {
-                    $collection[] = $this->getDocumentFromRef($dataItem['$ref'], $mapping);
-                } else {
-                    $targetClass = $this->getTargetClass($metadata, $dataItem, $field);
-                    if (isset($oldCollection[$index])) {
-                        $collection[] = $this->unserialize(
-                            $dataItem,
-                            $targetClass,
-                            $oldCollection[$index],
-                            self::UNSERIALIZE_PATCH
-                        );
-                    } else {
-                        $collection[] = $this->unserialize($dataItem, $targetClass);
-                    }
-                }
-            }
-            
-            if ($oldCollection instanceof PersistentCollection) {
-                $oldCollection->clear();
-                foreach ($collection as $index => $entry) {
-                    $oldCollection[$index] = $entry;
-                }
-                $collection = $oldCollection;
-            }
-        } else {
-            $collection = new ArrayCollection;
-            $this->emptyCollection($metadata, $document, $field);
-        }
-        return $collection;
-    }
-    
-    
 
-    protected function unserializePatchPersistenCollection($data, ClassMetadata $metadata, $document, $field)
-    {
-        $oldCollection = $metadata->getFieldValue($document, $field);
-        if(!($oldCollection = $metadata->getFieldValue($document, $field))) {
-            $collection = new ArrayCollection;
-        } else {
-            if($oldCollection instanceof PersistentCollection) {
-                $collection->clear();
+        foreach ($data[$field] as $index => $dataItem) {
+            $targetClass = $this->getTargetClass($metadata, $dataItem, $field);
+            if (isset($dataItem['$ref'])) {
+                $collection[] = $this->modelManager->getRepository($targetClass)->find($dataItem['$ref']);
             } else {
-                $collection = new ArrayCollection;
-            }
-        }
-        
-        if (isset($data[$field]) && !empty($data[$field])) {
-            $mapping = $metadata->fieldMappings[$field];
-            foreach ($data[$field] as $index => $dataItem) {
-                if (isset($dataItem['$ref'])) {
-                    $collection[] = $this->getDocumentFromRef($dataItem['$ref'], $mapping);
+                if (isset($oldCollection[$index])) {
+                    $collection[] = $this->unserialize(
+                        $dataItem,
+                        $targetClass,
+                        $oldCollection[$index],
+                        self::UNSERIALIZE_PATCH
+                    );
                 } else {
-                    $targetClass = $this->getTargetClass($metadata, $dataItem, $field);
-                    if ($oldCollection[$index]) {
-                        $collection[] = $this->unserialize(
-                            $dataItem,
-                            $targetClass,
-                            $oldCollection[$index],
-                            self::UNSERIALIZE_PATCH
-                        );
-                    } else {
-                        $collection[] = $this->unserialize($dataItem, $targetClass);
-                    }
+                    $collection[] = $this->unserialize($dataItem, $targetClass);
                 }
             }
-        } else {
-            $this->emptyCollection($metadata, $document, $field);
         }
-        return $collection;
-    }
 
-    protected function emptyCollection(ClassMetadata $metadata, $document, $field)
-    {
-        $collection = $metadata->getFieldValue($document, $field);
-        if ($collection) {
-            foreach ($collection->getKeys() as $key) {
-                $collection->remove($key);
+        if ($oldCollection instanceof PersistentCollection) {
+            $oldCollection->clear();
+            foreach ($collection as $index => $entry) {
+                $oldCollection[$index] = $entry;
             }
+            $collection = $oldCollection;
         }
+
+        return $collection;
     }
 
     protected function unserializeSingleValue($data, ClassMetadata $metadata, $field)
@@ -316,34 +264,13 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
         $type = $metadata->getTypeOfField($field);
 
         if (isset($this->typeSerializers[$type])) {
-            return $this->getTypeSerializer($type)->unserialize($data[$field]);
+            return $this->serviceLocator->get($this->typeSerializers[$type])->unserialize($data[$field]);
         }
         if ($type == 'float' && is_integer($data[$field])) {
             return (float) $data[$field];
         }
 
         return $data[$field];
-    }
-
-    protected function getDocumentFromRef($ref, array $mapping)
-    {
-        list($collectionName, $id) = explode('/', $ref);
-        if (isset($mapping['discriminatorMap'])) {
-            foreach ($mapping['discriminatorMap'] as $class) {
-                if ($this->modelManager->getClassMetadata($class)->collection == $collectionName) {
-                    $targetClass = $class;
-                    break;
-                }
-            }
-        } else {
-            $targetClass = $mapping['targetDocument'];
-        }
-        return $this->modelManager->getRepository($targetClass)->find($id);
-    }
-
-    protected function getTypeSerializer($type)
-    {
-        return $this->serviceLocator->get($this->typeSerializers[$type]);
     }
 
     protected function getTargetClass(ClassMetadata $metadata, $data, $field)

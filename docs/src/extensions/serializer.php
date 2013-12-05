@@ -110,29 +110,18 @@ protected MyProperty;
 
     <p>Document references can be serialized in several differnet ways.</p>
 
-    <h3>RefLazy</h3>
+    <h3>Lazy</h3>
 
     <p>By default references will be serialized to an array like this:</p>
 <pre class="prettyprint linenums">
-[$ref: 'CollectionName/DocumentId']
+[$ref: 'DocumentId']
 </pre>
 
     <p>The <code>$ref</code> style of referencing is what Mongo uses internally.</p>
 
-    <p>The default behaviour uses the RefLazy serializer. However this can be overridden by defineing an alternative ReferenceSerializer as a property annotation.</p>
+    <p>The default behaviour uses the Lazy serializer. However this can be overridden by defineing an alternative ReferenceSerializer as a property annotation.</p>
 
-    <p>Two alternate ReferenceSerializers are already included with Shard.</p>
-
-    <h3>SimpleLazy</h3>
-
-    <p>SimpleLazy will serialize a reference as the mongo id. It can be used like this:</p>
-<pre class="prettyprint linenums">
-/**
- * @ODM\ReferenceMany(targetDocument="MyTargetDocument")
- * @Sds\Serializer\SimpleLazy
- */
-protected $myDocumentProperty;
-</pre>
+    <p>One alternate ReferenceSerializers are already included with Shard.</p>
 
     <h3>Eager</h3>
     <p>Eager will serialize references as if they were embedded documents. It can be used like this:</p>
