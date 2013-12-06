@@ -228,6 +228,16 @@ class Manifest extends AbstractExtension
             }
         }
 
+        //make sure any defaults overridden by the manifest config get applied
+        if (isset($this->extensionConfigs[$name]) && is_array($this->extensionConfigs[$name])) {
+            foreach ($this->extensionConfigs[$name] as $key => $value) {
+                $setter = 'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
+                if (method_exists($extension, $setter)) {
+                    $extension->{$setter}($value);
+                }
+            }
+        }
+
         $this->extensionConfigs[$name] = $extension->toArray();
     }
 
