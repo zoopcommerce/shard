@@ -21,5 +21,5 @@ script:
   - cd ./tests
   - ../vendor/bin/phpunit --coverage-clover ../build/clover.xml
   - php ../build/coverage-checker.php ../build/clover.xml 83
-  - ../vendor/bin/phpcs --standard=PSR2 ../lib/ ./Zoop/
   - ../vendor/bin/phpmd --exclude ClassMetadataTrait.php ../lib/ text ruleset.xml
+  - ../vendor/bin/phpcs --standard=PSR2 ../lib/ ./Zoop/

@@ -186,37 +186,19 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
     {
         $collection = new ArrayCollection;
 
-        if (isset($data[$field]) && !empty($data[$field])) {
-            if ($mode == self::UNSERIALIZE_UPDATE) {
-                $this->clearCollection($metadata, $document, $field);
-            } else {
-                $existingCollection = $metadata->getFieldValue($document, $field);
-            }
+        if (($existingCollection = $metadata->getFieldValue($document, $field))) {
+            $existingCollection->clear();
+        }
 
-            foreach ($data[$field] as $index => $dataItem) {
+        if (isset($data[$field]) && !empty($data[$field])) {
+            foreach ($data[$field] as $dataItem) {
                 $targetClass = $this->getTargetClass($metadata, $dataItem, $field);
                 if (isset($dataItem['$ref'])) {
                     $collection[] = $this->modelManager->getRepository($targetClass)->find($dataItem['$ref']);
                 } else {
-                    if (isset($existingCollection[$index])) {
-                        $collection[] = $this->unserialize(
-                            $dataItem,
-                            $targetClass,
-                            $existingCollection[$index],
-                            $mode
-                        );
-                    } else {
-                        $collection[] = $this->unserialize($dataItem, $targetClass);
-                    }
+                    $collection[] = $this->unserialize($dataItem, $targetClass, null, $mode);
                 }
             }
-
-            if ($mode == self::UNSERIALIZE_PATCH) {
-                $this->clearCollection($metadata, $document, $field);
-            }
-        } else {
-            //empty existing collection
-            $this->clearCollection($metadata, $document, $field);
         }
 
         return $collection;
@@ -253,12 +235,5 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
         }
 
         return $targetClass;
-    }
-
-    protected function clearCollection(ClassMetadata $metadata, $document, $field)
-    {
-        if (($collection = $metadata->getFieldValue($document, $field))) {
-            $collection->clear();
-        }
     }
 }
