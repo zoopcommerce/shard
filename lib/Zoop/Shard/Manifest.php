@@ -205,11 +205,9 @@ class Manifest extends AbstractExtension
     protected function setExtensionConfig($extension, $config)
     {
         foreach ($config as $key => $value) {
-            if ($key == 'default_db') {
-                $setter = 'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
-                if (method_exists($extension, $setter)) {
-                    $extension->{$setter}($value);
-                }
+            $setter = 'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
+            if (method_exists($extension, $setter)) {
+                $extension->{$setter}($value);
             }
         }
     }
