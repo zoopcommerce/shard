@@ -184,32 +184,9 @@ class Manifest extends AbstractExtension
             $this->serviceManagerConfig
         );
 
-        //sets all the extension configs
-        $this->setExtensionsConfig();
-
         //setup lazySubscriber configuration
         $this->lazySubscriberConfig = $this->getLazySubscirberConfig($serviceManager);
         $this->subscribers = ['subscriber.lazysubscriber'];
-    }
-
-    protected function setExtensionsConfig()
-    {
-        foreach ($this->extensionConfigs as $extensionName => $config) {
-            $extension = $this->serviceManager->get($extensionName);
-            if ($extension) {
-                $this->setExtensionConfig($extension, $config);
-            }
-        }
-    }
-
-    protected function setExtensionConfig($extension, $config)
-    {
-        foreach ($config as $key => $value) {
-            $setter = 'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
-            if (method_exists($extension, $setter)) {
-                $extension->{$setter}($value);
-            }
-        }
     }
 
     protected function getLazySubscirberConfig($serviceManager)
@@ -251,12 +228,17 @@ class Manifest extends AbstractExtension
             }
         }
 
-        if (isset($this->extensionConfigs[$name]) && !is_bool($this->extensionConfigs[$name])) {
-            $default = $extension->toArray();
-            $this->extensionConfigs[$name] = ArrayUtils::merge($default, $this->extensionConfigs[$name]);
-        } else {
-            $this->extensionConfigs[$name] = $extension->toArray();
+        //make sure any defaults overridden by the manifest config get applied
+        if (isset($this->extensionConfigs[$name]) && is_array($this->extensionConfigs[$name])) {
+            foreach ($this->extensionConfigs[$name] as $key => $value) {
+                $setter = 'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
+                if (method_exists($extension, $setter)) {
+                    $extension->{$setter}($value);
+                }
+            }
         }
+
+        $this->extensionConfigs[$name] = $extension->toArray();
     }
 
     /**
