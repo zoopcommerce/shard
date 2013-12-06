@@ -19,7 +19,7 @@ class CakeEager
     protected $id;
 
     /**
-     * @ODM\ReferenceMany(targetDocument="Ingredient")
+     * @ODM\ReferenceMany(targetDocument="Ingredient", cascade="all")
      * @Shard\Serializer\Eager
      */
     protected $ingredients;

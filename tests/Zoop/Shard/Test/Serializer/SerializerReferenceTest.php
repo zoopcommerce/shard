@@ -71,12 +71,7 @@ class SerializerReferenceTest extends BaseTest
         // maxNestingDepth = 1 should display cakes as refereneces only
         $this->assertArrayHasKey('$ref', $array['flavour']['cakes'][0]);
 
-        $this->serializer->setMaxNestingDepth(2);
-        $array = $this->serializer->toArray($cake);
-
-        // maxNestingDepth = 2 should display cakes
-        $this->assertArrayHasKey('cakes', $array['flavour']);
-
+        //make sure it unserializes properly
         $array['ingredients'][3] = ['name' => 'coconut'];
 
         $cake = $this->unserializer->fromArray(
@@ -84,8 +79,31 @@ class SerializerReferenceTest extends BaseTest
             'Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager'
         );
 
+        $documentManager->flush(); //need to flush to make sure the new coconut ingredient gets given an id
         $this->assertInstanceOf('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager', $cake);
         $this->assertEquals('chocolate', $cake->getFlavour()->getName());
+        $this->assertCount(4, $cake->getIngredients());
+        $this->assertEquals('coconut', $cake->getIngredients()[3]->getName());
+
+        //now serialize again to a greater depth
+        $this->serializer->setMaxNestingDepth(2);
+        $array = $this->serializer->toArray($cake);
+
+        // maxNestingDepth = 2 should display cakes
+        $this->assertArrayHasKey('cakes', $array['flavour']);
+
+        //again, make sure it unserializes properly
+        //note: can't change an ingredient this time, because there are two copies of the ingredient list
+        //in the serialized array. If only one is changed, then there are consistency problems.
+        $array['flavour']['name'] = 'mega-choc';
+
+        $cake = $this->unserializer->fromArray(
+            $array,
+            'Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager'
+        );
+
+        $this->assertInstanceOf('Zoop\Shard\Test\Serializer\TestAsset\Document\CakeEager', $cake);
+        $this->assertEquals('mega-choc', $cake->getFlavour()->getName());
         $this->assertCount(4, $cake->getIngredients());
         $this->assertEquals('coconut', $cake->getIngredients()[3]->getName());
     }

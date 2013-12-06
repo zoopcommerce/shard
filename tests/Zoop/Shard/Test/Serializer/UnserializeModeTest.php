@@ -11,6 +11,7 @@ use Zoop\Shard\Test\Serializer\TestAsset\Document\Profile;
 
 class UnserializeModeTest extends BaseTest
 {
+    const USER_CLASS = 'Zoop\Shard\Test\Serializer\TestAsset\Document\User';
     public function setUp()
     {
         $manifest = new Manifest(
@@ -56,17 +57,14 @@ class UnserializeModeTest extends BaseTest
                 ],
                 'active' => false
             ],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
+            self::USER_CLASS,
+            $user
         );
 
         $this->assertEquals('there', $updated->location());
         $this->assertEquals('superdweebie', $updated->getUsername());
         $this->assertEquals('Tom', $updated->getProfile()->getFirstname());
         $this->assertEquals(false, $updated->getActive());
-
-        $documentManager->remove($updated);
-        $documentManager->flush();
-        $documentManager->clear();
     }
 
     public function testUnserializePatchAddItemToCollection()
@@ -86,7 +84,6 @@ class UnserializeModeTest extends BaseTest
         $groups[] = [
             'name'=> 'groupC'
         ];
-        $documentManager->clear();
 
         /* @var $updated User */
         $updated = $this->unserializer->fromArray(
@@ -94,14 +91,28 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'groups' => $groups
             ],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
+            self::USER_CLASS,
+            $user
         );
 
-        $this->assertCount(3, $updated->getGroups());
+        // this works pre flush
+        $userGroups = $updated->getGroups();
+        $this->assertCount(3, $userGroups);
+        $this->assertEquals('groupA', $userGroups[0]->getName());
+        $this->assertEquals('groupB', $userGroups[1]->getName());
+        $this->assertEquals('groupC', $userGroups[2]->getName());
 
-        $documentManager->remove($updated);
         $documentManager->flush();
         $documentManager->clear();
+
+        $userFind = $documentManager->find(self::USER_CLASS, $id);
+
+        //this fails from DB
+        $userGroups = $userFind->getGroups();
+        $this->assertCount(3, $userGroups);
+        $this->assertEquals('groupA', $userGroups[0]->getName());
+        $this->assertEquals('groupB', $userGroups[1]->getName());
+        $this->assertEquals('groupC', $userGroups[2]->getName());
     }
 
     public function testUnserializePatchRemoveItemFromCollection()
@@ -119,7 +130,6 @@ class UnserializeModeTest extends BaseTest
         $data = $this->serializer->toArray($user);
         $groups = $data['groups'];
         unset($groups[1]);
-        $documentManager->clear();
 
         /* @var $updated User */
         $updated = $this->unserializer->fromArray(
@@ -127,14 +137,21 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'groups' => $groups
             ],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
+            self::USER_CLASS,
+            $user
         );
 
-        $this->assertCount(1, $updated->getGroups());
+        $userGroups = $updated->getGroups();
+        $this->assertCount(1, $userGroups);
+        $this->assertEquals('groupA', $userGroups[0]->getName());
 
-        $documentManager->remove($updated);
         $documentManager->flush();
         $documentManager->clear();
+
+        $userFind = $documentManager->find(self::USER_CLASS, $id);
+        $userGroups = $userFind->getGroups();
+        $this->assertCount(1, $userGroups);
+        $this->assertEquals('groupA', $userGroups[0]->getName());
     }
 
     public function testUnserializePatchEmptyCollection()
@@ -149,7 +166,6 @@ class UnserializeModeTest extends BaseTest
         $documentManager->flush();
 
         $id = $user->getId();
-        $documentManager->clear();
 
         /* @var $updated User */
         $updated = $this->unserializer->fromArray(
@@ -157,14 +173,16 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'groups' => []
             ],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
+            self::USER_CLASS,
+            $user
         );
-
         $this->assertCount(0, $updated->getGroups());
 
-        $documentManager->remove($updated);
         $documentManager->flush();
         $documentManager->clear();
+
+        $userFind = $documentManager->find(self::USER_CLASS, $id);
+        $this->assertCount(0, $userFind->getGroups());
     }
 
     public function testUnserializeUpdateGeneral()
@@ -193,8 +211,8 @@ class UnserializeModeTest extends BaseTest
                     'firstname' => 'Tom'
                 ]
             ],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
-            null,
+            self::USER_CLASS,
+            $user,
             Unserializer::UNSERIALIZE_UPDATE
         );
 
@@ -203,10 +221,6 @@ class UnserializeModeTest extends BaseTest
         $this->assertEquals(null, $updated->getUsername());
         $this->assertEquals('Tom', $updated->getProfile()->getFirstname());
         $this->assertEquals(null, $updated->getProfile()->getLastname());
-
-        $documentManager->remove($updated);
-        $documentManager->flush();
-        $documentManager->clear();
     }
 
     public function testUnserializeUpdateAddItemToCollection()
@@ -225,7 +239,6 @@ class UnserializeModeTest extends BaseTest
         $groups[] = [
             'name'=> 'groupC'
         ];
-        $documentManager->clear();
 
         /* @var $updated User */
         $updated = $this->unserializer->fromArray(
@@ -233,16 +246,26 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'groups' => $groups
             ],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
-            null,
+            self::USER_CLASS,
+            $user,
             Unserializer::UNSERIALIZE_UPDATE
         );
 
-        $this->assertCount(3, $updated->getGroups());
+        $userGroups = $updated->getGroups();
+        $this->assertCount(3, $userGroups);
+        $this->assertEquals('groupA', $userGroups[0]->getName());
+        $this->assertEquals('groupB', $userGroups[1]->getName());
+        $this->assertEquals('groupC', $userGroups[2]->getName());
 
-        $documentManager->remove($updated);
         $documentManager->flush();
         $documentManager->clear();
+
+        $userFind = $documentManager->find(self::USER_CLASS, $id);
+        $userGroups = $userFind->getGroups();
+        $this->assertCount(3, $userGroups);
+        $this->assertEquals('groupA', $userGroups[0]->getName());
+        $this->assertEquals('groupB', $userGroups[1]->getName());
+        $this->assertEquals('groupC', $userGroups[2]->getName());
     }
 
     public function testUnserializeUpdateRemoveItemFromCollection()
@@ -258,8 +281,7 @@ class UnserializeModeTest extends BaseTest
         $id = $user->getId();
         $data = $this->serializer->toArray($user);
         $groups = $data['groups'];
-        unset($groups[1]);
-        $documentManager->clear();
+        unset($groups[0]);
 
         /* @var $updated User */
         $updated = $this->unserializer->fromArray(
@@ -267,16 +289,22 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'groups' => $groups
             ],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
-            null,
+            self::USER_CLASS,
+            $user,
             Unserializer::UNSERIALIZE_UPDATE
         );
 
-        $this->assertCount(1, $updated->getGroups());
+        $userGroups = $updated->getGroups();
+        $this->assertCount(1, $userGroups);
+        $this->assertEquals('groupB', $userGroups[0]->getName());
 
-        $documentManager->remove($updated);
         $documentManager->flush();
         $documentManager->clear();
+
+        $userFind = $documentManager->find(self::USER_CLASS, $id);
+        $userGroups = $userFind->getGroups();
+        $this->assertCount(1, $userGroups);
+        $this->assertEquals('groupB', $userGroups[0]->getName());
     }
 
     public function testUnserializeUpdateEmptyCollection()
@@ -290,7 +318,6 @@ class UnserializeModeTest extends BaseTest
         $documentManager->persist($user);
         $documentManager->flush();
         $id = $user->getId();
-        $documentManager->clear();
 
         /* @var $updated User */
         $updated = $this->unserializer->fromArray(
@@ -298,15 +325,17 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'groups' => []
             ],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
-            null,
+            self::USER_CLASS,
+            $user,
             Unserializer::UNSERIALIZE_UPDATE
         );
 
         $this->assertCount(0, $updated->getGroups());
 
-        $documentManager->remove($updated);
         $documentManager->flush();
         $documentManager->clear();
+
+        $userFind = $documentManager->find(self::USER_CLASS, $id);
+        $this->assertCount(0, $userFind->getGroups());
     }
 }

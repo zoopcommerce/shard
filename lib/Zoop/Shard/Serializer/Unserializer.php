@@ -8,7 +8,6 @@ namespace Zoop\Shard\Serializer;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-use Doctrine\ODM\MongoDB\PersistentCollection;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Exception;
@@ -123,7 +122,7 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
         }
 
         // Attempt to load prexisting model
-        if (! isset($document) && isset($data[$metadata->identifier])) {
+        if (!isset($document) && isset($data[$metadata->identifier])) {
             $document = $this->modelManager->getRepository($metadata->name)->find($data[$metadata->identifier]);
         }
 
@@ -185,71 +184,21 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
 
     protected function unserializeCollection($data, ClassMetadata $metadata, $document, $field, $mode)
     {
+        $collection = new ArrayCollection;
+
+        if (($existingCollection = $metadata->getFieldValue($document, $field))) {
+            $existingCollection->clear();
+        }
 
         if (isset($data[$field]) && !empty($data[$field])) {
-            if ($mode == self::UNSERIALIZE_UPDATE) {
-                return $this->unserializeUpdateCollection($data, $metadata, $field);
-            } else {
-                return $this->unserializePatchCollection($data, $metadata, $document, $field);
-            }
-        } else {
-            //empty existing collection
-            $collection = $metadata->getFieldValue($document, $field);
-            if ($collection) {
-                foreach ($collection->getKeys() as $key) {
-                    $collection->remove($key);
-                }
-            }
-            return new ArrayCollection;
-        }
-    }
-
-    protected function unserializeUpdateCollection($data, ClassMetadata $metadata, $field)
-    {
-        $collection = new ArrayCollection;
-
-        foreach ($data[$field] as $dataItem) {
-            $targetClass = $this->getTargetClass($metadata, $dataItem, $field);
-            if (isset($dataItem['$ref'])) {
-                $collection[] = $this->modelManager->getRepository($targetClass)->find($dataItem['$ref']);
-            } else {
-                $collection[] = $this->unserialize($dataItem, $targetClass);
-            }
-        }
-
-        return $collection;
-    }
-
-    protected function unserializePatchCollection($data, ClassMetadata $metadata, $document, $field)
-    {
-        //accommodates persistent collections.
-        $oldCollection = $metadata->getFieldValue($document, $field);
-        $collection = new ArrayCollection;
-
-        foreach ($data[$field] as $index => $dataItem) {
-            $targetClass = $this->getTargetClass($metadata, $dataItem, $field);
-            if (isset($dataItem['$ref'])) {
-                $collection[] = $this->modelManager->getRepository($targetClass)->find($dataItem['$ref']);
-            } else {
-                if (isset($oldCollection[$index])) {
-                    $collection[] = $this->unserialize(
-                        $dataItem,
-                        $targetClass,
-                        $oldCollection[$index],
-                        self::UNSERIALIZE_PATCH
-                    );
+            foreach ($data[$field] as $dataItem) {
+                $targetClass = $this->getTargetClass($metadata, $dataItem, $field);
+                if (isset($dataItem['$ref'])) {
+                    $collection[] = $this->modelManager->getRepository($targetClass)->find($dataItem['$ref']);
                 } else {
-                    $collection[] = $this->unserialize($dataItem, $targetClass);
+                    $collection[] = $this->unserialize($dataItem, $targetClass, null, $mode);
                 }
             }
-        }
-
-        if ($oldCollection instanceof PersistentCollection) {
-            $oldCollection->clear();
-            foreach ($collection as $index => $entry) {
-                $oldCollection[$index] = $entry;
-            }
-            $collection = $oldCollection;
         }
 
         return $collection;
