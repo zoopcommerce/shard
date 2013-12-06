@@ -8,7 +8,6 @@ namespace Zoop\Shard\Serializer;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
-use Doctrine\ODM\MongoDB\PersistentCollection;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Exception;
@@ -123,7 +122,7 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
         }
 
         // Attempt to load prexisting model
-        if (! isset($document) && isset($data[$metadata->identifier])) {
+        if (!isset($document) && isset($data[$metadata->identifier])) {
             $document = $this->modelManager->getRepository($metadata->name)->find($data[$metadata->identifier]);
         }
 
@@ -185,66 +184,40 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
 
     protected function unserializeCollection($data, ClassMetadata $metadata, $document, $field, $mode)
     {
+        $collection = new ArrayCollection;
 
         if (isset($data[$field]) && !empty($data[$field])) {
             if ($mode == self::UNSERIALIZE_UPDATE) {
-                return $this->unserializeUpdateCollection($data, $metadata, $document, $field);
+                $this->clearCollection($metadata, $document, $field);
             } else {
-                return $this->unserializePatchCollection($data, $metadata, $document, $field);
+                $existingCollection = $metadata->getFieldValue($document, $field);
+            }
+
+            foreach ($data[$field] as $index => $dataItem) {
+                $targetClass = $this->getTargetClass($metadata, $dataItem, $field);
+                if (isset($dataItem['$ref'])) {
+                    $collection[] = $this->modelManager->getRepository($targetClass)->find($dataItem['$ref']);
+                } else {
+                    if (isset($existingCollection[$index])) {
+                        $collection[] = $this->unserialize(
+                            $dataItem,
+                            $targetClass,
+                            $existingCollection[$index],
+                            $mode
+                        );
+                    } else {
+                        $collection[] = $this->unserialize($dataItem, $targetClass);
+                    }
+                }
+            }
+
+            if ($mode == self::UNSERIALIZE_PATCH) {
+                $this->clearCollection($metadata, $document, $field);
             }
         } else {
             //empty existing collection
             $this->clearCollection($metadata, $document, $field);
-            return new ArrayCollection;
         }
-    }
-
-    protected function unserializeUpdateCollection($data, ClassMetadata $metadata, $document, $field)
-    {
-        $collection = new ArrayCollection;
-
-        //empty existing collection
-        $this->clearCollection($metadata, $document, $field);
-
-        foreach ($data[$field] as $dataItem) {
-            $targetClass = $this->getTargetClass($metadata, $dataItem, $field);
-            if (isset($dataItem['$ref'])) {
-                $collection[] = $this->modelManager->getRepository($targetClass)->find($dataItem['$ref']);
-            } else {
-                $collection[] = $this->unserialize($dataItem, $targetClass);
-            }
-        }
-
-        return $collection;
-    }
-
-    protected function unserializePatchCollection($data, ClassMetadata $metadata, $document, $field)
-    {
-        $existingCollection = $metadata->getFieldValue($document, $field);
-        $collection = new ArrayCollection;
-
-        foreach ($data[$field] as $index => $dataItem) {
-            $targetClass = $this->getTargetClass($metadata, $dataItem, $field);
-            if (isset($dataItem['$ref'])) {
-                $collection[] = $this->modelManager->getRepository($targetClass)->find($dataItem['$ref']);
-            } else {
-                if (isset($existingCollection[$index])) {
-                    $collection[] = $this->unserialize(
-                        $dataItem,
-                        $targetClass,
-                        $existingCollection[$index],
-                        self::UNSERIALIZE_PATCH
-                    );
-                } else {
-                    $collection[] = $this->unserialize($dataItem, $targetClass);
-                }
-            }
-        }
-
-        //when a document is passed in, rather than created
-        //we need to explicitly clear it's contents,
-        //otherwise when persisted it appends elements
-        $this->clearCollection($metadata, $document, $field);
 
         return $collection;
     }
