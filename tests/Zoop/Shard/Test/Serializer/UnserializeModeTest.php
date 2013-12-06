@@ -11,6 +11,7 @@ use Zoop\Shard\Test\Serializer\TestAsset\Document\Profile;
 
 class UnserializeModeTest extends BaseTest
 {
+    const USER_CLASS = 'Zoop\Shard\Test\Serializer\TestAsset\Document\User';
     public function setUp()
     {
         $manifest = new Manifest(
@@ -56,7 +57,8 @@ class UnserializeModeTest extends BaseTest
                 ],
                 'active' => false
             ],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
+            self::USER_CLASS,
+            $user
         );
 
         $this->assertEquals('there', $updated->location());
@@ -94,14 +96,18 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'groups' => $groups
             ],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
+            self::USER_CLASS,
+            $user
         );
 
         $this->assertCount(3, $updated->getGroups());
 
-        $documentManager->remove($updated);
+        $documentManager->persist($updated);
         $documentManager->flush();
         $documentManager->clear();
+
+        $userFind = $documentManager->find(self::USER_CLASS, $id);
+        $this->assertCount(3, $userFind->getGroups());
     }
 
     public function testUnserializePatchRemoveItemFromCollection()
@@ -127,14 +133,18 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'groups' => $groups
             ],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
+            self::USER_CLASS,
+            $user
         );
 
         $this->assertCount(1, $updated->getGroups());
 
-        $documentManager->remove($updated);
+        $documentManager->persist($updated);
         $documentManager->flush();
         $documentManager->clear();
+
+        $userFind = $documentManager->find(self::USER_CLASS, $id);
+        $this->assertCount(1, $userFind->getGroups());
     }
 
     public function testUnserializePatchEmptyCollection()
@@ -157,14 +167,17 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'groups' => []
             ],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User'
+            self::USER_CLASS,
+            $user
         );
-
         $this->assertCount(0, $updated->getGroups());
 
-        $documentManager->remove($updated);
+        $documentManager->persist($updated);
         $documentManager->flush();
         $documentManager->clear();
+
+        $userFind = $documentManager->find(self::USER_CLASS, $id);
+        $this->assertCount(0, $userFind->getGroups());
     }
 
     public function testUnserializeUpdateGeneral()
@@ -193,8 +206,8 @@ class UnserializeModeTest extends BaseTest
                     'firstname' => 'Tom'
                 ]
             ],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
-            null,
+            self::USER_CLASS,
+            $user,
             Unserializer::UNSERIALIZE_UPDATE
         );
 
@@ -233,16 +246,19 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'groups' => $groups
             ],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
-            null,
+            self::USER_CLASS,
+            $user,
             Unserializer::UNSERIALIZE_UPDATE
         );
 
         $this->assertCount(3, $updated->getGroups());
 
-        $documentManager->remove($updated);
+        $documentManager->persist($updated);
         $documentManager->flush();
         $documentManager->clear();
+
+        $userFind = $documentManager->find(self::USER_CLASS, $id);
+        $this->assertCount(3, $userFind->getGroups());
     }
 
     public function testUnserializeUpdateRemoveItemFromCollection()
@@ -267,16 +283,19 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'groups' => $groups
             ],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
-            null,
+            self::USER_CLASS,
+            $user,
             Unserializer::UNSERIALIZE_UPDATE
         );
 
         $this->assertCount(1, $updated->getGroups());
 
-        $documentManager->remove($updated);
+        $documentManager->persist($updated);
         $documentManager->flush();
         $documentManager->clear();
+
+        $userFind = $documentManager->find(self::USER_CLASS, $id);
+        $this->assertCount(1, $userFind->getGroups());
     }
 
     public function testUnserializeUpdateEmptyCollection()
@@ -298,15 +317,18 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'groups' => []
             ],
-            'Zoop\Shard\Test\Serializer\TestAsset\Document\User',
-            null,
+            self::USER_CLASS,
+            $user,
             Unserializer::UNSERIALIZE_UPDATE
         );
 
         $this->assertCount(0, $updated->getGroups());
 
-        $documentManager->remove($updated);
+        $documentManager->persist($updated);
         $documentManager->flush();
         $documentManager->clear();
+
+        $userFind = $documentManager->find(self::USER_CLASS, $id);
+        $this->assertCount(0, $userFind->getGroups());
     }
 }

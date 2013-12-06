@@ -188,25 +188,23 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
 
         if (isset($data[$field]) && !empty($data[$field])) {
             if ($mode == self::UNSERIALIZE_UPDATE) {
-                return $this->unserializeUpdateCollection($data, $metadata, $field);
+                return $this->unserializeUpdateCollection($data, $metadata, $document, $field);
             } else {
                 return $this->unserializePatchCollection($data, $metadata, $document, $field);
             }
         } else {
             //empty existing collection
-            $collection = $metadata->getFieldValue($document, $field);
-            if ($collection) {
-                foreach ($collection->getKeys() as $key) {
-                    $collection->remove($key);
-                }
-            }
+            $this->clearCollection($metadata, $document, $field);
             return new ArrayCollection;
         }
     }
 
-    protected function unserializeUpdateCollection($data, ClassMetadata $metadata, $field)
+    protected function unserializeUpdateCollection($data, ClassMetadata $metadata, $document, $field)
     {
         $collection = new ArrayCollection;
+
+        //empty existing collection
+        $this->clearCollection($metadata, $document, $field);
 
         foreach ($data[$field] as $dataItem) {
             $targetClass = $this->getTargetClass($metadata, $dataItem, $field);
@@ -222,8 +220,7 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
 
     protected function unserializePatchCollection($data, ClassMetadata $metadata, $document, $field)
     {
-        //accommodates persistent collections.
-        $oldCollection = $metadata->getFieldValue($document, $field);
+        $existingCollection = $metadata->getFieldValue($document, $field);
         $collection = new ArrayCollection;
 
         foreach ($data[$field] as $index => $dataItem) {
@@ -231,11 +228,11 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
             if (isset($dataItem['$ref'])) {
                 $collection[] = $this->modelManager->getRepository($targetClass)->find($dataItem['$ref']);
             } else {
-                if (isset($oldCollection[$index])) {
+                if (isset($existingCollection[$index])) {
                     $collection[] = $this->unserialize(
                         $dataItem,
                         $targetClass,
-                        $oldCollection[$index],
+                        $existingCollection[$index],
                         self::UNSERIALIZE_PATCH
                     );
                 } else {
@@ -244,13 +241,10 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
             }
         }
 
-        if ($oldCollection instanceof PersistentCollection) {
-            $oldCollection->clear();
-            foreach ($collection as $index => $entry) {
-                $oldCollection[$index] = $entry;
-            }
-            $collection = $oldCollection;
-        }
+        //when a document is passed in, rather than created
+        //we need to explicitly clear it's contents,
+        //otherwise when persisted it appends elements
+        $this->clearCollection($metadata, $document, $field);
 
         return $collection;
     }
@@ -286,5 +280,12 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
         }
 
         return $targetClass;
+    }
+
+    protected function clearCollection(ClassMetadata $metadata, $document, $field)
+    {
+        if (($collection = $metadata->getFieldValue($document, $field))) {
+            $collection->clear();
+        }
     }
 }
