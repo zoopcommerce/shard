@@ -16,17 +16,11 @@
             "email": "superdweebie@gmail.com"
         }
     ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/superdweebie/mongodb-odm"
-        }
-    ],
     "require": {
         "php"                              : ">=5.4",
         "zoopcommerce/common"              : "~1.1",
         "zoopcommerce/mystique-php"        : "~1.2",
-        "doctrine/mongodb-odm"             : "dev-proxyFieldValues",
+        "doctrine/mongodb-odm"             : "dev-master",
         "zendframework/zend-json"          : "~2.2",
         "zendframework/zend-crypt"         : "~2.2",
         "zendframework/zend-math"          : "~2.2",

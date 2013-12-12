@@ -4,7 +4,6 @@ namespace Zoop\Shard\Test\Core;
 
 use Zoop\Shard\Manifest;
 use Zoop\Shard\Test\BaseTest;
-use Zoop\Shard\ODMCore\Extension as CoreExtension;
 
 class ManifestConfigTest extends BaseTest
 {
