@@ -45,7 +45,10 @@ class ClassMetadataTest extends BaseTest
         $this->documentManager->clear();
 
         //get the proxy
-        $proxy = $this->documentManager->getReference('Zoop\Shard\Test\ODMCore\TestAsset\Document\Album', $document->getId());
+        $proxy = $this->documentManager->getReference(
+            'Zoop\Shard\Test\ODMCore\TestAsset\Document\Album',
+            $document->getId()
+        );
 
         //get metadata
         $metadata = $this->documentManager->getClassMetadata('Zoop\Shard\Test\ODMCore\TestAsset\Document\Album');
@@ -62,7 +65,10 @@ class ClassMetadataTest extends BaseTest
         $this->documentManager->clear();
 
         //get the proxy
-        $proxy = $this->documentManager->getReference('Zoop\Shard\Test\ODMCore\TestAsset\Document\Album', $document->getId());
+        $proxy = $this->documentManager->getReference(
+            'Zoop\Shard\Test\ODMCore\TestAsset\Document\Album',
+            $document->getId()
+        );
 
         //get metadata
         $metadata = $this->documentManager->getClassMetadata('Zoop\Shard\Test\ODMCore\TestAsset\Document\Album');
@@ -95,7 +101,10 @@ class ClassMetadataTest extends BaseTest
         $this->documentManager->clear();
 
         //get the proxy
-        $proxy = $this->documentManager->getReference('Zoop\Shard\Test\ODMCore\TestAsset\Document\Album', $document->getId());
+        $proxy = $this->documentManager->getReference(
+            'Zoop\Shard\Test\ODMCore\TestAsset\Document\Album',
+            $document->getId()
+        );
 
         //get metadata
         $metadata = $this->documentManager->getClassMetadata('Zoop\Shard\Test\ODMCore\TestAsset\Document\Album');
@@ -108,7 +117,10 @@ class ClassMetadataTest extends BaseTest
         $this->documentManager->clear();
 
         //check that changes did get flushed
-        $proxy = $this->documentManager->getReference('Zoop\Shard\Test\ODMCore\TestAsset\Document\Album', $document->getId());
+        $proxy = $this->documentManager->getReference(
+            'Zoop\Shard\Test\ODMCore\TestAsset\Document\Album',
+            $document->getId()
+        );
 
         $this->assertEquals('nevermind', $proxy->getName());
     }
