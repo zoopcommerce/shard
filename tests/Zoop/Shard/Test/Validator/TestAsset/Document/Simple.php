@@ -18,7 +18,7 @@ class Simple
     protected $id;
 
     /**
-     * @ODM\Field(type="string")
+     * @ODM\String
      * @Shard\Validator\Chain({
      *     @Shard\Validator\Required,
      *     @Shard\Validator(class = "Zoop\Shard\Test\Validator\TestAsset\FieldValidator1"),
