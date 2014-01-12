@@ -108,7 +108,7 @@ class Serializer implements ServiceLocatorAwareInterface, ModelManagerAwareInter
         $metadata = $this->modelManager->getClassMetadata(get_class($document));
 
         if ($metadata->hasDiscriminator()) {
-            $return[$metadata->discriminatorField['name']] = $metadata->discriminatorValue;
+            $return[$metadata->discriminatorField] = $metadata->discriminatorValue;
         }
 
         if ($document instanceof Proxy) {

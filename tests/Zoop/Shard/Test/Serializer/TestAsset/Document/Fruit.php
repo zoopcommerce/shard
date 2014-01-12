@@ -9,7 +9,7 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 /**
  * @ODM\Document
  * @ODM\InheritanceType("SINGLE_COLLECTION")
- * @ODM\DiscriminatorField(fieldName="type")
+ * @ODM\DiscriminatorField("type")
  * @ODM\DiscriminatorMap({
  *     "apple"="Zoop\Shard\Test\Serializer\TestAsset\Document\Apple",
  *     "orange"="Zoop\Shard\Test\Serializer\TestAsset\Document\Orange"
