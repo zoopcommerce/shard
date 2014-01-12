@@ -110,9 +110,9 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
         $metadata = $this->modelManager->getClassMetadata($class);
 
         // Check for discrimnator and discriminator field in data
-        if (isset($metadata->discriminatorField) && isset($data[$metadata->discriminatorField['fieldName']])) {
+        if (isset($metadata->discriminatorField) && isset($data[$metadata->discriminatorField])) {
             $metadata = $this->modelManager->getClassMetadata(
-                $metadata->discriminatorMap[$data[$metadata->discriminatorField['fieldName']]]
+                $metadata->discriminatorMap[$data[$metadata->discriminatorField]]
             );
         }
 
