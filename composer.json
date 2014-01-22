@@ -20,7 +20,7 @@
         "php"                              : ">=5.4",
         "zoopcommerce/common"              : "~1.1",
         "zoopcommerce/mystique-php"        : "~1.2",
-        "doctrine/mongodb-odm"             : "dev-master#dd838e5856e40592a529a1a2f78c6cc55d7ccb65 as dev-master",
+        "doctrine/mongodb-odm"             : "dev-master#dd838e5856e40592a529a1a2f78c6cc55d7ccb65 as 1.0.0-BETA9",
         "zendframework/zend-json"          : "~2.2",
         "zendframework/zend-crypt"         : "~2.2",
         "zendframework/zend-math"          : "~2.2",
