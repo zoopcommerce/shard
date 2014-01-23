@@ -195,8 +195,7 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
                     $collection[] = $this->unserialize($dataItem, $targetClass, null, $mode);
                 }
             }
-        } elseif (
-            $mode == self::UNSERIALIZE_PATCH &&
+        } elseif ($mode == self::UNSERIALIZE_PATCH &&
             $existingCollection = $metadata->getFieldValue($document, $field)
         ) {
             return $existingCollection;
