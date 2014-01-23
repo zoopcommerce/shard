@@ -175,8 +175,14 @@ class FlushSubscriber implements EventSubscriber
     protected function rejectUpdate($document, $documentManager)
     {
         //stop updates
-        $documentManager->refresh($document);
-        $documentManager->getUnitOfWork()->clearDocumentChangeSet(spl_object_hash($document));
+        $unitOfWork = $documentManager->getUnitOfWork();
+        $metadata = $documentManager->getClassMetadata(get_class($document));
+
+        foreach ($unitOfWork->getDocumentChangeSet($document) as $field => $change) {
+            $metadata->setFieldValue($document, $field, $change[0]);
+        }
+        $unitOfWork->clearDocumentChangeSet(spl_object_hash($document));
+        $unitOfWork->persist($document);
     }
 
     protected function rejectDelete($document, $documentManager)

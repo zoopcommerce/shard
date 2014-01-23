@@ -186,11 +186,7 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
     {
         $collection = new ArrayCollection;
 
-        if (($existingCollection = $metadata->getFieldValue($document, $field))) {
-            $existingCollection->clear();
-        }
-
-        if (isset($data[$field]) && !empty($data[$field])) {
+        if (isset($data[$field])) {
             foreach ($data[$field] as $dataItem) {
                 $targetClass = $this->getTargetClass($metadata, $dataItem, $field);
                 if (isset($dataItem['$ref'])) {
@@ -199,6 +195,10 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
                     $collection[] = $this->unserialize($dataItem, $targetClass, null, $mode);
                 }
             }
+        } elseif ($mode == self::UNSERIALIZE_PATCH &&
+            $existingCollection = $metadata->getFieldValue($document, $field)
+        ) {
+            return $existingCollection;
         }
 
         return $collection;
