@@ -178,7 +178,7 @@ class FlushSubscriber implements EventSubscriber
         $unitOfWork = $documentManager->getUnitOfWork();
         $metadata = $documentManager->getClassMetadata(get_class($document));
 
-        foreach($unitOfWork->getDocumentChangeSet($document) as $field => $change) {
+        foreach ($unitOfWork->getDocumentChangeSet($document) as $field => $change) {
             $metadata->setFieldValue($document, $field, $change[0]);
         }
         $unitOfWork->clearDocumentChangeSet(spl_object_hash($document));
