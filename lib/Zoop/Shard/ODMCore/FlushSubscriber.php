@@ -164,10 +164,12 @@ class FlushSubscriber implements EventSubscriber
             if ($mapping['type'] == 'many') {
                 $collection = $parentMetadata->reflFields[$mapping['fieldName']]->getValue($parent);
                 $collection->removeElement($document);
-                $unitOfWork->recomputeSingleDocumentChangeSet($parentMetadata, $parent);
             } else {
-                $parentMetadata->reflFields[$mapping['fieldName']]->setValue($document, null);
+                $parentMetadata->reflFields[$mapping['fieldName']]->setValue($parent, null);
             }
+            $unitOfWork->detach($parent);
+            $unitOfWork->persist($parent);
+            $unitOfWork->recomputeSingleDocumentChangeSet($parentMetadata, $parent);
         }
         $unitOfWork->detach($document);
     }

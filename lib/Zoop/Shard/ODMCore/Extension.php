@@ -20,6 +20,7 @@ class Extension extends AbstractExtension
     protected $subscribers = [
         'subscriber.odmcore.boostrappedsubscriber',
         'subscriber.odmcore.flushsubscriber',
+        'subscriber.odmcore.preloadsubscriber',
         'subscriber.odmcore.loadmetadatasubscriber'
     ];
 
@@ -29,6 +30,8 @@ class Extension extends AbstractExtension
                 'Zoop\Shard\ODMCore\BootstrappedSubscriber',
             'subscriber.odmcore.flushsubscriber' =>
                 'Zoop\Shard\ODMCore\FlushSubscriber',
+            'subscriber.odmcore.preloadsubscriber' =>
+                'Zoop\Shard\ODMCore\PreLoadSubscriber',
             'subscriber.odmcore.loadmetadatasubscriber' =>
                 'Zoop\Shard\ODMCore\LoadMetadataSubscriber'
         ],

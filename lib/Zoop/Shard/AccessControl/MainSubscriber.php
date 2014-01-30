@@ -57,6 +57,7 @@ class MainSubscriber extends AbstractAccessControlSubscriber
             if ($result->getAllowed()) {
                 $criteria = []; //allow read
             } else {
+                $eventArgs->setReject(true);
                 $criteria = [$metadata->identifier => ['$exists' => false]]; //deny read
             }
         }
