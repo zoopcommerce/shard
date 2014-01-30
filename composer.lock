@@ -488,12 +488,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/superdweebie/mongodb-odm.git",
-                "reference": "173c8042f4eee5d0991d2b6a66d7e0e35a57e108"
+                "reference": "87319a6d8df14f65023cb7446a29551330055131"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/superdweebie/mongodb-odm/zipball/173c8042f4eee5d0991d2b6a66d7e0e35a57e108",
-                "reference": "173c8042f4eee5d0991d2b6a66d7e0e35a57e108",
+                "url": "https://api.github.com/repos/superdweebie/mongodb-odm/zipball/87319a6d8df14f65023cb7446a29551330055131",
+                "reference": "87319a6d8df14f65023cb7446a29551330055131",
                 "shasum": ""
             },
             "require": {
@@ -555,7 +555,7 @@
             "support": {
                 "source": "https://github.com/superdweebie/mongodb-odm/tree/hotfix719"
             },
-            "time": "2014-01-23 19:37:23"
+            "time": "2014-01-30 10:38:46"
         },
         {
             "name": "symfony/console",

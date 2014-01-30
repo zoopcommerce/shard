@@ -15,8 +15,10 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class ReadEventArgs extends BaseEventArgs
+class ReadEventArgs extends BaseEventArgs implements RejectInterface
 {
+    use RejectTrait;
+
     protected $metadata;
 
     protected $eventManager;

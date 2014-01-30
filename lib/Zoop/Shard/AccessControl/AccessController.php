@@ -140,7 +140,7 @@ class AccessController implements ServiceLocatorAwareInterface
         $eventManager->dispatchEvent(Events::GET_ROLES, $event);
 
         if ($user instanceof RoleAwareUserInterface) {
-            return array_merge($user->getRoles(), $event->getRoles());
+            return array_unique(array_merge($user->getRoles(), $event->getRoles()));
         } else {
             return $event->getRoles();
         }
