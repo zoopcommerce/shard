@@ -47,7 +47,7 @@ class PreLoadSubscriber implements EventSubscriber
         $metadata = $documentManager->getClassMetadata(get_class($document));
         $eventManager = $documentManager->getEventManager();
 
-        foreach ($metadata->associationMappings as $field => $mapping){
+        foreach ($metadata->associationMappings as $field => $mapping) {
             if (!isset($mapping['embedded']) || !$mapping['embedded']) {
                 continue;
             }
@@ -57,7 +57,7 @@ class PreLoadSubscriber implements EventSubscriber
             $readEventArgs = new ReadEventArgs($targetMetadata, $eventManager);
             $eventManager->dispatchEvent(CoreEvents::READ, $readEventArgs);
 
-            if ($readEventArgs->getReject()){
+            if ($readEventArgs->getReject()) {
                 $eventArgs->getData()[$field] = null;
             }
         }
