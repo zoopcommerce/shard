@@ -102,9 +102,11 @@ class Extension extends AbstractExtension
         $this->filters = $filters;
     }
 
-    public function __construct()
+    public function __construct(array $config)
     {
         $this->proxyDir =  __DIR__ . '/../../../../../../data/proxies';
         $this->hydratorDir = __DIR__ . '/../../../../../../data/hydrators';
+
+        parent::__construct($config);
     }
 }
