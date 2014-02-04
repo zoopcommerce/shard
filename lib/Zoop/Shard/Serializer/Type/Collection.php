@@ -11,7 +11,7 @@ namespace Zoop\Shard\Serializer\Type;
 use Doctrine\Common\Collections\ArrayCollection;
 
 /**
- * Serializes dateTime objects
+ * Serializes Collection objects
  *
  * @since   1.0
  * @author  Josh Stuart <josh.stuart@zoopcommerce.com>
