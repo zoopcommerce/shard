@@ -24,13 +24,13 @@ class Post
 
     /**
      * @ODM\Collection
-     * @Shard\Unserialilzer\Collection(unserializeTo="array")
+     * @Shard\Unserializer\Collection(type="Array")
      */
     protected $arrayTags = [];
 
     /**
      * @ODM\Collection
-     * @Shard\Unserialilzer\Collection(unserializeTo="ArrayCollection")
+     * @Shard\Unserializer\Collection(type="ArrayCollection")
      */
     protected $arrayCollectionTags;
 
