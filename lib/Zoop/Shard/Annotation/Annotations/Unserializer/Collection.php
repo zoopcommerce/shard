@@ -21,4 +21,5 @@ final class Collection extends Annotation
     const EVENT = 'annotationUnserializerCollection';
 
     public $value = true;
+    public $type;
 }
