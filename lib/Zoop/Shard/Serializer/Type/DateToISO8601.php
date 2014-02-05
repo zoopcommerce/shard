@@ -1,12 +1,15 @@
 <?php
+
 /**
  * @link       http://zoopcommerce.github.io/shard
  * @package    Zoop
  * @license    MIT
  */
+
 namespace Zoop\Shard\Serializer\Type;
 
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+
 /**
  * Serializes dateTime objects
  *
@@ -20,7 +23,7 @@ class DateToISO8601 implements TypeSerializerInterface
         switch (true) {
             case $value instanceof \MongoDate:
                 $value = new \DateTime("@$value->sec");
-                //deliberate fall through
+            //deliberate fall through
             case $value instanceof \DateTime:
                 $value->setTimezone(new \DateTimeZone('UTC'));
 

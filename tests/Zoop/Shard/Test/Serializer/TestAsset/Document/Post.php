@@ -40,7 +40,7 @@ class Post
     }
 
     /**
-     * 
+     *
      * @return string
      */
     public function getId()
@@ -49,7 +49,7 @@ class Post
     }
 
     /**
-     * 
+     *
      * @return string
      */
     public function getTitle()
@@ -58,7 +58,7 @@ class Post
     }
 
     /**
-     * 
+     *
      * @return array
      */
     public function getArrayTags()
@@ -67,7 +67,7 @@ class Post
     }
 
     /**
-     * 
+     *
      * @return ArrayCollection
      */
     public function getArrayCollectionTags()
@@ -76,7 +76,7 @@ class Post
     }
 
     /**
-     * 
+     *
      * @param string $title
      */
     public function setTitle($title)
@@ -85,7 +85,7 @@ class Post
     }
 
     /**
-     * 
+     *
      * @param array $arrayTags
      */
     public function setArrayTags($arrayTags = [])
@@ -94,7 +94,7 @@ class Post
     }
 
     /**
-     * 
+     *
      * @param ArrayCollection $arrayCollectionTags
      */
     public function setArrayCollectionTags(ArrayCollection $arrayCollectionTags)
@@ -103,7 +103,7 @@ class Post
     }
 
     /**
-     * 
+     *
      * @param string $arrayTag
      */
     public function addArrayTag($arrayTag)
@@ -112,7 +112,7 @@ class Post
     }
 
     /**
-     * 
+     *
      * @param string $arrayCollectionTag
      */
     public function addArrayCollectionTag($arrayCollectionTag)

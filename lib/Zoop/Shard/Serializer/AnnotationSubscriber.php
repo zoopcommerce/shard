@@ -115,10 +115,10 @@ class AnnotationSubscriber implements EventSubscriber
         $metadata = $eventArgs->getMetadata();
         $annotation = $eventArgs->getAnnotation();
         $serializeMetadata = $this->getSerializerMetadata($metadata);
-        
+
         $serializeMetadata['fields'][$eventArgs->getReflection()->getName()]['collectionType'] =
             $annotation->type;
-        
+
         $metadata->setSerializer($serializeMetadata);
     }
 

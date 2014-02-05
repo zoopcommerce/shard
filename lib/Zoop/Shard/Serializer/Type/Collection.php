@@ -20,7 +20,6 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
  */
 class Collection implements TypeSerializerInterface
 {
-
     public function serialize(ClassMetadata $metadata, $value, $field)
     {
         //change value to array
@@ -29,7 +28,7 @@ class Collection implements TypeSerializerInterface
                 $value = $value->toArray();
             }
         }
-        
+
         return $value;
     }
 
@@ -60,5 +59,4 @@ class Collection implements TypeSerializerInterface
         }
         return $array;
     }
-
 }

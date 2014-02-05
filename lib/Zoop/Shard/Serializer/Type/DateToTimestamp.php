@@ -1,12 +1,15 @@
 <?php
+
 /**
  * @link       http://zoopcommerce.github.io/shard
  * @package    Zoop
  * @license    MIT
  */
+
 namespace Zoop\Shard\Serializer\Type;
 
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+
 /**
  * Serializes dateTime objects
  *

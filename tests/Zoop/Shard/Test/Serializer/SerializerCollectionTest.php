@@ -39,7 +39,7 @@ class SerializerCollectionTest extends BaseTest
         $post->addArrayTag($tags[1]);
         $post->addArrayCollectionTag($tags[0]);
         $post->addArrayCollectionTag($tags[1]);
-        
+
         $correct = [
             'title' => $title,
             'arrayTags' => $tags,
@@ -58,7 +58,7 @@ class SerializerCollectionTest extends BaseTest
             'Justin Bieber',
             'Not News'
         ];
-        
+
         $data = [
             'title' => $title,
             'arrayTags' => $tags,
@@ -75,9 +75,9 @@ class SerializerCollectionTest extends BaseTest
         $this->assertFalse($post->getArrayTags() instanceof ArrayCollection);
         $this->assertTrue(is_array($post->getArrayTags()));
         $this->assertCount(2, $post->getArrayCollectionTags());
-        
+
         $post->addArrayCollectionTag('Who cares');
-        
+
         $this->assertCount(3, $post->getArrayCollectionTags());
     }
 }
