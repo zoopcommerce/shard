@@ -18,7 +18,6 @@ use Zoop\Shard\Annotation\AnnotationEventArgs;
  */
 class AnnotationSubscriber implements EventSubscriber
 {
-
     /**
      *
      * @return array
@@ -116,10 +115,10 @@ class AnnotationSubscriber implements EventSubscriber
         $metadata = $eventArgs->getMetadata();
         $annotation = $eventArgs->getAnnotation();
         $serializeMetadata = $this->getSerializerMetadata($metadata);
-        die(var_dump($annotation, $serializeMetadata));
-        $serializeMetadata['fields'][$eventArgs->getReflection()->getName()]['referenceSerializer'] =
-            $annotation->value;
-
+        
+        $serializeMetadata['fields'][$eventArgs->getReflection()->getName()]['collectionType'] =
+            $annotation->type;
+        
         $metadata->setSerializer($serializeMetadata);
     }
 

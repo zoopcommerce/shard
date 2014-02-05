@@ -6,6 +6,7 @@
  */
 namespace Zoop\Shard\Serializer\Type;
 
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 /**
  * Serializes dateTime objects
  *
@@ -14,7 +15,7 @@ namespace Zoop\Shard\Serializer\Type;
  */
 class DateToTimestamp implements TypeSerializerInterface
 {
-    public function serialize($value)
+    public function serialize(ClassMetadata $metadata, $value, $field)
     {
         switch (true) {
             case $value instanceof \MongoDate:
@@ -26,7 +27,7 @@ class DateToTimestamp implements TypeSerializerInterface
         }
     }
 
-    public function unserialize($value)
+    public function unserialize(ClassMetadata $metadata, $value, $field)
     {
         return new \DateTime("@$value");
     }

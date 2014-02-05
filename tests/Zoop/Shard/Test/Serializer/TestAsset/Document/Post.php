@@ -24,7 +24,7 @@ class Post
 
     /**
      * @ODM\Collection
-     * @Shard\Unserializer\Collection(type="Array")
+     * @Shard\Unserializer\Collection(type="array")
      */
     protected $arrayTags = [];
 

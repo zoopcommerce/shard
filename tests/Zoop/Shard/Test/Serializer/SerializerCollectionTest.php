@@ -71,5 +71,13 @@ class SerializerCollectionTest extends BaseTest
         );
 
         $this->assertTrue($post instanceof Post);
+        $this->assertTrue($post->getArrayCollectionTags() instanceof ArrayCollection);
+        $this->assertFalse($post->getArrayTags() instanceof ArrayCollection);
+        $this->assertTrue(is_array($post->getArrayTags()));
+        $this->assertCount(2, $post->getArrayCollectionTags());
+        
+        $post->addArrayCollectionTag('Who cares');
+        
+        $this->assertCount(3, $post->getArrayCollectionTags());
     }
 }
