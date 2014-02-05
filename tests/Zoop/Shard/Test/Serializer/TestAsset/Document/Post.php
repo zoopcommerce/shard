@@ -24,6 +24,11 @@ class Post
 
     /**
      * @ODM\Collection
+     */
+    protected $tags = [];
+
+    /**
+     * @ODM\Collection
      * @Shard\Unserializer\Collection(type="array")
      */
     protected $arrayTags = [];
@@ -118,5 +123,29 @@ class Post
     public function addArrayCollectionTag($arrayCollectionTag)
     {
         $this->arrayCollectionTags->add($arrayCollectionTag);
+    }
+
+    /**
+     * @return array
+     */
+    public function getTags()
+    {
+        return $this->tags;
+    }
+
+    /**
+     * @param array $tags
+     */
+    public function setTags($tags = [])
+    {
+        $this->tags = $tags;
+    }
+
+    /**
+     * @param string $tag
+     */
+    public function addTag($tag)
+    {
+        $this->tags[] = $tag;
     }
 }

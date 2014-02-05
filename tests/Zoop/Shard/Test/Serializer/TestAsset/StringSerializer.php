@@ -16,12 +16,12 @@ use Zoop\Shard\Serializer\Type\TypeSerializerInterface;
  */
 class StringSerializer implements TypeSerializerInterface
 {
-    public function serialize(ClassMetadata $metadata, $value, $field)
+    public function serialize($value, ClassMetadata $metadata, $field)
     {
         return ucfirst($value);
     }
 
-    public function unserialize(ClassMetadata $metadata, $value, $field)
+    public function unserialize($value, ClassMetadata $metadata, $field)
     {
         return lcfirst($value);
     }

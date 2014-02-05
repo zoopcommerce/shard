@@ -18,7 +18,7 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
  */
 class DateToTimestamp implements TypeSerializerInterface
 {
-    public function serialize(ClassMetadata $metadata, $value, $field)
+    public function serialize($value, ClassMetadata $metadata, $field)
     {
         switch (true) {
             case $value instanceof \MongoDate:
@@ -30,7 +30,7 @@ class DateToTimestamp implements TypeSerializerInterface
         }
     }
 
-    public function unserialize(ClassMetadata $metadata, $value, $field)
+    public function unserialize($value, ClassMetadata $metadata, $field)
     {
         return new \DateTime("@$value");
     }

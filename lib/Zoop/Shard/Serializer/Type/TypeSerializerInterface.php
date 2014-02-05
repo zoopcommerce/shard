@@ -18,7 +18,7 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
  */
 interface TypeSerializerInterface
 {
-    public function serialize(ClassMetadata $metadata, $value, $field);
+    public function serialize($value, ClassMetadata $metadata, $field);
 
-    public function unserialize(ClassMetadata $metadata, $value, $field);
+    public function unserialize($value, ClassMetadata $metadata, $field);
 }

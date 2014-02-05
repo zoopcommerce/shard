@@ -20,8 +20,12 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
  */
 class Collection implements TypeSerializerInterface
 {
-    public function serialize(ClassMetadata $metadata, $value, $field)
+    public function serialize($value, ClassMetadata $metadata, $field)
     {
+        if(empty($value)) {
+            return array();
+        }
+        
         //change value to array
         if (!is_array($value)) {
             if ($value instanceof ArrayCollection || $value instanceof ArrayObject) {
@@ -32,9 +36,9 @@ class Collection implements TypeSerializerInterface
         return $value;
     }
 
-    public function unserialize(ClassMetadata $metadata, $value, $field)
+    public function unserialize($value, ClassMetadata $metadata, $field)
     {
-        $array = null;
+        $array = array();
         $serializerMetadata = $metadata->getSerializer();
 
         //reset value to array
@@ -43,20 +47,25 @@ class Collection implements TypeSerializerInterface
                 $value = $value->toArray();
             }
         }
-
-        switch ($serializerMetadata['fields'][$field]['collectionType']) {
-            case 'ArrayObject':
-                $array = new ArrayObject($value);
-                break;
-            case 'ArrayCollection':
-                $array = new ArrayCollection($value);
-                break;
-            case 'Array':
-            case 'array':
-            default:
-                $array = $value;
-                break;
+        
+        if (isset($serializerMetadata['fields'][$field]['collectionType'])) {
+            switch ($serializerMetadata['fields'][$field]['collectionType']) {
+                case 'ArrayObject':
+                    $array = new ArrayObject($value);
+                    break;
+                case 'ArrayCollection':
+                    $array = new ArrayCollection($value);
+                    break;
+                case 'Array':
+                case 'array':
+                default:
+                    $array = $value;
+                    break;
+            }
+        } else {
+            $array = (array) $value;
         }
+        
         return $array;
     }
 }

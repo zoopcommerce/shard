@@ -214,7 +214,7 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
 
         if (isset($this->typeSerializers[$type])) {
             return $this->serviceLocator->get($this->typeSerializers[$type])
-                ->unserialize($metadata, $data[$field], $field);
+                ->unserialize($data[$field], $metadata, $field);
         }
         if ($type == 'float' && is_integer($data[$field])) {
             return (float) $data[$field];

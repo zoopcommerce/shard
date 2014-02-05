@@ -35,6 +35,8 @@ class SerializerCollectionTest extends BaseTest
         ];
         $post = new Post();
         $post->setTitle($title);
+        $post->addTag($tags[0]);
+        $post->addTag($tags[1]);
         $post->addArrayTag($tags[0]);
         $post->addArrayTag($tags[1]);
         $post->addArrayCollectionTag($tags[0]);
@@ -42,6 +44,7 @@ class SerializerCollectionTest extends BaseTest
 
         $correct = [
             'title' => $title,
+            'tags' => $tags,
             'arrayTags' => $tags,
             'arrayCollectionTags' => $tags
         ];
@@ -61,6 +64,7 @@ class SerializerCollectionTest extends BaseTest
 
         $data = [
             'title' => $title,
+            'tags' => $tags,
             'arrayTags' => $tags,
             'arrayCollectionTags' => $tags
         ];
@@ -75,6 +79,7 @@ class SerializerCollectionTest extends BaseTest
         $this->assertFalse($post->getArrayTags() instanceof ArrayCollection);
         $this->assertTrue(is_array($post->getArrayTags()));
         $this->assertCount(2, $post->getArrayCollectionTags());
+        $this->assertTrue(is_array($post->getTags()));
 
         $post->addArrayCollectionTag('Who cares');
 
