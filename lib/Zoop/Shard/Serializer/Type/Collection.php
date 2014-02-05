@@ -22,7 +22,7 @@ class Collection implements TypeSerializerInterface
 {
     public function serialize($value, ClassMetadata $metadata, $field)
     {
-        if(empty($value)) {
+        if (empty($value)) {
             return array();
         }
         
