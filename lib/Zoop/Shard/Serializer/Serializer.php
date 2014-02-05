@@ -249,7 +249,7 @@ class Serializer implements ServiceLocatorAwareInterface, ModelManagerAwareInter
         $type = $metadata->getTypeOfField($field);
 
         if (array_key_exists($type, $this->typeSerializers)) {
-            return $this->getTypeSerializer($type)->serialize($value);
+            return $this->getTypeSerializer($type)->serialize($value, $metadata, $field);
         }
 
         return $value;

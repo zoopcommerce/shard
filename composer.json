@@ -24,6 +24,7 @@
     ],
     "require": {
         "php"                              : ">=5.4",
+        "doctrine/annotations"             : "dev-master#a11349d39d85bef75a71bd69bd604ac4fb993f03 as dev-master",
         "zoopcommerce/common"              : "~1.1",
         "zoopcommerce/mystique-php"        : "~1.2",
         "doctrine/mongodb-odm"             : "dev-hotfix719 as 1.0.0-BETA9",

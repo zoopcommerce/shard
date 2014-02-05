@@ -26,6 +26,7 @@ class Extension extends AbstractExtension
             'subscriber.serializer.mainsubscriber' => 'Zoop\Shard\Serializer\MainSubscriber',
             'serializer.reference.lazy'            => 'Zoop\Shard\Serializer\Reference\Lazy',
             'serializer.reference.eager'           => 'Zoop\Shard\Serializer\Reference\Eager',
+            'serializer.type.collection'           => 'Zoop\Shard\Serializer\Type\Collection',
             'serializer.type.dateToISO8601'        => 'Zoop\Shard\Serializer\Type\DateToISO8601',
             'serializer.type.dateToTimestamp'      => 'Zoop\Shard\Serializer\Type\DateToTimestamp'
         ],
@@ -42,7 +43,8 @@ class Extension extends AbstractExtension
 
     /** @var array */
     protected $typeSerializers = [
-        'date' => 'serializer.type.dateToISO8601'
+        'collection'        => 'serializer.type.collection',
+        'date'              => 'serializer.type.dateToISO8601'
     ];
 
     /** @var int */

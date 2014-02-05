@@ -18,7 +18,6 @@ use Zoop\Shard\Annotation\AnnotationEventArgs;
  */
 class AnnotationSubscriber implements EventSubscriber
 {
-
     /**
      *
      * @return array
@@ -31,6 +30,7 @@ class AnnotationSubscriber implements EventSubscriber
             Shard\Serializer\Lazy::EVENT,
             Shard\Serializer\ReferenceSerializer::EVENT,
             Shard\Unserializer\Ignore::EVENT,
+            Shard\Unserializer\Collection::EVENT
         ];
     }
 
@@ -102,6 +102,22 @@ class AnnotationSubscriber implements EventSubscriber
         $serializeMetadata = $this->getSerializerMetadata($metadata);
         $serializeMetadata['fields'][$eventArgs->getReflection()->getName()]['referenceSerializer'] =
             $annotation->value;
+
+        $metadata->setSerializer($serializeMetadata);
+    }
+
+    /**
+     *
+     * @param \Zoop\Shard\Annotation\AnnotationEventArgs $eventArgs
+     */
+    public function annotationUnserializerCollection(AnnotationEventArgs $eventArgs)
+    {
+        $metadata = $eventArgs->getMetadata();
+        $annotation = $eventArgs->getAnnotation();
+        $serializeMetadata = $this->getSerializerMetadata($metadata);
+
+        $serializeMetadata['fields'][$eventArgs->getReflection()->getName()]['collectionType'] =
+            $annotation->type;
 
         $metadata->setSerializer($serializeMetadata);
     }

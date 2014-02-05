@@ -1,10 +1,14 @@
 <?php
+
 /**
  * @link       http://zoopcommerce.github.io/shard
  * @package    Zoop
  * @license    MIT
  */
+
 namespace Zoop\Shard\Serializer\Type;
+
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 
 /**
  * Serializes dataTime objects
@@ -14,7 +18,7 @@ namespace Zoop\Shard\Serializer\Type;
  */
 interface TypeSerializerInterface
 {
-    public function serialize($value);
+    public function serialize($value, ClassMetadata $metadata, $field);
 
-    public function unserialize($value);
+    public function unserialize($value, ClassMetadata $metadata, $field);
 }
