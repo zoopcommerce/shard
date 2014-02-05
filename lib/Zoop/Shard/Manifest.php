@@ -140,10 +140,15 @@ class Manifest extends AbstractExtension
         }
         $this->initalized = true;
 
+        $initalServiceManagerConfig = ArrayUtils::merge(
+            $this->defaultServiceManagerConfig,
+            $this->serviceManagerConfig
+        );
+
         if (isset($this->serviceManager)) {
             $serviceManager = $this->serviceManager;
         } else {
-            $serviceManager = self::createServiceManager($this->defaultServiceManagerConfig);
+            $serviceManager = self::createServiceManager($initalServiceManagerConfig);
             $this->serviceManager = $serviceManager;
         }
         $serviceManager->setService('manifest', $this);
@@ -171,18 +176,14 @@ class Manifest extends AbstractExtension
                 )
             );
         }
-        $this->serviceManagerConfig = ArrayUtils::merge($config['service_manager_config'], $this->serviceManagerConfig);
+        $this->serviceManagerConfig = ArrayUtils::merge($config['service_manager_config'], $initalServiceManagerConfig);
         $this->models = ArrayUtils::merge($config['models'], $this->models);
 
         //Apply service manager config
         $serviceManagerConfig = new Config($this->serviceManagerConfig);
+        $serviceManager->setAllowOverride(true);
         $serviceManagerConfig->configureServiceManager($serviceManager);
-
-        //Make sure default service manager config is included in the main service manager config variable
-        $this->serviceManagerConfig = ArrayUtils::merge(
-            $this->defaultServiceManagerConfig,
-            $this->serviceManagerConfig
-        );
+        $serviceManager->setAllowOverride(false);
 
         //setup lazySubscriber configuration
         $this->lazySubscriberConfig = $this->getLazySubscirberConfig($serviceManager);
@@ -225,16 +226,6 @@ class Manifest extends AbstractExtension
                 is_bool($this->extensionConfigs[$dependencyName])
             ) {
                 $this->expandExtensionConfig($dependencyName);
-            }
-        }
-
-        //make sure any defaults overridden by the manifest config get applied
-        if (isset($this->extensionConfigs[$name]) && is_array($this->extensionConfigs[$name])) {
-            foreach ($this->extensionConfigs[$name] as $key => $value) {
-                $setter = 'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
-                if (method_exists($extension, $setter)) {
-                    $extension->{$setter}($value);
-                }
             }
         }
 
