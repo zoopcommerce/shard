@@ -2,6 +2,7 @@
 
 namespace Zoop\Shard\Test\Serializer;
 
+use \ArrayObject;
 use Doctrine\Common\Collections\ArrayCollection;
 use Zoop\Shard\Manifest;
 use Zoop\Shard\Test\BaseTest;
@@ -39,6 +40,8 @@ class SerializerCollectionTest extends BaseTest
         $post->addTag($tags[1]);
         $post->addArrayTag($tags[0]);
         $post->addArrayTag($tags[1]);
+        $post->addArrayObjectTag($tags[0]);
+        $post->addArrayObjectTag($tags[1]);
         $post->addArrayCollectionTag($tags[0]);
         $post->addArrayCollectionTag($tags[1]);
 
@@ -46,6 +49,7 @@ class SerializerCollectionTest extends BaseTest
             'title' => $title,
             'tags' => $tags,
             'arrayTags' => $tags,
+            'arrayObjectTags' => $tags,
             'arrayCollectionTags' => $tags
         ];
 
@@ -66,6 +70,7 @@ class SerializerCollectionTest extends BaseTest
             'title' => $title,
             'tags' => $tags,
             'arrayTags' => $tags,
+            'arrayObjectTags' => $tags,
             'arrayCollectionTags' => $tags
         ];
 
@@ -75,11 +80,15 @@ class SerializerCollectionTest extends BaseTest
         );
 
         $this->assertTrue($post instanceof Post);
+        
         $this->assertTrue($post->getArrayCollectionTags() instanceof ArrayCollection);
+        $this->assertTrue($post->getArrayObjectTags() instanceof ArrayObject);
         $this->assertFalse($post->getArrayTags() instanceof ArrayCollection);
         $this->assertTrue(is_array($post->getArrayTags()));
-        $this->assertCount(2, $post->getArrayCollectionTags());
         $this->assertTrue(is_array($post->getTags()));
+        
+        $this->assertCount(2, $post->getArrayCollectionTags());
+        $this->assertCount(2, $post->getArrayObjectTags());
 
         $post->addArrayCollectionTag('Who cares');
 

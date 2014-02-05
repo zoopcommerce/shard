@@ -2,6 +2,7 @@
 
 namespace Zoop\Shard\Test\Serializer\TestAsset\Document;
 
+use \ArrayObject;
 use Doctrine\Common\Collections\ArrayCollection;
 //Annotation imports
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
@@ -39,9 +40,16 @@ class Post
      */
     protected $arrayCollectionTags;
 
+    /**
+     * @ODM\Collection
+     * @Shard\Unserializer\Collection(type="ArrayObject")
+     */
+    protected $arrayObjectTags;
+
     public function __construct()
     {
         $this->arrayCollectionTags = new ArrayCollection;
+        $this->arrayObjectTags = new ArrayObject;
     }
 
     /**
@@ -147,5 +155,20 @@ class Post
     public function addTag($tag)
     {
         $this->tags[] = $tag;
+    }
+    
+    public function getArrayObjectTags()
+    {
+        return $this->arrayObjectTags;
+    }
+
+    public function setArrayObjectTags($arrayObjectTags)
+    {
+        $this->arrayObjectTags = $arrayObjectTags;
+    }
+
+    public function addArrayObjectTag($arrayObjectTag)
+    {
+        $this->arrayObjectTags[] = $arrayObjectTag;
     }
 }

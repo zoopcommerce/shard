@@ -28,8 +28,10 @@ class Collection implements TypeSerializerInterface
         
         //change value to array
         if (!is_array($value)) {
-            if ($value instanceof ArrayCollection || $value instanceof ArrayObject) {
+            if ($value instanceof ArrayCollection) {
                 $value = $value->toArray();
+            } elseif ($value instanceof ArrayObject) {
+                $value = $value->getArrayCopy();
             }
         }
 
@@ -43,8 +45,10 @@ class Collection implements TypeSerializerInterface
 
         //reset value to array
         if (!is_array($value)) {
-            if ($value instanceof ArrayCollection || $value instanceof ArrayObject) {
+            if ($value instanceof ArrayCollection) {
                 $value = $value->toArray();
+            } elseif ($value instanceof ArrayObject) {
+                $value = $value->getArrayCopy();
             }
         }
         
