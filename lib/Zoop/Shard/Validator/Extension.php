@@ -22,6 +22,10 @@ class Extension extends AbstractExtension
         'subscriber.validator.annotationsubscriber'
     ];
 
+    protected $exceptionEvents = [
+        Events::INVALID_MODEL,
+    ];
+
     protected $dependencies = [
         'extension.annotation' => true,
     ];

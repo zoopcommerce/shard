@@ -16,12 +16,6 @@ use Zend\Stdlib\AbstractOptions;
  */
 abstract class AbstractExtension extends AbstractOptions
 {
-    protected $models = [];
-
-    protected $subscribers = [];
-
-    protected $serviceManagerConfig = [];
-
     /**
      * List of other extensions which must be loaded
      * for this extension to work
@@ -30,35 +24,18 @@ abstract class AbstractExtension extends AbstractOptions
      */
     protected $dependencies = [];
 
-    public function getServiceManagerConfig()
-    {
-        return $this->serviceManagerConfig;
-    }
+    /**
+     * List of events that are triggered instead of raising an exception
+     *
+     * @var array
+     */
+    protected $exceptionEvents = [];
 
-    public function setServiceManagerConfig($serviceManagerConfig)
-    {
-        $this->serviceManagerConfig = $serviceManagerConfig;
-    }
+    protected $models = [];
 
-    public function getModels()
-    {
-        return $this->models;
-    }
+    protected $subscribers = [];
 
-    public function setModels($models)
-    {
-        $this->models = $models;
-    }
-
-    public function getSubscribers()
-    {
-        return $this->subscribers;
-    }
-
-    public function setSubscribers($subscribers)
-    {
-        $this->subscribers = $subscribers;
-    }
+    protected $serviceManagerConfig = [];
 
     /**
      *
@@ -76,5 +53,45 @@ abstract class AbstractExtension extends AbstractOptions
     public function setDependencies(array $dependencies)
     {
         $this->dependencies = $dependencies;
+    }
+
+    public function getExceptionEvents()
+    {
+        return $this->exceptionEvents;
+    }
+
+    public function setExceptionEvents($exceptionEvents)
+    {
+        $this->exceptionEvents = $exceptionEvents;
+    }
+
+    public function getModels()
+    {
+        return $this->models;
+    }
+
+    public function setModels($models)
+    {
+        $this->models = $models;
+    }
+
+    public function getServiceManagerConfig()
+    {
+        return $this->serviceManagerConfig;
+    }
+
+    public function setServiceManagerConfig($serviceManagerConfig)
+    {
+        $this->serviceManagerConfig = $serviceManagerConfig;
+    }
+
+    public function getSubscribers()
+    {
+        return $this->subscribers;
+    }
+
+    public function setSubscribers($subscribers)
+    {
+        $this->subscribers = $subscribers;
     }
 }

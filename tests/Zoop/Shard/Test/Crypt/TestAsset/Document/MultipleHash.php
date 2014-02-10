@@ -7,7 +7,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Zoop\Shard\Annotation\Annotations as Shard;
 
 /** @ODM\Document */
-class CryptValidatorDoc
+class MultipleHash
 {
     /**
      * @ODM\Id(strategy="UUID")
@@ -16,39 +16,38 @@ class CryptValidatorDoc
 
     /**
      * @ODM\String
-     * @Shard\Crypt\BlockCipher(key = "testkey")
-     * @Shard\Validator\Email
+     * @Shard\Crypt\Hash(salt="testsalt")
      */
-    protected $email;
+    protected $firstname;
 
     /**
-     *
      * @ODM\String
+     * @Shard\Crypt\Hash(salt="testsalt")
      */
-    protected $name;
+    protected $lastname;
 
     public function getId()
     {
         return $this->id;
     }
 
-    public function getEmail()
+    public function getFirstname()
     {
-        return $this->email;
+        return $this->firstname;
     }
 
-    public function setEmail($email)
+    public function setFirstname($firstname)
     {
-        $this->email = $email;
+        $this->firstname = $firstname;
     }
 
-    public function getName()
+    public function getLastname()
     {
-        return $this->name;
+        return $this->lastname;
     }
 
-    public function setName($name)
+    public function setLastname($lastname)
     {
-        $this->name = $name;
+        $this->lastname = $lastname;
     }
 }

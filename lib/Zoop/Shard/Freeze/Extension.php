@@ -39,6 +39,13 @@ class Extension extends AbstractExtension
         ]
     ];
 
+    protected $exceptionEvents = [
+        Events::FREEZE_DENIED,
+        Events::THAW_DENIED,
+        Events::FROZEN_DELETE_DENIED,
+        Events::FROZEN_UPDATE_DENIED,
+    ];
+
     protected $dependencies = [
         'extension.annotation' => true
     ];

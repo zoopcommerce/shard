@@ -19,6 +19,7 @@ class Extension extends AbstractExtension
 
     protected $subscribers = [
         'subscriber.odmcore.boostrappedsubscriber',
+        'subscriber.odmcore.exceptioneventsaggregator',
         'subscriber.odmcore.flushsubscriber',
         'subscriber.odmcore.preloadsubscriber',
         'subscriber.odmcore.loadmetadatasubscriber'
@@ -36,7 +37,8 @@ class Extension extends AbstractExtension
                 'Zoop\Shard\ODMCore\LoadMetadataSubscriber'
         ],
         'factories' => [
-            'modelmanager' => 'Zoop\Shard\ODMCore\DevDocumentManagerFactory'
+            'modelmanager'                                 => 'Zoop\Shard\ODMCore\DevDocumentManagerFactory',
+            'subscriber.odmcore.exceptioneventsaggregator' => 'Zoop\Shard\ODMCore\ExceptionEventsAggregatorFactory'
         ]
     ];
 

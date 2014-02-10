@@ -52,12 +52,12 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
             //stop freeze
             $this->getFreezer()->thaw($document, $metadata);
 
-            $eventArgs->setReject(true);
-
             $eventArgs->getEventManager()->dispatchEvent(
                 Events::FREEZE_DENIED,
                 new AccessControlEventArgs($document, Actions::FREEZE)
             );
+
+            $eventArgs->setReject(true);
         }
     }
 
@@ -81,12 +81,12 @@ class FreezeSubscriber extends AbstractAccessControlSubscriber
             //stop thaw
             $this->getFreezer()->freeze($document, $metadata);
 
-            $eventArgs->setReject(true);
-
             $eventArgs->getEventManager()->dispatchEvent(
                 Events::THAW_DENIED,
                 new AccessControlEventArgs($document, Actions::THAW)
             );
+
+            $eventArgs->setReject(true);
         }
     }
 
