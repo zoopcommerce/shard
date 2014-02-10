@@ -39,6 +39,12 @@ class Extension extends AbstractExtension
         ]
     ];
 
+    protected $exceptionEvents = [
+        Events::CREATE_DENIED,
+        Events::DELETE_DENIED,
+        Events::UPDATE_DENIED,
+    ];
+
     /**
      *
      * @var array

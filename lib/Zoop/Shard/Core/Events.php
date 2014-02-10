@@ -46,4 +46,6 @@ final class Events
     const LOAD_METADATA = 'loadMetadata';
 
     const BOOTSTRAPPED = 'bootstrapped';
+
+    const EXCEPTION = 'exception';
 }
