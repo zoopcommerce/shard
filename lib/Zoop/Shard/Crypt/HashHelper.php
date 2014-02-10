@@ -24,12 +24,25 @@ class HashHelper implements ServiceLocatorAwareInterface
         $cryptMetadata = $metadata->getCrypt();
         if (isset($cryptMetadata['hash'])) {
             foreach ($cryptMetadata['hash'] as $field => $config) {
-                $service = $this->serviceLocator->get($config['service']);
-                if (! $service instanceof HashServiceInterface) {
-                    throw new \Zoop\Shard\Exception\InvalidArgumentException();
-                }
-                $service->hashField($field, $document, $metadata);
+                $this->getHashService($config)->hashField($field, $document, $metadata);
             }
         }
+    }
+
+    public function hashField($field, $document, $metadata)
+    {
+        $cryptMetadata = $metadata->getCrypt();
+        if (isset($cryptMetadata['hash']) && isset($cryptMetadata['hash'][$field])) {
+            $this->getHashService($cryptMetadata['hash'][$field])->hashField($field, $document, $metadata);
+        }
+    }
+    
+    protected function getHashService($config)
+    {
+        $service = $this->serviceLocator->get($config['service']);
+        if (! $service instanceof HashServiceInterface) {
+            throw new \Zoop\Shard\Exception\InvalidArgumentException();
+        }
+        return $service;
     }
 }
