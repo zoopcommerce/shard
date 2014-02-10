@@ -45,6 +45,7 @@ class ExceptionEventsAggregatorTest extends BaseTest
         $documentManager->flush();
 
         $this->assertTrue(isset($this->calls[Events::EXCEPTION]));
+        $this->assertEquals('invalidModel', $this->calls[Events::EXCEPTION][0]->getName());
         $this->assertCount(
             2,
             $this->calls[Events::EXCEPTION][0]->getInnerEvent()->getResult()->getFieldResults()['name']->getMessages()

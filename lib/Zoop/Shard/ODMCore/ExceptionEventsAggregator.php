@@ -6,10 +6,12 @@
 namespace Zoop\Shard\ODMCore;
 
 use Doctrine\Common\EventArgs;
-use Doctrine\Common\EventManager;
 use Doctrine\Common\EventSubscriber;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Zoop\Shard\Core\Events;
 use Zoop\Shard\Core\ExceptionEventArgs;
+use Zoop\Shard\Core\EventManagerTrait;
 
 /**
  *
@@ -17,11 +19,12 @@ use Zoop\Shard\Core\ExceptionEventArgs;
  * @version $Revision$
  * @author  Tim Roediger <superdweebie@gmail.com>
  */
-class ExceptionEventsAggregator implements EventSubscriber
+class ExceptionEventsAggregator implements EventSubscriber, ServiceLocatorAwareInterface
 {
-    protected $exceptionEvents;
+    use ServiceLocatorAwareTrait;
+    use EventManagerTrait;
 
-    protected $eventManager;
+    protected $exceptionEvents;
 
     public function getSubscribedEvents()
     {
@@ -38,20 +41,12 @@ class ExceptionEventsAggregator implements EventSubscriber
         $this->exceptionEvents = $exceptionEvents;
     }
 
-    public function __construct(EventManager $eventManager)
-    {
-        $this->eventManager = $eventManager;
-    }
-
-    /**
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
     public function __call($name, $args)
     {
         if (!($args[0] instanceof EventArgs)) {
             return;
         }
 
-        $this->eventManager->dispatchEvent(Events::EXCEPTION, new ExceptionEventArgs($args[0]));
+        $this->getEventManager()->dispatchEvent(Events::EXCEPTION, new ExceptionEventArgs($name, $args[0]));
     }
 }

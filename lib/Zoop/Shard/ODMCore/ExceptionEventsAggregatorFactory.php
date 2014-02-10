@@ -25,7 +25,7 @@ class ExceptionEventsAggregatorFactory implements FactoryInterface
     {
         $manifest = $serviceLocator->get('manifest');
 
-        $subscriber = new ExceptionEventsAggregator($serviceLocator->get('eventmanager'));
+        $subscriber = new ExceptionEventsAggregator();
 
         $exceptionEvents = [];
         foreach ($manifest->getExtensionConfigs() as $extensionConfig){

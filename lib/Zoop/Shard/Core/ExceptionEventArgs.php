@@ -15,15 +15,23 @@ use Doctrine\Common\EventArgs as BaseEventArgs;
  */
 class ExceptionEventArgs extends BaseEventArgs
 {
+    protected $name;
+
     protected $innerEvent;
+
+    public function getName()
+    {
+        return $this->name;
+    }
 
     public function getInnerEvent()
     {
         return $this->innerEvent;
     }
 
-    public function __construct(BaseEventArgs $innerEvent)
+    public function __construct($name, BaseEventArgs $innerEvent)
     {
+        $this->name = (string) $name;
         $this->innerEvent = $innerEvent;
     }
 }

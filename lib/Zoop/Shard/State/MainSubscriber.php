@@ -88,9 +88,8 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         //stop state change if the new state is not on the defined state list
         if (count($stateMetadata[$field]) > 0 && ! in_array($toState, $stateMetadata[$field])) {
             $metadata->setFieldValue($document, $field, $fromState);
-            $eventArgs->setReject(true);
             $eventManager->dispatchEvent(Events::BAD_STATE, $eventArgs);
-
+            $eventArgs->setReject(true);
             return;
         }
 
@@ -136,11 +135,8 @@ class MainSubscriber implements EventSubscriber, ServiceLocatorAwareInterface
         if (count($stateMetadata[$field]) > 0 &&
             ! in_array($metadata->getFieldValue($document, $field), $stateMetadata[$field])
         ) {
+            $eventArgs->getEventManager()->dispatchEvent(Events::BAD_STATE, $eventArgs);
             $eventArgs->setReject(true);
-            $eventArgs->getEventManager()->dispatchEvent(
-                Events::BAD_STATE,
-                $eventArgs
-            );
         }
     }
 }
