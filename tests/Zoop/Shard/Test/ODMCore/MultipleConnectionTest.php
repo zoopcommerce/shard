@@ -58,10 +58,13 @@ class MultipleConnectionTest extends BaseTest
         $this->assertEquals('Guide to better living', $albums2[0]->getName());
 
         //cleanup
-        foreach ($documentManager1->getConnection()->selectDatabase('shard-phpunit-1')->listCollections() as $collection) {
+        $collections = $documentManager1->getConnection()->selectDatabase('shard-phpunit-1')->listCollections();
+        foreach ($collections as $collection) {
             $collection->remove(array(), array('safe' => true));
         }
-        foreach ($documentManager2->getConnection()->selectDatabase('shard-phpunit-2')->listCollections() as $collection) {
+
+        $collections = $documentManager2->getConnection()->selectDatabase('shard-phpunit-2')->listCollections();
+        foreach ($collections as $collection) {
             $collection->remove(array(), array('safe' => true));
         }
     }

@@ -28,7 +28,7 @@ class ExceptionEventsAggregatorFactory implements FactoryInterface
         $subscriber = new ExceptionEventsAggregator();
 
         $exceptionEvents = [];
-        foreach ($manifest->getExtensionConfigs() as $extensionConfig){
+        foreach ($manifest->getExtensionConfigs() as $extensionConfig) {
             $exceptionEvents = array_merge($exceptionEvents, $extensionConfig['exception_events']);
         }
         $subscriber->setExceptionEvents($exceptionEvents);

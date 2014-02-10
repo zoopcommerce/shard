@@ -43,7 +43,8 @@ class BlockCipherHelper implements ServiceLocatorAwareInterface
     {
         $cryptMetadata = $metadata->getCrypt();
         if (isset($cryptMetadata['blockCipher']) && isset($cryptMetadata['blockCipher'][$field])) {
-            $this->getBlockCipherService($cryptMetadata['blockCipher'][$field])->encryptField($field, $document, $metadata);
+            $this->getBlockCipherService($cryptMetadata['blockCipher'][$field])
+                ->encryptField($field, $document, $metadata);
         }
     }
 
@@ -51,7 +52,8 @@ class BlockCipherHelper implements ServiceLocatorAwareInterface
     {
         $cryptMetadata = $metadata->getCrypt();
         if (isset($cryptMetadata['blockCipher']) && isset($cryptMetadata['blockCipher'][$field])) {
-            $this->getBlockCipherService($cryptMetadata['blockCipher'][$field])->decryptField($field, $document, $metadata);
+            $this->getBlockCipherService($cryptMetadata['blockCipher'][$field])
+                ->decryptField($field, $document, $metadata);
         }
     }
 

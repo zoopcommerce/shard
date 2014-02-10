@@ -49,7 +49,11 @@ class HashHelperTest extends BaseTest
         $testDoc->setFirstname('Tommy');
         $testDoc->setLastname('Hatchling');
 
-        $this->hashHelper->hashField('firstname', $testDoc, $this->documentManager->getClassMetadata(get_class($testDoc)));
+        $this->hashHelper->hashField(
+            'firstname',
+            $testDoc,
+            $this->documentManager->getClassMetadata(get_class($testDoc))
+        );
 
         $this->assertNotEquals('Tommy', $testDoc->getFirstname());
         $this->assertEquals('Hatchling', $testDoc->getLastname());

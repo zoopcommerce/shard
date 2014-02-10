@@ -37,12 +37,18 @@ class BlockCipherHelperTest extends BaseTest
         $testDoc->setFirstname('Tommy');
         $testDoc->setLastname('Hatchling');
 
-        $this->blockCipherHelper->encryptDocument($testDoc, $this->documentManager->getClassMetadata(get_class($testDoc)));
+        $this->blockCipherHelper->encryptDocument(
+            $testDoc,
+            $this->documentManager->getClassMetadata(get_class($testDoc))
+        );
 
         $this->assertNotEquals('Tommy', $testDoc->getFirstname());
         $this->assertNotEquals('Hatchling', $testDoc->getLastname());
 
-        $this->blockCipherHelper->decryptDocument($testDoc, $this->documentManager->getClassMetadata(get_class($testDoc)));
+        $this->blockCipherHelper->decryptDocument(
+            $testDoc,
+            $this->documentManager->getClassMetadata(get_class($testDoc))
+        );
 
         $this->assertEquals('Tommy', $testDoc->getFirstname());
         $this->assertEquals('Hatchling', $testDoc->getLastname());
@@ -54,12 +60,20 @@ class BlockCipherHelperTest extends BaseTest
         $testDoc->setFirstname('Tommy');
         $testDoc->setLastname('Hatchling');
 
-        $this->blockCipherHelper->encryptField('firstname', $testDoc, $this->documentManager->getClassMetadata(get_class($testDoc)));
+        $this->blockCipherHelper->encryptField(
+            'firstname',
+            $testDoc,
+            $this->documentManager->getClassMetadata(get_class($testDoc))
+        );
 
         $this->assertNotEquals('Tommy', $testDoc->getFirstname());
         $this->assertEquals('Hatchling', $testDoc->getLastname());
 
-        $this->blockCipherHelper->decryptField('firstname', $testDoc, $this->documentManager->getClassMetadata(get_class($testDoc)));
+        $this->blockCipherHelper->decryptField(
+            'firstname',
+            $testDoc,
+            $this->documentManager->getClassMetadata(get_class($testDoc))
+        );
 
         $this->assertEquals('Tommy', $testDoc->getFirstname());
         $this->assertEquals('Hatchling', $testDoc->getLastname());

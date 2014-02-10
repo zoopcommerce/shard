@@ -17,7 +17,8 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 class EventManagerFactory implements FactoryInterface
 {
     /**
-     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * 
      * @param  \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator
      * @return object
      */
