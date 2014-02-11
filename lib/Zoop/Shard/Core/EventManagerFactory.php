@@ -24,6 +24,6 @@ class EventManagerFactory implements FactoryInterface
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
-        return new EventManager;
+        return $serviceLocator->get('modelmanager')->getEventManager();
     }
 }
