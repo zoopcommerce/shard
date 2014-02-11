@@ -14,6 +14,7 @@ use Doctrine\ODM\MongoDB\Configuration;
 use Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
+use Zoop\Shard\Core\EventManager;
 
 /**
  *
@@ -62,7 +63,7 @@ class DevDocumentManagerFactory implements FactoryInterface
         }
 
         //create event manager
-        $eventManager = $serviceLocator->get('eventmanager');
+        $eventManager = new EventManager;
         foreach ($manifest->getSubscribers() as $subscriber) {
             $eventManager->addEventSubscriber($serviceLocator->get($subscriber));
         }
