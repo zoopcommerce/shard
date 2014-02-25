@@ -39,9 +39,6 @@ class AnnotationSubscriber implements EventSubscriber
         $metadata = $eventArgs->getMetadata();
 
         if ($annotation->value) {
-            $metadata->addProperty('permissions', true);
-            $metadata->setPermissions([]);
-
             $eventManager = $eventArgs->getEventManager();
             foreach ($annotation->value as $permissionAnnotation) {
                 if (defined(get_class($permissionAnnotation) . '::EVENT')) {

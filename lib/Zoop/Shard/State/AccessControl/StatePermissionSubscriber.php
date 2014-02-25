@@ -76,6 +76,11 @@ class StatePermissionSubscriber implements EventSubscriber
             $config['options']['deny'] = [];
         }
 
+        if (!$metadata->hasProperty('permissions')) {
+            $metadata->addProperty('permissions', true);
+            $metadata->setPermissions([]);
+        }
+
         $permissionsMetadata = $metadata->getPermissions();
         $permissionsMetadata[] = $config;
         $metadata->setPermissions($permissionsMetadata);
