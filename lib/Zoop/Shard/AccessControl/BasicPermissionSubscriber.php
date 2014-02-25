@@ -72,6 +72,12 @@ class BasicPermissionSubscriber implements EventSubscriber
         }
 
         $metadata = $eventArgs->getMetadata();
+
+        if (!$metadata->hasProperty('permissions')) {
+            $metadata->addProperty('permissions', true);
+            $metadata->setPermissions([]);
+        }
+
         $permissionsMetadata = $metadata->getPermissions();
         $permissionsMetadata[] = $config;
         $metadata->setPermissions($permissionsMetadata);
