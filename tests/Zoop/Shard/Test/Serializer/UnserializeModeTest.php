@@ -57,9 +57,19 @@ class UnserializeModeTest extends BaseTest
                 ],
                 'active' => false
             ],
-            self::USER_CLASS,
-            $user
+            self::USER_CLASS
         );
+
+        $this->assertEquals('there', $updated->location());
+        $this->assertEquals('superdweebie', $updated->getUsername());
+        $this->assertEquals('Tom', $updated->getProfile()->getFirstname());
+        $this->assertEquals(false, $updated->getActive());
+
+        //also check that the updated doc persists correctly
+        $documentManager->flush();
+        $documentManager->clear();
+
+        $updated = $documentManager->getRepository(get_class($user))->find($id);
 
         $this->assertEquals('there', $updated->location());
         $this->assertEquals('superdweebie', $updated->getUsername());
@@ -91,8 +101,7 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'groups' => $groups
             ],
-            self::USER_CLASS,
-            $user
+            self::USER_CLASS
         );
 
         // this works pre flush
@@ -137,8 +146,7 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'groups' => $groups
             ],
-            self::USER_CLASS,
-            $user
+            self::USER_CLASS
         );
 
         $userGroups = $updated->getGroups();
@@ -173,8 +181,7 @@ class UnserializeModeTest extends BaseTest
                 'id' => $id,
                 'groups' => []
             ],
-            self::USER_CLASS,
-            $user
+            self::USER_CLASS
         );
         $this->assertCount(0, $updated->getGroups());
 
@@ -212,7 +219,7 @@ class UnserializeModeTest extends BaseTest
                 ]
             ],
             self::USER_CLASS,
-            $user,
+            null,
             Unserializer::UNSERIALIZE_UPDATE
         );
 
@@ -247,7 +254,7 @@ class UnserializeModeTest extends BaseTest
                 'groups' => $groups
             ],
             self::USER_CLASS,
-            $user,
+            null,
             Unserializer::UNSERIALIZE_UPDATE
         );
 
@@ -290,7 +297,7 @@ class UnserializeModeTest extends BaseTest
                 'groups' => $groups
             ],
             self::USER_CLASS,
-            $user,
+            null,
             Unserializer::UNSERIALIZE_UPDATE
         );
 
@@ -326,7 +333,7 @@ class UnserializeModeTest extends BaseTest
                 'groups' => []
             ],
             self::USER_CLASS,
-            $user,
+            null,
             Unserializer::UNSERIALIZE_UPDATE
         );
 
