@@ -19,7 +19,7 @@ class CryptValidatorTest extends BaseTest
                 'extension_configs' => [
                     'extension.crypt' => true,
                     'extension.validator' => true,
-                    'extension.odmcore' => true
+                    'extension.odmcore' => $this->getOdmCoreConfig()
                 ],
                 'service_manager_config' => [
                     'invokables' => [

@@ -19,7 +19,7 @@ class StateTest extends BaseTest
                 ],
                 'extension_configs' => [
                     'extension.state' => true,
-                    'extension.odmcore' => true
+                    'extension.odmcore' => $this->getOdmCoreConfig()
                 ],
             ]
         );

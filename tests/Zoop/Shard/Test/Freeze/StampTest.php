@@ -18,7 +18,7 @@ class StampTest extends BaseTest
                 ],
                 'extension_configs' => [
                     'extension.freeze' => true,
-                    'extension.odmcore' => true
+                    'extension.odmcore' => $this->getOdmCoreConfig()
                 ],
                 'service_manager_config' => [
                     'factories' => [

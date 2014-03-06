@@ -17,7 +17,7 @@ class UnserializerTest extends BaseTest
                 ],
                 'extension_configs' => [
                     'extension.serializer' => true,
-                    'extension.odmcore' => true
+                    'extension.odmcore' => $this->getOdmCoreConfig()
                 ],
             ]
         );

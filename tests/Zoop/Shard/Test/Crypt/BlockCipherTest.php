@@ -18,7 +18,7 @@ class BlockCipherTest extends BaseTest
                 ],
                 'extension_configs' => [
                     'extension.crypt' => true,
-                    'extension.odmcore' => true
+                    'extension.odmcore' => $this->getOdmCoreConfig()
                 ],
                 'service_manager_config' => [
                     'invokables' => [

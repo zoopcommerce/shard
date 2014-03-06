@@ -22,7 +22,7 @@ class SoftDeleteTest extends BaseTest implements EventSubscriber
                 ],
                 'extension_configs' => [
                     'extension.softdelete' => true,
-                    'extension.odmcore' => true
+                    'extension.odmcore' => $this->getOdmCoreConfig()
                 ],
                 'service_manager_config' => [
                     'factories' => [

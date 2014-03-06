@@ -20,7 +20,7 @@ class AccessControlledReferenceDenyTest extends BaseTest
                 'extension_configs' => [
                     'extension.accessControl' => true,
                     'extension.serializer' => true,
-                    'extension.odmcore' => true
+                    'extension.odmcore' => $this->getOdmCoreConfig()
                 ],
             ]
         );

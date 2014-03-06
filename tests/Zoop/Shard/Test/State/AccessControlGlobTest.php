@@ -23,7 +23,7 @@ class AccessControlGlobTest extends BaseTest
                 'extension_configs' => [
                     'extension.state' => true,
                     'extension.accessControl' => true,
-                    'extension.odmcore' => true
+                    'extension.odmcore' => $this->getOdmCoreConfig()
                 ],
                 'service_manager_config' => [
                     'factories' => [

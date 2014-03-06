@@ -21,7 +21,7 @@ class AccessControlFreezeDenyTest extends BaseTest
                 'extension_configs' => [
                     'extension.freeze' => true,
                     'extension.accesscontrol' => true,
-                    'extension.odmcore' => true
+                    'extension.odmcore' => $this->getOdmCoreConfig()
                 ],
             ]
         );

@@ -18,7 +18,7 @@ class ZoneTest extends BaseTest
                 ],
                 'extension_configs' => [
                     'extension.zone' => true,
-                    'extension.odmcore' => true
+                    'extension.odmcore' => $this->getOdmCoreConfig()
                 ],
             ]
         );

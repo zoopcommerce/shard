@@ -34,9 +34,11 @@ class Extension extends AbstractExtension
             'subscriber.odmcore.preloadsubscriber' =>
                 'Zoop\Shard\ODMCore\PreLoadSubscriber',
             'subscriber.odmcore.loadmetadatasubscriber' =>
-                'Zoop\Shard\ODMCore\LoadMetadataSubscriber'
+                'Zoop\Shard\ODMCore\LoadMetadataSubscriber',
+            'doctrine.cache.array' => 'Doctrine\Common\Cache\ArrayCache'
         ],
         'factories' => [
+            'doctrine.cache.juggernaut'                    => 'Zoop\Shard\ODMCore\JuggernautFileSystemCacheFactory',
             'modelmanager'                                 => 'Zoop\Shard\ODMCore\DevDocumentManagerFactory',
             'subscriber.odmcore.exceptioneventsaggregator' => 'Zoop\Shard\ODMCore\ExceptionEventsAggregatorFactory'
         ]
@@ -47,6 +49,10 @@ class Extension extends AbstractExtension
     protected $proxyDir;
 
     protected $hydratorDir;
+
+    protected $metadataCache = 'doctrine.cache.array';
+
+    protected $metadataCacheDir;
 
     protected $classMetadataFactory = 'Zoop\Shard\ODMCore\ClassMetadataFactory';
 
@@ -84,6 +90,26 @@ class Extension extends AbstractExtension
         $this->hydratorDir = $hydratorDir;
     }
 
+    public function getMetadataCache()
+    {
+        return $this->metadataCache;
+    }
+
+    public function setMetadataCache($metadataCache)
+    {
+        $this->metadataCache = $metadataCache;
+    }
+
+    public function getMetadataCacheDir()
+    {
+        return $this->metadataCacheDir;
+    }
+
+    public function setMetadataCacheDir($metadataCacheDir)
+    {
+        $this->metadataCacheDir = $metadataCacheDir;
+    }
+
     public function getClassMetadataFactory()
     {
         return $this->classMetadataFactory;
@@ -108,6 +134,7 @@ class Extension extends AbstractExtension
     {
         $this->proxyDir =  __DIR__ . '/../../../../../../data/proxies';
         $this->hydratorDir = __DIR__ . '/../../../../../../data/hydrators';
+        $this->metadataCacheDir = __DIR__ . '/../../../../../../data/metadata';
 
         parent::__construct($config);
     }

@@ -22,7 +22,7 @@ class FreezeTest extends BaseTest implements EventSubscriber
                 ],
                 'extension_configs' => [
                     'extension.freeze' => true,
-                    'extension.odmcore' => true
+                    'extension.odmcore' => $this->getOdmCoreConfig()
                 ],
                 'service_manager_config' => [
                     'factories' => [
