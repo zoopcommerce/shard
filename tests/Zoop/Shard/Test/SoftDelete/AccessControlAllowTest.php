@@ -22,7 +22,7 @@ class AccessControlAllowTest extends BaseTest
                 'extension_configs' => [
                     'extension.softDelete' => true,
                     'extension.accessControl' => true,
-                    'extension.odmcore' => true
+                    'extension.odmcore' => $this->getOdmCoreConfig()
                 ],
                 'service_manager_config' => [
                     'factories' => [

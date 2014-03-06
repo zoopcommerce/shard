@@ -20,7 +20,7 @@ class StampTest extends BaseTest
                 ],
                 'extension_configs' => [
                     'extension.stamp' => true,
-                    'extension.odmcore' => true
+                    'extension.odmcore' => $this->getOdmCoreConfig()
                 ],
                 'service_manager_config' => [
                     'factories' => [

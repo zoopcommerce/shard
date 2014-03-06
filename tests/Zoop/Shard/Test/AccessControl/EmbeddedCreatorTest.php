@@ -22,7 +22,7 @@ class EmbeddedCreatorTest extends BaseTest
                 ],
                 'extension_configs' => [
                     'extension.accessControl' => true,
-                    'extension.odmcore' => true
+                    'extension.odmcore' => $this->getOdmCoreConfig()
                 ],
                 'service_manager_config' => [
                     'factories' => [

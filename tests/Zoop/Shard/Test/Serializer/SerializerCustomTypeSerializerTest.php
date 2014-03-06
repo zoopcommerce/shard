@@ -21,7 +21,7 @@ class SerializerCustomTypeSerializerTest extends BaseTest
                             'string' => 'stringTypeSerializer'
                         ]
                     ],
-                    'extension.odmcore' => true
+                    'extension.odmcore' => $this->getOdmCoreConfig()
                 ],
             ]
         );

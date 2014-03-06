@@ -22,7 +22,7 @@ class ValidatorTest extends BaseTest
                 ],
                 'extension_configs' => [
                     'extension.validator' => true,
-                    'extension.odmcore' => true
+                    'extension.odmcore' => $this->getOdmCoreConfig()
                 ],
             ]
         );

@@ -7,7 +7,6 @@ namespace Zoop\Shard\ODMCore;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
-use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\MongoDB\Connection;
 use Doctrine\ODM\MongoDB\Configuration;
@@ -46,7 +45,7 @@ class DevDocumentManagerFactory implements FactoryInterface
 
         $config->setClassMetadataFactoryName($extension->getClassMetadataFactory());
 
-        $config->setMetadataCacheImpl(new ArrayCache);
+        $config->setMetadataCacheImpl($serviceLocator->get($extension->getMetadataCache()));
 
         //create driver chain
         $chain  = new MappingDriverChain;
