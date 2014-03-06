@@ -13,6 +13,8 @@ abstract class BaseTest extends PHPUnit_Framework_TestCase
 
     public function run(PHPUnit_Framework_TestResult $result = NULL)
     {
+        global $metadataCacheOnly;
+
         if ($result === NULL) {
             $result = $this->createResult();
         }
@@ -20,15 +22,38 @@ abstract class BaseTest extends PHPUnit_Framework_TestCase
         /**
          * Run the testsuite multiple times with different metadata cache
          */
-        print "Array cache: ";
-        $this->metadataCache = false;
-        $result->run($this);
-        print PHP_EOL;
+        $runs = [
+            [
+                'metadataCache' => false,
+                'message'       => 'Array cache     : '
+            ],
+            [
+                'metadataCache' => 'doctrine.cache.juggernaut',
+                'message'       => 'Juggernaut cache: '
+            ]
+        ];
 
-        print "Juggernaut cache: ";
-        $this->metadataCache = 'doctrine.cache.juggernaut';
-        $result->run($this);
-        print PHP_EOL;
+        foreach ($runs as $run) {
+            if (!isset($metadataCacheOnly) || $run['metadataCache'] == $metadataCacheOnly) {
+                print $run['message'];
+                $this->metadataCache = $run['metadataCache'];
+
+                //Note: The cache has to be cleared out and re-primed before each test run.
+                //Di
+                //clearout metadata cache first
+                array_map('unlink', glob( __DIR__ . '/../../../Metadata/*.php'));
+
+                //first test run will prime the cache
+                $result->run($this);
+
+                //if the cache has been primed, run a second time
+                if ( count(glob( __DIR__ . '/../../../Metadata/*.php')) > 0) {
+                    $result->run($this);
+                }
+
+                print PHP_EOL;
+            }
+        }
 
         return $result;
     }

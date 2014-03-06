@@ -2,7 +2,8 @@
 
 namespace Zoop\Shard\Test\User;
 
-use Zoop\Shard\AccessControl\Events as Events;
+use Zoop\Shard\AccessControl\Events as AccessControlEvents;
+use Zoop\Shard\Core\Events as CoreEvents;
 use Zoop\Shard\Manifest;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\User\TestAsset\Document\User;
@@ -46,7 +47,8 @@ class UpdatePasswordAllowTest extends BaseTest
         $documentManager = $this->documentManager;
         $eventManager = $documentManager->getEventManager();
 
-        $eventManager->addEventListener(Events::UPDATE_DENIED, $this);
+        $eventManager->addEventListener(AccessControlEvents::UPDATE_DENIED, $this);
+        $eventManager->addEventListener(CoreEvents::EXCEPTION, $this);
 
         $testDoc = new PasswordTraitDoc();
         $testDoc->setPassword('password1');
@@ -62,7 +64,7 @@ class UpdatePasswordAllowTest extends BaseTest
         $testDoc->setPassword('password2');
         $documentManager->flush();
 
-        $this->assertFalse(isset($this->calls[Events::UPDATE_DENIED]));
+        $this->assertFalse(isset($this->calls[AccessControlEvents::UPDATE_DENIED]));
     }
 
     public function __call($name, $arguments)
