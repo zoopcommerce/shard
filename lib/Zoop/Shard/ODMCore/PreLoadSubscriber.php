@@ -39,6 +39,7 @@ class PreLoadSubscriber implements EventSubscriber
     }
 
     /**
+     * @SuppressWarnings(PHPMD.LongVariable)
      * @param PreLoadEventArgs $eventArgs
      */
     public function preLoad(PreLoadEventArgs $eventArgs)
