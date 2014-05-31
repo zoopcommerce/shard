@@ -14,12 +14,16 @@
         {
             "name": "Tim Roediger",
             "email": "superdweebie@gmail.com"
+        },
+        {
+            "name": "Josh Stuart",
+            "email": "josh.stuart@zoopcommerce.com"
         }
     ],
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/superdweebie/mongodb-odm"
+            "url": "https://github.com/zoopcommerce/mongodb-odm"
         }
     ],
     "require": {

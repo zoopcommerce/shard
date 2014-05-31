@@ -8,7 +8,7 @@ use Zoop\Shard\Test\Annotation\TestAsset\Document\ChildB;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\TestAsset\User;
 
-class AnnotationInheritaceTest extends BaseTest
+class AnnotationInhritanceTest extends BaseTest
 {
     public function setUp()
     {

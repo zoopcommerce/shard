@@ -7,6 +7,8 @@
 namespace Zoop\Shard\ODMCore;
 
 use Doctrine\Common\EventSubscriber;
+use Doctrine\Common\EventManager as BaseEventManager;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\ODM\MongoDB\Event\PreLoadEventArgs;
 use Doctrine\ODM\MongoDB\Events as ODMEvents;
 use Zoop\Shard\Core\AbstractChangeEventArgs;
@@ -20,11 +22,11 @@ use Zoop\Shard\Core\UpdateEventArgs;
  *
  * @since   1.0
  * @author  Tim Roediger <superdweebie@gmail.com>
+ * @author  Josh Stuart <josh.stuart@zoopcommerce.com>
  */
 class PreLoadSubscriber implements EventSubscriber
 {
     /**
-     *
      * @return array
      */
     public function getSubscribedEvents()
@@ -37,8 +39,7 @@ class PreLoadSubscriber implements EventSubscriber
     }
 
     /**
-     *
-     * @param \Doctrine\ODM\MongoDB\Event\PreLoadEventArgs $eventArgs
+     * @param PreLoadEventArgs $eventArgs
      */
     public function preLoad(PreLoadEventArgs $eventArgs)
     {
@@ -52,14 +53,43 @@ class PreLoadSubscriber implements EventSubscriber
                 continue;
             }
 
-            $targetMetadata = $documentManager->getClassMetadata($mapping['targetDocument']);
+            if (isset($mapping['discriminatorField'])) {
+                $unhydratedDoc = $eventArgs->getData();
+                if (!isset($unhydratedDoc[$field])) {
+                    continue;
+                }
+                $unhydratedEmbeddedDoc = $unhydratedDoc[$field];
+                foreach ($unhydratedEmbeddedDoc as $i => $embeddedDoc) {
+                    $discriminatorFieldValue = $embeddedDoc[$mapping['discriminatorField']];
+                    $embeddedClassName = $mapping['discriminatorMap'][$discriminatorFieldValue];
+                    $targetMetadata = $documentManager->getClassMetadata($embeddedClassName);
 
-            $readEventArgs = new ReadEventArgs($targetMetadata, $eventManager);
-            $eventManager->dispatchEvent(CoreEvents::READ, $readEventArgs);
+                    $readEventArgs = $this->getReadEventArgs($targetMetadata, $eventManager);
 
-            if ($readEventArgs->getReject()) {
-                $eventArgs->getData()[$field] = null;
+                    if ($readEventArgs->getReject()) {
+                        $eventArgs->getData()[$field][$i] = null;
+                    }
+                }
+            } else {
+                $targetMetadata = $documentManager->getClassMetadata($mapping['targetDocument']);
+                $readEventArgs = $this->getReadEventArgs($targetMetadata, $eventManager);
+
+                if ($readEventArgs->getReject()) {
+                    $eventArgs->getData()[$field] = null;
+                }
             }
         }
+    }
+
+    /**
+     * @param ClassMetadata $metadata
+     * @param BaseEventManager $eventManager
+     * @return ReadEventArgs
+     */
+    protected function getReadEventArgs(ClassMetadata $metadata, BaseEventManager $eventManager)
+    {
+        $readEventArgs = new ReadEventArgs($metadata, $eventManager);
+        $eventManager->dispatchEvent(CoreEvents::READ, $readEventArgs);
+        return $readEventArgs;
     }
 }

@@ -79,7 +79,7 @@ class TransitionPermissionSubscriber extends AbstractAccessControlSubscriber
             $metadata->addProperty('permissions', true);
             $metadata->setPermissions([]);
         }
-        
+
         $permissionsMetadata = $metadata->getPermissions();
         $permissionsMetadata[] = $config;
         $metadata->setPermissions($permissionsMetadata);

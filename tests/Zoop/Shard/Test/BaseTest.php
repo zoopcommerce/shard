@@ -14,7 +14,7 @@ abstract class BaseTest extends \PHPUnit_Framework_TestCase
                 ->selectDatabase('zoop-shard')->listCollections();
 
             foreach ($collections as $collection) {
-                $collection->remove(array(), array('safe' => true));
+                $collection->remove();
             }
         }
     }

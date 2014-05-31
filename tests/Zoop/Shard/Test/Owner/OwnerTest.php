@@ -7,7 +7,7 @@ use Zoop\Shard\Test\Owner\TestAsset\Document\OwnerDoc;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\TestAsset\User;
 
-class OwnerTraitTest extends BaseTest
+class OwnerTest extends BaseTest
 {
     public function setUp()
     {
