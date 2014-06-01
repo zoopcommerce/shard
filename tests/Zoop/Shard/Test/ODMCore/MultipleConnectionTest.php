@@ -60,12 +60,12 @@ class MultipleConnectionTest extends BaseTest
         //cleanup
         $collections = $documentManager1->getConnection()->selectDatabase('shard-phpunit-1')->listCollections();
         foreach ($collections as $collection) {
-            $collection->remove(array(), array('safe' => true));
+            $collection->remove();
         }
 
         $collections = $documentManager2->getConnection()->selectDatabase('shard-phpunit-2')->listCollections();
         foreach ($collections as $collection) {
-            $collection->remove(array(), array('safe' => true));
+            $collection->remove();
         }
     }
 }
