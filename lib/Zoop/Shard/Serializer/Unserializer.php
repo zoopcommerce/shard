@@ -231,6 +231,8 @@ class Unserializer implements ServiceLocatorAwareInterface, ModelManagerAwareInt
             $mapping['discriminatorField'] :
             '_doctrine_class_name';
             $targetClass = $mapping['discriminatorMap'][$data[$discriminatorField]];
+        } elseif (isset($mapping['targetDocument']) && class_exists($mapping['targetDocument'])) {
+            $targetClass = $mapping['targetDocument'];
         } else {
             $targetClass = $metadata->getAssociationTargetClass($field);
         }
