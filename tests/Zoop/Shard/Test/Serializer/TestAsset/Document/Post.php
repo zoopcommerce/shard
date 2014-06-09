@@ -156,7 +156,7 @@ class Post
     {
         $this->tags[] = $tag;
     }
-    
+
     public function getArrayObjectTags()
     {
         return $this->arrayObjectTags;

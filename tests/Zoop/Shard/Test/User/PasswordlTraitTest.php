@@ -8,7 +8,7 @@ use Zoop\Shard\Test\User\TestAsset\Document\PasswordTraitDoc;
 use Zoop\Shard\Test\BaseTest;
 use Zoop\Shard\Test\TestAsset\User;
 
-class PasswordTraitTest extends BaseTest
+class PasswordlTraitTest extends BaseTest
 {
     public function setUp()
     {

@@ -36,7 +36,7 @@ class HashHelper implements ServiceLocatorAwareInterface
             $this->getHashService($cryptMetadata['hash'][$field])->hashField($field, $document, $metadata);
         }
     }
-    
+
     protected function getHashService($config)
     {
         $service = $this->serviceLocator->get($config['service']);

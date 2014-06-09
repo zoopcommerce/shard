@@ -24,7 +24,7 @@ class CustomExtensionTest extends BaseTest
         );
 
         $extension = $manifest->getServiceManager()->get('extension.custom');
-        
+
         $this->assertEquals('extension loaded', $extension->getMessage());
     }
 }

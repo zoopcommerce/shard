@@ -25,7 +25,7 @@ class Collection implements TypeSerializerInterface
         if (empty($value)) {
             return array();
         }
-        
+
         //change value to array
         if (!is_array($value)) {
             if ($value instanceof ArrayCollection) {
@@ -51,7 +51,7 @@ class Collection implements TypeSerializerInterface
                 $value = $value->getArrayCopy();
             }
         }
-        
+
         if (isset($serializerMetadata['fields'][$field]['collectionType'])) {
             switch ($serializerMetadata['fields'][$field]['collectionType']) {
                 case 'ArrayObject':
@@ -69,7 +69,7 @@ class Collection implements TypeSerializerInterface
         } else {
             $array = (array) $value;
         }
-        
+
         return $array;
     }
 }
