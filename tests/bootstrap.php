@@ -1,6 +1,7 @@
 <?php
 
 ini_set('error_reporting', E_ALL);
+putenv("SERVER_TYPE=test");
 
 $files = array(
     __DIR__ . '/../vendor/autoload.php' /*independent testing*/,
