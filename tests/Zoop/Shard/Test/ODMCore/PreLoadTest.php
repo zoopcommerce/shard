@@ -27,7 +27,7 @@ class PreLoadTest extends BaseTest
         $this->documentManager = $manifest->getServiceManager()->get('modelmanager');
     }
 
-    public function testGetEmbeddedOneWithDiscriminator()
+    public function testEmbedOneWithDiscriminatorMap()
     {
         $license1 = new Artist('Pearl Jam');
         $license2 = new RecordLabel('Epic Records');
