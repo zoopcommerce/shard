@@ -8,7 +8,6 @@ use Zoop\Shard\Test\BaseTest;
 
 class ClassMetadataTest extends BaseTest
 {
-
     public function setUp()
     {
         $manifest = new Manifest(

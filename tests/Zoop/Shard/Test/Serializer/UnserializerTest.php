@@ -119,16 +119,16 @@ class UnserializerTest extends BaseTest
             $data,
             'Zoop\Shard\Test\Serializer\TestAsset\Document\Order\Order'
         );
-        
+
         $this->assertTrue($order instanceof Order);
         $this->assertEquals('crimsonronin', $order->getName());
         $this->assertCount(2, $order->getItems());
-        
+
         $single = $order->getItems()[0];
         $this->assertTrue($single instanceof SingleItem);
         $this->assertEquals(150, $single->getPrice()->getWholesale());
         $this->assertTrue($single->getSku() instanceof PhysicalSku);
-        
+
         $bundle = $order->getItems()[1];
         $this->assertTrue($bundle instanceof Bundle);
         $this->assertEquals(10, $bundle->getPrice()->getWholesale());

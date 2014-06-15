@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./vendor/bin/phpmd --exclude ClassMetadataTrait.php ./lib/ ./tests/text ./tests/ruleset.xml
+./vendor/bin/phpmd --exclude ClassMetadataTrait.php ./lib/ text ./tests/ruleset.xml
