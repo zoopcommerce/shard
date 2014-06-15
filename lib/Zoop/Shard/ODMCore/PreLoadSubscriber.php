@@ -47,18 +47,62 @@ class PreLoadSubscriber implements EventSubscriber
         $documentManager = $eventArgs->getDocumentManager();
         $document = $eventArgs->getDocument();
         $metadata = $documentManager->getClassMetadata(get_class($document));
-        $eventManager = $documentManager->getEventManager();
 
         foreach ($metadata->associationMappings as $field => $mapping) {
-            if (!isset($mapping['embedded']) || !$mapping['embedded']) {
-                continue;
-            }
-
-            if (isset($mapping['discriminatorField'])) {
-                $unhydratedDoc = $eventArgs->getData();
-                if (!isset($unhydratedDoc[$field])) {
-                    continue;
+            if (isset($mapping['embedded']) && !!$mapping['embedded']) {
+                if (isset($mapping['discriminatorField'])) {
+                    $this->preLoadEmbeddedWithDiscriminator($eventArgs, $field, $mapping);
+                } else {
+                    $this->preLoadEmbeddedWithoutDiscriminator($eventArgs, $field, $mapping);
                 }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param PreLoadEventArgs $eventArgs
+     * @param type $field
+     * @param type $mapping
+     */
+    protected function preLoadEmbeddedWithoutDiscriminator(PreLoadEventArgs $eventArgs, $field, $mapping)
+    {
+        $documentManager = $eventArgs->getDocumentManager();
+        $eventManager = $documentManager->getEventManager();
+
+        $targetMetadata = $documentManager->getClassMetadata($mapping['targetDocument']);
+        $readEventArgs = $this->getReadEventArgs($targetMetadata, $eventManager);
+
+        if ($readEventArgs->getReject()) {
+            $eventArgs->getData()[$field] = null;
+        }
+    }
+
+    /**
+     * @SuppressWarnings(PHPMD.LongVariable)
+     *
+     * @param PreLoadEventArgs $eventArgs
+     * @param string $field
+     * @param array $mapping
+     */
+    protected function preLoadEmbeddedWithDiscriminator(PreLoadEventArgs $eventArgs, $field, $mapping)
+    {
+        $unhydratedDoc = $eventArgs->getData();
+
+        if (isset($unhydratedDoc[$field])) {
+            $documentManager = $eventArgs->getDocumentManager();
+            $eventManager = $documentManager->getEventManager();
+
+            if ($mapping['type'] === 'one') {
+                $discriminatorFieldValue = $unhydratedDoc[$field][$mapping['discriminatorField']];
+                $embeddedClassName = $mapping['discriminatorMap'][$discriminatorFieldValue];
+                $targetMetadata = $documentManager->getClassMetadata($embeddedClassName);
+                $readEventArgs = $this->getReadEventArgs($targetMetadata, $eventManager);
+
+                if ($readEventArgs->getReject()) {
+                    $eventArgs->getData()[$field] = null;
+                }
+            } else {
                 $unhydratedEmbeddedDoc = $unhydratedDoc[$field];
                 foreach ($unhydratedEmbeddedDoc as $i => $embeddedDoc) {
                     $discriminatorFieldValue = $embeddedDoc[$mapping['discriminatorField']];
@@ -70,13 +114,6 @@ class PreLoadSubscriber implements EventSubscriber
                     if ($readEventArgs->getReject()) {
                         $eventArgs->getData()[$field][$i] = null;
                     }
-                }
-            } else {
-                $targetMetadata = $documentManager->getClassMetadata($mapping['targetDocument']);
-                $readEventArgs = $this->getReadEventArgs($targetMetadata, $eventManager);
-
-                if ($readEventArgs->getReject()) {
-                    $eventArgs->getData()[$field] = null;
                 }
             }
         }

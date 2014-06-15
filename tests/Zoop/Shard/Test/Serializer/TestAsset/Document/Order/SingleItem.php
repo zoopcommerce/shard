@@ -16,7 +16,7 @@ class SingleItem extends AbstractItem
      * @ODM\String
      */
     protected $name;
-    
+
     /**
      * @ODM\EmbedOne(
      *      discriminatorField="type",
@@ -43,9 +43,9 @@ class SingleItem extends AbstractItem
     {
         $this->sku = $sku;
     }
-    
+
     /**
-     * 
+     *
      * @return string
      */
     public function getName()
@@ -54,7 +54,7 @@ class SingleItem extends AbstractItem
     }
 
     /**
-     * 
+     *
      * @param string $name
      */
     public function setName($name)

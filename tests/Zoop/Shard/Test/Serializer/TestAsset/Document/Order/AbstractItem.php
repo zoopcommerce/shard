@@ -15,7 +15,7 @@ abstract class AbstractItem
      * @ODM\String
      */
     protected $brand;
-    
+
     /**
      * @ODM\String
      * @Shard\Validator\Required

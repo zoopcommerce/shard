@@ -39,7 +39,7 @@ class Order
      * @ODM\EmbedOne(targetDocument="Total")
      */
     protected $total;
-    
+
     public function getId()
     {
         return $this->id;

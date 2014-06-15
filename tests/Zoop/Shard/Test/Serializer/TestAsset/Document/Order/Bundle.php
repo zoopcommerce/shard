@@ -24,7 +24,7 @@ class Bundle
      * @ODM\EmbedOne(targetDocument="Price")
      */
     protected $price;
-    
+
     /**
      *
      * @ODM\EmbedMany(targetDocument="SingleItem")

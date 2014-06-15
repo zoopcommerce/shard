@@ -8,7 +8,6 @@ use Zoop\Shard\Test\BaseTest;
 
 class ClassMetadataTest extends BaseTest
 {
-
     public function setUp()
     {
         $manifest = new Manifest(
@@ -17,6 +16,7 @@ class ClassMetadataTest extends BaseTest
                     __NAMESPACE__ . '\TestAsset\Document' => __DIR__ . '/TestAsset/Document'
                 ],
                 'extension_configs' => [
+                'extension.serializer' => true,
                     'extension.odmcore' => true
                 ],
             ]
