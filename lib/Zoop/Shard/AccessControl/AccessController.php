@@ -36,14 +36,30 @@ class AccessController implements ServiceLocatorAwareInterface
      */
     public function areAllowed(array $actions, ClassMetadata $metadata, $document = null, ChangeSet $changeSet = null)
     {
-        $result = new AllowedResult(false);
-
         if (!$metadata->hasProperty('permissions')) {
-            return $result;
+            return new AllowedResult(false);
         }
 
-        $roles = $this->getRoles($metadata, $document);
+        //first check the generic 'guest' role
+        $result = $this->checkRolesAgainstActions(['guest'], $actions, $metadata);
+        
+        if (!$result->getAllowed() || $result->hasCriteria()) {
+            //now load the user roles if the generic 'guest' role failed
+            $roles = $this->getRoles($metadata, $document);
+            $result = $this->checkRolesAgainstActions($roles, $actions, $metadata);
+        }
 
+        if (isset($document)) {
+            return $this->testCritieraAgainstDocument($metadata, $document, $changeSet, $result);
+        }
+
+        return $result;
+    }
+
+    protected function checkRolesAgainstActions($roles, $actions, $metadata)
+    {
+        $result = new AllowedResult(false);
+        
         foreach ($this->getPermissions($metadata) as $permission) {
 
             $newResult = $permission->areAllowed($roles, $actions);
@@ -57,14 +73,10 @@ class AccessController implements ServiceLocatorAwareInterface
             $result->setNew(array_merge($result->getNew(), $newResult->getNew()));
             $result->setOld(array_merge($result->getOld(), $newResult->getOld()));
         }
-
-        if (isset($document)) {
-            return $this->testCritieraAgainstDocument($metadata, $document, $changeSet, $result);
-        }
-
+        
         return $result;
     }
-
+    
     protected function testCritieraAgainstDocument($metadata, $document, $changeSet, $result)
     {
         if (count($result->getNew()) > 0) {
