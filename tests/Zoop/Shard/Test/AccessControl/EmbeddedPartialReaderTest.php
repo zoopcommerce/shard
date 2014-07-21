@@ -2,7 +2,6 @@
 
 namespace Zoop\Shard\Test\AccessControl;
 
-use Zoop\Shard\AccessControl\Events as AccessControlEvents;
 use Zoop\Shard\Manifest;
 use Zoop\Shard\Test\AccessControl\TestAsset\Document\User;
 use Zoop\Shard\Test\AccessControl\TestAsset\Document\Profile;

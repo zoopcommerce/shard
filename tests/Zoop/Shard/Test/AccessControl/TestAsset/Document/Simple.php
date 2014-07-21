@@ -10,6 +10,7 @@ use Zoop\Shard\Annotation\Annotations as Shard;
  * @ODM\Document
  * @Shard\AccessControl({
  *     @Shard\Permission\Basic(roles="*",          allow="read"                  ),
+ *     @Shard\Permission\Basic(roles="guest",                       deny="*"     ),
  *     @Shard\Permission\Basic(roles="creator",    allow="create",  deny="read"  ),
  *     @Shard\Permission\Basic(roles="reader",     allow="read"                  ),
  *     @Shard\Permission\Basic(roles="updater",    allow="update::*"             ),

@@ -8,9 +8,8 @@ use Zoop\Shard\Annotation\Annotations as Shard;
 /**
  * @ODM\EmbeddedDocument
  * @Shard\AccessControl({
- *     @Shard\Permission\Basic(roles="*",             allow="read"              ),
- *     @Shard\Permission\Basic(roles="partialReader",                deny="read"),
- *     @Shard\Permission\Basic(roles="creator",       allow="create"            ),
+ *     @Shard\Permission\Basic(roles="creator", allow={"read", "create"}),
+ *     @Shard\Permission\Basic(roles="partialReader", deny="read")
  * })
  */
 class Profile

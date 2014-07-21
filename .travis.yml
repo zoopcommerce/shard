@@ -9,10 +9,6 @@ env:
 
 services: mongodb
 
-matrix:
-  allow_failures:
-    - php: 5.5
-
 before_script:
   - echo "extension = mongo.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - composer install --dev
@@ -20,6 +16,6 @@ before_script:
 script:
   - cd ./tests
   - ../vendor/bin/phpunit --coverage-clover ../build/clover.xml
-  - php ../build/coverage-checker.php ../build/clover.xml 85
+  - php ../build/coverage-checker.php ../build/clover.xml 84
   - ../vendor/bin/phpmd --exclude ClassMetadataTrait.php ../lib/ text ruleset.xml
   - ../vendor/bin/phpcs --standard=PSR2 ../lib/ ./Zoop/
