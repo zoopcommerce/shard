@@ -20,6 +20,6 @@ before_script:
 script:
   - cd ./tests
   - ../vendor/bin/phpunit --coverage-clover ../build/clover.xml
-  - php ../build/coverage-checker.php ../build/clover.xml 85
+  - php ../build/coverage-checker.php ../build/clover.xml 84
   - ../vendor/bin/phpmd --exclude ClassMetadataTrait.php ../lib/ text ruleset.xml
   - ../vendor/bin/phpcs --standard=PSR2 ../lib/ ./Zoop/
